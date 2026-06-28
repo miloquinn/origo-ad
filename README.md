@@ -78,7 +78,7 @@ dist/origo15-module-snippet.yaml
 推到 GitHub 后，Egern 可以直接引用 raw URL：
 
 ```text
-https://raw.githubusercontent.com/<你的 GitHub 用户名>/origo-ad/main/dist/origo-ad-lite.module
+https://github.com/<你的 GitHub 用户名>/origo-ad/raw/main/dist/origo-ad-lite.module
 ```
 
 如果你的仓库名不是 `origo-ad`，或者默认分支不是 `main`，把 URL 对应改一下。
@@ -86,7 +86,7 @@ https://raw.githubusercontent.com/<你的 GitHub 用户名>/origo-ad/main/dist/o
 也可以本地生成时指定 URL：
 
 ```bash
-/usr/bin/python3 tools/build.py --base-url "https://raw.githubusercontent.com/<你的 GitHub 用户名>/<仓库名>/main/dist"
+/usr/bin/python3 tools/build.py --base-url "https://github.com/<你的 GitHub 用户名>/<仓库名>/raw/main/dist"
 ```
 
 ### 创建远程仓库

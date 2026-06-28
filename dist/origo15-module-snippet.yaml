@@ -4,10 +4,10 @@
 
 modules:
 - name: Origo Ad Lite
-  url: https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist/origo-ad-lite.module
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
   enabled: true
 - name: Origo Ad Balanced
-  url: https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist/origo-ad-balanced.module
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
   enabled: false
 - url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module
   enabled: false

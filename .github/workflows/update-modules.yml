@@ -29,7 +29,7 @@ jobs:
         run: |
           python tools/build.py \
             --no-profile \
-            --base-url "https://raw.githubusercontent.com/${{ github.repository }}/main/dist"
+            --base-url "https://github.com/${{ github.repository }}/raw/main/dist"
 
       - name: Verify generated modules stay script-free
         run: |
