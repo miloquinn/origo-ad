@@ -3,11 +3,11 @@
 # 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
 
 modules:
-- name: Origo Battery AdBlock Lite
-  url: https://raw.githubusercontent.com/miloquinn/egern-battery-adblock/main/dist/origo-adblock-lite.module
+- name: Origo Ad Lite
+  url: https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist/origo-ad-lite.module
   enabled: true
-- name: Origo Battery AdBlock Balanced
-  url: https://raw.githubusercontent.com/miloquinn/egern-battery-adblock/main/dist/origo-adblock-balanced.module
+- name: Origo Ad Balanced
+  url: https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist/origo-ad-balanced.module
   enabled: false
 - url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module
   enabled: false

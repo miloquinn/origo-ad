@@ -33,7 +33,7 @@ jobs:
 
       - name: Verify generated modules stay script-free
         run: |
-          ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-adblock-*.module
+          ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-ad-*.module
 
       - name: Commit updated modules
         run: |

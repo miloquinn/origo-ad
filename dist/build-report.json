@@ -69,13 +69,13 @@
   ],
   "tiers": {
     "lite": {
-      "path": "dist/origo-adblock-lite.module",
+      "path": "dist/origo-ad-lite.module",
       "counts": {
         "Rule": 132
       }
     },
     "balanced": {
-      "path": "dist/origo-adblock-balanced.module",
+      "path": "dist/origo-ad-balanced.module",
       "counts": {
         "Rule": 167,
         "URL Rewrite": 456,
