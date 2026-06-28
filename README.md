@@ -1,28 +1,38 @@
 # Origo Ad
 
-这个小项目把仍在维护的去广告模块重新打包成更省电的 Egern 模块。
+Origo Ad 是一组面向 Egern 的去广告模块和 Origo VPN 配置模板。
 
-目标不是追求“挡得最狠”，而是降低 iPhone 上 Egern 的持续处理成本：少做 HTTPS 解密、少跑响应脚本、少读响应 body。
+它把仍在维护的上游去广告规则重新打包成三档：省电、日常、强力。默认思路不是一上来就把所有脚本和响应体处理全打开，而是在尽量保留广告拦截效果的同时，控制 iPhone 上 Egern 的耗电和误伤。
 
-## 输出
+## 快速链接
+
+- Lite: [dist/origo-ad-lite.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module)
+- Balanced: [dist/origo-ad-balanced.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module)
+- Powerful: [dist/origo-ad-powerful.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module)
+- Origo VPN 模板: [dist/origo-vpn-template.yaml](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml)
+
+## 模块档位
 
 运行生成器后会得到：
 
 - `dist/origo-ad-lite.module`
-  - 最省电。
+  - 最省电档。
   - 只保留上游模块里低成本的域名/IP 类 `Rule` 拦截。
-  - 默认丢弃 `URL-REGEX`、`URL Rewrite`、`Body Rewrite`、`Map Local`、`Script`。
+  - 丢弃 `URL-REGEX`、`URL Rewrite`、`Body Rewrite`、`Map Local`、`MITM`、`Script`。
+  - 适合只想要基础拦截、优先省电的配置。
 
 - `dist/origo-ad-balanced.module`
-  - 折中版。
+  - 日常推荐档。
   - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`、`MITM`。
   - `MITM` 会合并为一条 `hostname = %APPEND% ...`，并补入旧配置里的 Google/YouTube/归因统计等泛域名。
   - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
+  - 适合默认开启。
 
 - `dist/origo-ad-powerful.module`
-  - 最强版。
+  - 最强去广告档。
   - 保留 `Argument`、`Rule`、`URL Rewrite`、`Rewrite`、`Map Local`、`Body Rewrite`、`Script`、`MITM`。
-  - 去广告最强，但会重新引入响应体处理和脚本执行，更耗电。
+  - 去广告最强，但会重新引入响应体处理和脚本执行，更耗电，也更容易误伤。
+  - 适合某些 App 广告仍然明显时手动切换，不建议和 Lite/Balanced 同时开。
 
 - `dist/origo15-module-snippet.yaml`
   - 可以复制到你的 Egern 配置里参考。
@@ -31,7 +41,7 @@
 - `dist/build-report.json`
   - 记录上游来源、各 section 原始数量、保留数量、丢弃数量。
 
-## 使用
+## 本地生成
 
 ```bash
 cd /Users/xiaoyuan/work/origo-ad
@@ -54,7 +64,20 @@ cd /Users/xiaoyuan/work/origo-ad
 
 先用 `balanced`。
 
-把 `dist/origo-ad-balanced.module` 放到一个 Egern 能访问的 HTTPS URL，然后在 Egern 配置里把原来的重模块关掉，新增这个折中模块。
+在 Egern 配置里只开启一个 Origo Ad 档位。默认推荐：
+
+```yaml
+modules:
+- name: Origo Ad Lite
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
+  enabled: false
+- name: Origo Ad Balanced
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
+  enabled: true
+- name: Origo Ad Powerful
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
+  enabled: false
+```
 
 配置片段示例会生成到：
 
@@ -80,6 +103,8 @@ https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml
 - 移除了 `ca_p12` 和 `ca_passphrase`，避免公开 Egern CA 证书。
 - 保留策略组、规则、MITM hostnames、模块开关和 Origo Ad Balanced 接入方式。
 
+使用模板时，需要把占位符替换为自己的订阅信息；Egern CA 证书建议在本机重新生成或导入，不要使用公开文件承载私有证书。
+
 ## GitHub Actions 自动更新
 
 仓库里已经带了工作流：
@@ -98,13 +123,11 @@ https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml
 - 纯去广告 LoonLab 模块会被合并进生成产物；解锁会员、功能增强、定时任务类模块建议继续作为独立模块按需开启。
 - 只有上游内容真的变了，才自动 commit 并 push。
 
-推到 GitHub 后，Egern 可以直接引用 raw URL：
+Egern 可以直接引用 raw URL：
 
 ```text
-https://github.com/<你的 GitHub 用户名>/origo-ad/raw/main/dist/origo-ad-lite.module
+https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
 ```
-
-如果你的仓库名不是 `origo-ad`，或者默认分支不是 `main`，把 URL 对应改一下。
 
 也可以本地生成时指定 URL：
 

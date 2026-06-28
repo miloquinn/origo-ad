@@ -35,6 +35,43 @@ jobs:
         run: |
           ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-ad-lite.module dist/origo-ad-balanced.module
 
+      - name: Verify generated metadata and template hygiene
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          modules = [
+              Path("dist/origo-ad-lite.module"),
+              Path("dist/origo-ad-balanced.module"),
+              Path("dist/origo-ad-powerful.module"),
+          ]
+          descriptions = []
+          for path in modules:
+              text = path.read_text(encoding="utf-8")
+              desc = next((line.removeprefix("#!desc=") for line in text.splitlines() if line.startswith("#!desc=")), "")
+              if not desc:
+                  raise SystemExit(f"{path} is missing #!desc")
+              descriptions.append(desc)
+          if len(set(descriptions)) != len(descriptions):
+              raise SystemExit("generated module descriptions must be distinct")
+
+          template = Path("dist/origo-vpn-template.yaml")
+          text = template.read_text(encoding="utf-8")
+          forbidden = [
+              r"SxIpVsj",
+              r"88bbf949",
+              r"7272cbb",
+              r"dfceb8ee",
+              r"ca_p12",
+              r"ca_passphrase",
+              r"MIIKpA",
+          ]
+          for pattern in forbidden:
+              if re.search(pattern, text):
+                  raise SystemExit(f"template contains forbidden private marker: {pattern}")
+          PY
+
       - name: Commit updated modules
         run: |
           if git diff --quiet -- dist; then
