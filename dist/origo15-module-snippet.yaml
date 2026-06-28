@@ -1,5 +1,6 @@
 # 省电版模块接入片段
 # 先用 lite。如果广告明显变多，再把 lite 的 enabled 改 false，balanced 改 true。
+# powerful 是最强档，包含脚本/MITM/响应体处理，去广告强但更耗电，默认别开。
 # 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
 
 modules:
@@ -8,6 +9,9 @@ modules:
   enabled: true
 - name: Origo Ad Balanced
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
+  enabled: false
+- name: Origo Ad Powerful
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
   enabled: false
 - url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module
   enabled: false

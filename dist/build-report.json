@@ -20,6 +20,14 @@
         "URL Rewrite": 517,
         "Map Local": 800
       },
+      "kept_powerful_counts": {
+        "Rule": 250,
+        "URL Rewrite": 517,
+        "Body Rewrite": 85,
+        "Map Local": 800,
+        "Script": 220,
+        "MITM": 1
+      },
       "dropped_sections": {
         "lite": [
           "URL-REGEX in Rule",
@@ -31,7 +39,8 @@
         "balanced": [
           "Body Rewrite",
           "Script"
-        ]
+        ],
+        "powerful": []
       }
     },
     {
@@ -49,6 +58,11 @@
         "URL Rewrite": 1229,
         "Map Local": 0
       },
+      "kept_powerful_counts": {
+        "General": 1,
+        "URL Rewrite": 1229,
+        "MITM": 1
+      },
       "dropped_sections": {
         "lite": [
           "URL-REGEX in Rule",
@@ -60,7 +74,8 @@
         "balanced": [
           "Body Rewrite",
           "Script"
-        ]
+        ],
+        "powerful": []
       }
     }
   ],
@@ -77,6 +92,18 @@
         "Rule": 202,
         "URL Rewrite": 1745,
         "Map Local": 800
+      }
+    },
+    "powerful": {
+      "path": "dist/origo-ad-powerful.module",
+      "counts": {
+        "General": 1,
+        "Rule": 202,
+        "URL Rewrite": 1745,
+        "Body Rewrite": 85,
+        "Map Local": 800,
+        "Script": 220,
+        "MITM": 2
       }
     }
   }

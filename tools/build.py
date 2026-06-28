@@ -28,6 +28,7 @@ RULE_PREFIXES_LITE = (
 )
 
 SECTION_ORDER = ["Rule", "URL Rewrite", "Map Local"]
+POWERFUL_SECTION_ORDER = ["General", "Rule", "URL Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
 
 
 def read_json(path: Path) -> dict:
@@ -105,6 +106,7 @@ def build_module(
     kept_sections: Dict[str, List[str]],
     dropped_note: str,
     build_id: str,
+    section_order: List[str] | None = None,
 ) -> str:
     lines = [
         f"#!name={name}",
@@ -120,7 +122,7 @@ def build_module(
         lines.append(f"# - {record['name']}: {record['url']}")
     lines.append("")
 
-    for section in SECTION_ORDER:
+    for section in section_order or SECTION_ORDER:
         entries = kept_sections.get(section, [])
         if not entries:
             continue
@@ -138,9 +140,10 @@ def source_stats(sections: Dict[str, List[str]]) -> Dict[str, int]:
     return stats
 
 
-def make_snippet(lite_url: str, balanced_url: str) -> str:
+def make_snippet(lite_url: str, balanced_url: str, powerful_url: str) -> str:
     return f"""# 省电版模块接入片段
 # 先用 lite。如果广告明显变多，再把 lite 的 enabled 改 false，balanced 改 true。
+# powerful 是最强档，包含脚本/MITM/响应体处理，去广告强但更耗电，默认别开。
 # 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
 
 modules:
@@ -149,6 +152,9 @@ modules:
   enabled: true
 - name: Origo Ad Balanced
   url: {balanced_url}
+  enabled: false
+- name: Origo Ad Powerful
+  url: {powerful_url}
   enabled: false
 - url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module
   enabled: false
@@ -185,6 +191,7 @@ def main() -> int:
 
     all_lite_rules: List[str] = []
     all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Map Local": []}
+    all_powerful: Dict[str, List[str]] = {section: [] for section in POWERFUL_SECTION_ORDER}
     source_hashes: List[str] = []
 
     for source in sources:
@@ -204,6 +211,8 @@ def main() -> int:
         all_balanced["Rule"].extend(balanced_rules)
         all_balanced["URL Rewrite"].extend(url_rewrites)
         all_balanced["Map Local"].extend(map_locals)
+        for section in POWERFUL_SECTION_ORDER:
+            all_powerful[section].extend(meaningful_entries(sections.get(section, [])))
 
         report["sources"].append(
             {
@@ -217,15 +226,22 @@ def main() -> int:
                     "URL Rewrite": len(url_rewrites),
                     "Map Local": len(map_locals),
                 },
+                "kept_powerful_counts": {
+                    section: len(meaningful_entries(sections.get(section, [])))
+                    for section in POWERFUL_SECTION_ORDER
+                    if meaningful_entries(sections.get(section, []))
+                },
                 "dropped_sections": {
                     "lite": ["URL-REGEX in Rule", "URL Rewrite", "Body Rewrite", "Map Local", "Script"],
                     "balanced": ["Body Rewrite", "Script"],
+                    "powerful": [],
                 },
             }
         )
 
     lite_sections = {"Rule": dedupe_keep_order(all_lite_rules)}
     balanced_sections = {section: dedupe_keep_order(entries) for section, entries in all_balanced.items()}
+    powerful_sections = {section: dedupe_keep_order(entries) for section, entries in all_powerful.items()}
 
     source_records = [{"name": item["name"], "url": item["url"]} for item in sources]
     build_id = hashlib.sha256("\n".join(source_hashes).encode("utf-8")).hexdigest()
@@ -243,14 +259,28 @@ def main() -> int:
         "Keeps rules, URL rewrite, and map local; drops body rewrite and scripts.",
         build_id,
     )
+    powerful_module = build_module(
+        "Origo Ad Powerful",
+        source_records,
+        powerful_sections,
+        "Maximum ad blocking; keeps rule, rewrite, map local, body rewrite, script, and MITM sections.",
+        build_id,
+        POWERFUL_SECTION_ORDER,
+    )
 
     lite_path = DIST_DIR / "origo-ad-lite.module"
     balanced_path = DIST_DIR / "origo-ad-balanced.module"
+    powerful_path = DIST_DIR / "origo-ad-powerful.module"
     lite_path.write_text(lite_module, encoding="utf-8")
     balanced_path.write_text(balanced_module, encoding="utf-8")
+    powerful_path.write_text(powerful_module, encoding="utf-8")
 
     base = args.base_url.rstrip("/")
-    snippet = make_snippet(f"{base}/origo-ad-lite.module", f"{base}/origo-ad-balanced.module")
+    snippet = make_snippet(
+        f"{base}/origo-ad-lite.module",
+        f"{base}/origo-ad-balanced.module",
+        f"{base}/origo-ad-powerful.module",
+    )
     (DIST_DIR / "origo15-module-snippet.yaml").write_text(snippet, encoding="utf-8")
 
     if not args.no_profile and args.profile.exists():
@@ -279,15 +309,21 @@ def main() -> int:
             "path": str(balanced_path.relative_to(ROOT)),
             "counts": {section: len(entries) for section, entries in balanced_sections.items()},
         },
+        "powerful": {
+            "path": str(powerful_path.relative_to(ROOT)),
+            "counts": {section: len(entries) for section, entries in powerful_sections.items() if entries},
+        },
     }
     (DIST_DIR / "build-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"wrote {lite_path}")
     print(f"wrote {balanced_path}")
+    print(f"wrote {powerful_path}")
     print(f"wrote {DIST_DIR / 'origo15-module-snippet.yaml'}")
     print(f"wrote {DIST_DIR / 'build-report.json'}")
     print("lite counts:", report["tiers"]["lite"]["counts"])
     print("balanced counts:", report["tiers"]["balanced"]["counts"])
+    print("powerful counts:", report["tiers"]["powerful"]["counts"])
     return 0
 
 

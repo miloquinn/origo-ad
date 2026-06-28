@@ -31,9 +31,9 @@ jobs:
             --no-profile \
             --base-url "https://github.com/${{ github.repository }}/raw/main/dist"
 
-      - name: Verify generated modules stay script-free
+      - name: Verify lite and balanced modules stay script-free
         run: |
-          ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-ad-*.module
+          ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-ad-lite.module dist/origo-ad-balanced.module
 
       - name: Commit updated modules
         run: |
@@ -46,8 +46,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add dist
           git commit -m "Refresh generated Egern adblock modules" \
-            -m "The workflow rebuilds the lite and balanced modules from the configured upstream Egern modules. Generated output is deterministic, so this commit only appears when upstream content changes." \
-            -m "Constraint: Keep generated modules free of Body Rewrite and Script sections to reduce Egern battery cost." \
+            -m "The workflow rebuilds the lite, balanced, and powerful modules from the configured upstream Egern modules. Generated output is deterministic, so this commit only appears when upstream content changes." \
+            -m "Constraint: Keep lite and balanced free of Body Rewrite and Script sections; powerful intentionally keeps them for maximum blocking." \
             -m "Confidence: high" \
             -m "Scope-risk: narrow" \
             -m "Tested: tools/build.py --no-profile and script-free grep guard in GitHub Actions"

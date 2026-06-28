@@ -18,6 +18,11 @@
   - 保留 `Rule`、`URL Rewrite`、`Map Local`。
   - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
 
+- `dist/origo-ad-powerful.module`
+  - 最强版。
+  - 保留 `Rule`、`URL Rewrite`、`Map Local`、`Body Rewrite`、`Script`、`MITM`。
+  - 去广告最强，但会重新引入响应体处理和脚本执行，更耗电。
+
 - `dist/origo15-module-snippet.yaml`
   - 可以复制到你的 Egern 配置里参考。
   - 默认关闭原来的 `StartUpAds.module` / `BlockAds.module`，换成生成后的省电模块 URL 占位。
@@ -58,6 +63,8 @@ dist/origo15-module-snippet.yaml
 
 如果广告回来了，再换 `balanced`。
 
+如果还不够，再手动换 `powerful`。不要同时开三档，开 Powerful 时建议关掉 Lite/Balanced，避免重复处理。
+
 ## GitHub Actions 自动更新
 
 仓库里已经带了工作流：
@@ -71,8 +78,8 @@ dist/origo15-module-snippet.yaml
 - 每 6 小时自动运行一次。
 - 也可以在 GitHub Actions 页面手动点 `Run workflow`。
 - 拉取 `sources.json` 里的活跃上游模块。
-- 重新生成 `dist/origo-ad-lite.module` 和 `dist/origo-ad-balanced.module`。
-- 确认生成模块里没有 `[Body Rewrite]`、`[Script]`、`script_url`、`body_required`。
+- 重新生成 `dist/origo-ad-lite.module`、`dist/origo-ad-balanced.module` 和 `dist/origo-ad-powerful.module`。
+- 确认 lite / balanced 里没有 `[Body Rewrite]`、`[Script]`、`script_url`、`body_required`。
 - 只有上游内容真的变了，才自动 commit 并 push。
 
 推到 GitHub 后，Egern 可以直接引用 raw URL：
@@ -109,7 +116,7 @@ gh repo create origo-ad --public --source=. --remote=origin --push
 3. `URL-REGEX` 规则
 4. 普通 `DOMAIN` / `DOMAIN-SUFFIX` / `IP-CIDR` 拦截
 
-所以这个项目默认把 1 删掉，lite 连 2 和 3 也删掉。
+所以 lite 默认把 1、2、3 都删掉；balanced 删掉 1；powerful 全部保留。
 
 ## 上游来源
 
