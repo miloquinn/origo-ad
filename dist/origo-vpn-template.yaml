@@ -1,0 +1,1403 @@
+ipv6: false
+vif_only: true
+hijack_dns:
+- '*:53'
+geoip_db_url: https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
+asn_db_url: https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb
+proxy_latency_test_url: https://cp.cloudflare.com/generate_204
+direct_latency_test_url: http://connectivitycheck.platform.hicloud.com/generate_204
+dns:
+  bootstrap:
+  - system
+  upstreams:
+    Domestic-DNS:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 2400:3200::1
+    - 2400:3200:baba::1
+    - '2402:4e00::'
+    - '2402:4e00:1::'
+  forward:
+  - domain_wildcard:
+      match: '*'
+      value: Domestic-DNS
+  hosts:
+    iosapps.itunes.apple.com:
+    - iosapps.itunes.apple.com.download.ks-cdn.com
+    tally.oorigo.tech:
+    - 52.229.242.52
+real_ip_domains:
+- '*.aikunapp.com'
+- v6-aws-sg.aikunapp.com
+- v6-aws-jp.aikunapp.com
+- v6-aws-hk.aikunapp.com
+policy_groups:
+- select:
+    name: 🎛️ 手动选择
+    policies:
+    - 🌌 Origo 云端
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🇭🇰 香港自动元
+    - ⚡ Zoro 自动
+    - 🛰️ Zoro 手选
+    - 🌊 Ocean 手选
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - 🧭 Valtrogen
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
+    hidden: false
+- external:
+    name: 🌌 Origo 云端
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN
+    interval: 3000
+    update_interval: 86400
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: false
+- external:
+    name: 🧪 Origo 优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=origo
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- auto_test:
+    name: 🌌 Origo 优选
+    policies:
+    - 🧪 Origo 优选池
+    flatten: true
+    interval: 9000
+    tolerance: 80
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: false
+- external:
+    name: 🧪 智能优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=smart
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 全球优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=global
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 美国优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=us
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 日本优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=jp
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 香港优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=hk
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 新加坡优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=sg
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- external:
+    name: 🧪 IPv6 优选池
+    type: select
+    urls:
+    - https://sub.oorigo.tech/s/YOUR_ORIGO_SUB_TOKEN?profile=ipv6
+    interval: 10800
+    update_interval: 10800
+    icon: https://vpn.oorigo.tech/app/assets/origo-icon.jpg
+    hidden: true
+- auto_test:
+    name: ♻️ 智能优选
+    policies:
+    - 🧪 智能优选池
+    flatten: true
+    interval: 9000
+    tolerance: 80
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+    hidden: false
+- auto_test:
+    name: ⚡ 全球优选
+    policies:
+    - 🧪 全球优选池
+    flatten: true
+    interval: 9000
+    tolerance: 80
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    hidden: false
+- auto_test:
+    name: 🇺🇸 美国优选
+    policies:
+    - 🧪 美国优选池
+    flatten: true
+    interval: 9000
+    tolerance: 80
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+    hidden: false
+- auto_test:
+    name: 🇯🇵 日本优选
+    policies:
+    - 🧪 日本优选池
+    flatten: true
+    interval: 9000
+    tolerance: 80
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+    hidden: false
+- select:
+    name: 🇭🇰 香港优选
+    policies:
+    - 🧪 香港优选池
+    flatten: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    hidden: false
+- select:
+    name: 🇸🇬 新加坡优选
+    policies:
+    - 🧪 新加坡优选池
+    flatten: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+    hidden: false
+- select:
+    name: 🌐 IPv6 优选
+    policies:
+    - 🧪 IPv6 优选池
+    flatten: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+    hidden: true
+- select:
+    name: 🇺🇸 美国自动元
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i)^(?=.*元)(?=.*(?:美国|洛杉矶|凤凰城|圣何塞|纽约|旧金山|\b(?:US|United States)\b))(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+    hidden: false
+- auto_test:
+    name: 🇯🇵 日本自动元
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i)^(?=.*元)(?=.*(?:日本|东京|\b(?:JP|Japan)\b))(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*
+    interval: 9000
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+    hidden: false
+- select:
+    name: 🇭🇰 香港自动元
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i)^(?=.*元)(?=.*(?:香港|\b(?:HK|Hong Kong|Hong)\b))(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    hidden: false
+- select:
+    name: 🌐 IPv6 手选
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:IPv6|IPV6|ipv6|v6-|\[.*:.*\])
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    hidden: true
+- select:
+    name: ⚡ Zoro 自动
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i).*zoro.*
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+    hidden: false
+- select:
+    name: 🛰️ Zoro 手选
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i).*zoro.*
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Server.png
+    hidden: false
+- select:
+    name: 🌊 Ocean 手选
+    policies:
+    - 🌌 Origo 云端
+    flatten: true
+    filter: (?i).*ocean.*
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Server.png
+    hidden: false
+- external:
+    name: 🧭 Valtrogen
+    type: select
+    urls:
+    - https://api.valconfig.com/sub/?access_key=YOUR_VALTROGEN_ACCESS_KEY
+    interval: 3600
+    update_interval: 86400
+    icon: https://github.com/Repcz/Repcz.github.io/raw/main/docs/egern/Photo/Egern.png
+    hidden: false
+- external:
+    name: 💴 三毛机场
+    type: select
+    urls:
+    - https://sub-1.smjcdh.top/smjc/api/v1/client/subscribe?token=YOUR_SANMAO_TOKEN
+    tolerance: 20
+    update_interval: 86400
+    icon: https://github.com/Repcz/Repcz.github.io/raw/main/docs/egern/Photo/Egern.png
+    hidden: true
+- external:
+    name: 💸 赔钱机场
+    type: select
+    urls:
+    - https://dash.pqjc.site/api/v1/pq/YOUR_PQ_TOKEN
+    interval: 3600
+    update_interval: 86400
+    icon: https://github.com/Repcz/Repcz.github.io/raw/main/docs/egern/Photo/Egern.png
+    hidden: true
+- select:
+    name: 🌍 国外网站
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    hidden: false
+- select:
+    name: 🤖 AI 服务
+    policies:
+    - ⚡ Zoro 自动
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🛰️ Zoro 手选
+    - 🌊 Ocean 手选
+    - 🌌 Origo 云端
+    - 💸 赔钱机场
+    - 💴 三毛机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/OpenAI.png
+    hidden: false
+- select:
+    name: 💎 Gemini
+    policies:
+    - ⚡ Zoro 自动
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌊 Ocean 手选
+    - 🛰️ Zoro 手选
+    - 🌌 Origo 云端
+    - 💸 赔钱机场
+    - 💴 三毛机场
+    - 🤖 AI 服务
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Google_Search.png
+    hidden: false
+- select:
+    name: 🔎 谷歌服务
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Google_Search.png
+- select:
+    name: ✈️ Telegram
+    policies:
+    - 🇭🇰 香港自动元
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🌊 Ocean 手选
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
+    hidden: false
+- select:
+    name: 𝕏 Twitter
+    policies:
+    - 🇺🇸 美国自动元
+    - 🇭🇰 香港自动元
+    - 🇯🇵 日本自动元
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Twitter.png
+    hidden: false
+- select:
+    name: 🎬 国际媒体
+    policies:
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🇭🇰 香港自动元
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇯🇵 日本优选
+    - 🇺🇸 美国优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
+    hidden: false
+- select:
+    name: 🎻 Spotify
+    policies:
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇯🇵 日本优选
+    - 🇺🇸 美国优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Spotify.png
+    hidden: false
+- select:
+    name: 🎵 TikTok
+    policies:
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇯🇵 日本优选
+    - 🇺🇸 美国优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TikTok.png
+    hidden: false
+- select:
+    name: 🎮 游戏平台
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇯🇵 日本优选
+    - 🇺🇸 美国优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Game.png
+- select:
+    name: 🪟 微软服务
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png
+    hidden: false
+- select:
+    name: 🍎 Apple 推送
+    policies:
+    - 🇭🇰 香港自动元
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+    hidden: false
+- select:
+    name: 🍎 Apple 服务
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+- select:
+    name: 💳 PayPal
+    policies:
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🇭🇰 香港自动元
+    - 🇺🇸 美国自动元
+    - 🇯🇵 日本自动元
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💸 赔钱机场
+    - 💴 三毛机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+    hidden: false
+- select:
+    name: ₿ Bybit
+    policies:
+    - 🇹🇼 台湾节点
+    - 🌊 Ocean 手选
+    - 🛰️ Zoro 手选
+    - ⚡ Zoro 自动
+    - 🇭🇰 香港自动元
+    - 🇯🇵 日本自动元
+    - 🇺🇸 美国自动元
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency.png
+    hidden: false
+- select:
+    name: 🏦 香港银行
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ♻️ 智能优选
+    - ⚡ 全球优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - DIRECT
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    hidden: false
+- select:
+    name: 🧭 兜底分流
+    policies:
+    - 🎛️ 手动选择
+    - 🌌 Origo 优选
+    - ⚡ 全球优选
+    - ♻️ 智能优选
+    - 🇺🇸 美国优选
+    - 🇯🇵 日本优选
+    - 🇭🇰 香港优选
+    - 🇸🇬 新加坡优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    - DIRECT
+    flatten: false
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
+    hidden: false
+- select:
+    name: 🌐 全部节点
+    policies:
+    - 🌌 Origo 云端
+    - 🧭 Valtrogen
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).+
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+    hidden: true
+- select:
+    name: 🇺🇸 美国节点
+    policies:
+    - 🇺🇸 美国自动元
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇺🇸|美国|洛杉矶|凤凰城|圣何塞|(\b(US|United States)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+    hidden: true
+- select:
+    name: 🇯🇵 日本节点
+    policies:
+    - 🇯🇵 日本自动元
+    - 🇯🇵 日本优选
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇯🇵|日本|东京|(\b(JP|Japan)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+    hidden: true
+- select:
+    name: 🇭🇰 香港节点
+    policies:
+    - 🇭🇰 香港自动元
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇭🇰|香港|(\b(HK|Hong)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    hidden: true
+- select:
+    name: 🇸🇬 新加坡节点
+    policies:
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇸🇬|新加坡|狮|(\b(SG|Singapore)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+    hidden: true
+- select:
+    name: 🇹🇼 台湾节点
+    policies:
+    - 🌌 Origo 云端
+    - 🧭 Valtrogen
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇨🇳|🇹🇼|台湾|(\b(TW|Tai|Taiwan)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/China.png
+    hidden: false
+- select:
+    name: 🇬🇧 英国节点
+    policies:
+    - 🌌 Origo 云端
+    - 💴 三毛机场
+    - 💸 赔钱机场
+    flatten: true
+    filter: (?i)^(?!.*(?:剩余|流量|到期|过期|套餐|官网|订阅|更新|客服|频道|群组|通知|Traffic|Expire|Expired|Subscription|Reset|Used|Remain|Notice|Official|Website)).*(?:🇬🇧|英国|英國|伦敦|倫敦|(\b(UK|GB|United Kingdom|Britain|London)\b))
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_Kingdom.png
+    hidden: true
+rules:
+- ip_cidr:
+    match: 129.146.132.36/32
+    policy: DIRECT
+- domain:
+    match: vpn.oorigo.tech
+    policy: DIRECT
+- domain:
+    match: sub.oorigo.tech
+    policy: DIRECT
+- domain:
+    match: tally.oorigo.tech
+    policy: DIRECT
+- domain_suffix:
+    match: oorigo.tech
+    policy: DIRECT
+- rule_set:
+    match: https://raw.githubusercontent.com/Repcz/EgernRules/X/Rules/Tencent/Tencent_All.yaml
+    policy: DIRECT
+    update_interval: 172800
+- domain:
+    match: courier.push.apple.com
+    policy: 🍎 Apple 推送
+- domain_suffix:
+    match: push.apple.com
+    policy: 🍎 Apple 推送
+- domain_suffix:
+    match: ess.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: bag.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: init.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: p-bb.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: se2.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: su.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: xp.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: ax.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: api.storekit.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: mzstorekit.itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: pancake.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: appstore.com
+    policy: 🍎 Apple 服务
+- domain:
+    match: apps.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: itunes.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: mzstatic.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: aaplimg.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: apple.com.cn
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: appldnld.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: mesu.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: swcdn.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: swdist.apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: cdn-apple.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: apple-cloudkit.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: icloud.com
+    policy: 🍎 Apple 服务
+- domain_suffix:
+    match: icloud-content.com
+    policy: 🍎 Apple 服务
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/AppleCN.yaml
+    policy: 🍎 Apple 服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/AppleServers.yaml
+    policy: 🍎 Apple 服务
+    update_interval: 172800
+- rule_set:
+    match: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/PayPal/PayPal.list
+    policy: 💳 PayPal
+    update_interval: 172800
+- domain_suffix:
+    match: paypal.com
+    policy: 💳 PayPal
+- domain_suffix:
+    match: paypalobjects.com
+    policy: 💳 PayPal
+- domain_suffix:
+    match: venmo.com
+    policy: 💳 PayPal
+- rule_set:
+    match: https://ruleset.isteed.cc/List/Surge/BankHK_ZABank.conf
+    policy: 🏦 香港银行
+    update_interval: 172800
+- rule_set:
+    match: https://ruleset.isteed.cc/List/Surge/BankHK_AntBank.conf
+    policy: 🏦 香港银行
+    update_interval: 172800
+- rule_set:
+    match: https://ruleset.isteed.cc/List/Surge/BankHK_WeLab.conf
+    policy: 🏦 香港银行
+    update_interval: 172800
+- rule_set:
+    match: https://ruleset.isteed.cc/List/Surge/BankHK_HSBCHK.conf
+    policy: 🏦 香港银行
+    update_interval: 172800
+- domain_suffix:
+    match: bybit.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bybit.biz
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bybit.global
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bytick.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bycsi.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: byapis.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bycbe.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bymj.io
+    policy: ₿ Bybit
+- domain_suffix:
+    match: byabcde.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: byapps.net
+    policy: ₿ Bybit
+- domain_suffix:
+    match: byd3c3.com
+    policy: ₿ Bybit
+- domain_suffix:
+    match: bybdc6.com
+    policy: ₿ Bybit
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Direct.yaml
+    policy: DIRECT
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Reject.yaml
+    policy: REJECT
+    update_interval: 172800
+- domain:
+    match: ai.google.dev
+    policy: 💎 Gemini
+- domain:
+    match: alkalicore-pa.clients6.google.com
+    policy: 💎 Gemini
+- domain:
+    match: alkalimakersuite-pa.clients6.google.com
+    policy: 💎 Gemini
+- domain:
+    match: webchannel-alkalimakersuite-pa.clients6.google.com
+    policy: 💎 Gemini
+- domain:
+    match: cloudaicompanion.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: cloudcode-pa.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: daily-cloudcode-pa.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: notebooklm-pa.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: notebooklm.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: antigravity-pa.googleapis.com
+    policy: 💎 Gemini
+- domain:
+    match: antigravity.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: gemini.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: deepmind.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: antigravity-unleash.goog
+    policy: 💎 Gemini
+- domain_suffix:
+    match: antigravity.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: opal.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: labs.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: generativeai.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: jules.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: ai.studio
+    policy: 💎 Gemini
+- domain_suffix:
+    match: notebooklm.google
+    policy: 💎 Gemini
+- domain_suffix:
+    match: deepmind.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: gemini.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: labs.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: aistudio.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: notebooklm.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: makersuite.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: jules.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: robinfrontend-pa.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: bard.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: aisandbox-pa.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: aicode.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: aida.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: proactivebackend-pa.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: opal.google.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: generativelanguage.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: geller-pa.googleapis.com
+    policy: 💎 Gemini
+- domain_suffix:
+    match: stitch.withgoogle.com
+    policy: 💎 Gemini
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/AI.yaml
+    policy: 🤖 AI 服务
+    update_interval: 172800
+- rule_set:
+    match: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Copilot/Copilot.list
+    policy: 🤖 AI 服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Github.yaml
+    policy: 🌍 国外网站
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/OneDrive.yaml
+    policy: 🪟 微软服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Microsoft.yaml
+    policy: 🪟 微软服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/YouTube.yaml
+    policy: 🔎 谷歌服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Google.yaml
+    policy: 🔎 谷歌服务
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Telegram.yaml
+    policy: ✈️ Telegram
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Twitter.yaml
+    policy: 𝕏 Twitter
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Game.yaml
+    policy: 🎮 游戏平台
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Bahamut.yaml
+    policy: 🎬 国际媒体
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Disney.yaml
+    policy: 🎬 国际媒体
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/HBO.yaml
+    policy: 🎬 国际媒体
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Netflix.yaml
+    policy: 🎬 国际媒体
+    update_interval: 172800
+- rule_set:
+    match: https://raw.githubusercontent.com/Repcz/Tool/X/Egern/Rules/Spotify.yaml
+    policy: 🎻 Spotify
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/PrimeVideo.yaml
+    policy: 🎬 国际媒体
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/TikTok.yaml
+    policy: 🎵 TikTok
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Proxy.yaml
+    policy: 🌍 国外网站
+    update_interval: 172800
+- rule_set:
+    match: https://github.com/Repcz/Tool/raw/X/Egern/Rules/Lan.yaml
+    policy: DIRECT
+    update_interval: 172800
+- domain:
+    name: 番茄核心用户接口放行
+    match: ecomuser.snssdk.com
+    policy: DIRECT
+- domain_regex:
+    name: 字节广告签名素材
+    match: ^(?:p3|p6|p9)-ad-sign\.byteimg\.com$
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲广告 SDK
+    match: pangolin-sdk-toutiao.com
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲广告 SDK 备用域名
+    match: pangolin-sdk-toutiao-b.com
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲广告 SDK 备用域名 1
+    match: pangolin-sdk-toutiao1.com
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲 DSP
+    match: pangolin-dsp-toutiao.com
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲 DSP 备用域名
+    match: pangolin-dsp-toutiao-b.com
+    policy: REJECT
+- domain_suffix:
+    name: 穿山甲广告素材
+    match: pglstatp-toutiao.com
+    policy: REJECT
+- domain:
+    name: 今日头条 DSP 广告
+    match: dsp.toutiao.com
+    policy: REJECT
+- domain:
+    name: 今日头条广告接口
+    match: ad.toutiao.com
+    policy: REJECT
+- domain_regex:
+    name: 番茄字节广告与上报接口
+    match: ^(?:ads3-normal|ads3-normal-hl|ads3-normal-lq|ads5-normal|ads5-normal-hl|ads5-normal-lq|ma5-normal-hl|ad|applog|timon)\.zijieapi\.com$
+    policy: REJECT
+- domain:
+    name: 番茄广告样式接口
+    match: api5-normal-sinfonlinec.fqnovel.com
+    policy: REJECT
+- domain_regex:
+    name: 番茄广告日志与卡片接口
+    match: ^(?:log\d*|rtlog\d*|mon\d+)-(?:applog|misc)(?:-[^.]+)?\.fqnovel\.com$
+    policy: REJECT
+- domain:
+    name: 字节穿山甲接口
+    match: pangolin.snssdk.com
+    policy: REJECT
+- domain:
+    name: 字节广告服务
+    match: bds.snssdk.com
+    policy: REJECT
+- domain:
+    name: 字节广告资源
+    match: dm.pstatp.com
+    policy: REJECT
+- domain:
+    name: 字节广告资源 S3A
+    match: s3a.pstatp.com
+    policy: REJECT
+- domain:
+    name: 字节广告短链追踪
+    match: dig.bdurl.net
+    policy: REJECT
+- domain:
+    name: 字节广告短链追踪 ZJ
+    match: dig.zjurl.cn
+    policy: REJECT
+- domain:
+    name: 字节增长追踪短链
+    match: zlink.ugsdk.cn
+    policy: REJECT
+- domain:
+    name: 哔哩哔哩广告投放
+    match: cm.ad.bilibili.com
+    policy: REJECT
+- domain:
+    name: 哔哩哔哩通用广告
+    match: cm.adcommon.bilibili.com
+    policy: REJECT
+- domain:
+    name: Google 页面广告
+    match: pagead2.googlesyndication.com
+    policy: REJECT
+- domain:
+    name: Google 广告素材
+    match: tpc.googlesyndication.com
+    policy: REJECT
+- domain:
+    name: Google DoubleClick 广告
+    match: googleads.g.doubleclick.net
+    policy: REJECT
+- domain:
+    name: Google 安全发布广告
+    match: securepubads.g.doubleclick.net
+    policy: REJECT
+- domain:
+    name: Google 发布商广告
+    match: pubads.g.doubleclick.net
+    policy: REJECT
+- domain_suffix:
+    name: Google 广告服务
+    match: adservice.google.com
+    policy: REJECT
+- domain_suffix:
+    name: ExoClick 广告
+    match: exoclick.com
+    policy: REJECT
+- domain_suffix:
+    name: ExoClick 广告素材
+    match: exdynsrv.com
+    policy: REJECT
+- domain_suffix:
+    name: ExoClick 广告素材备用
+    match: exosrv.com
+    policy: REJECT
+- domain_suffix:
+    name: TrafficStars/TSyndicate
+    match: tsyndicate.com
+    policy: REJECT
+- domain_suffix:
+    name: TrafficJunky 广告
+    match: trafficjunky.net
+    policy: REJECT
+- domain_suffix:
+    name: JuicyAds 广告
+    match: juicyads.com
+    policy: REJECT
+- domain_suffix:
+    name: PopAds 广告
+    match: popads.net
+    policy: REJECT
+- domain_suffix:
+    name: PopCash 广告
+    match: popcash.net
+    policy: REJECT
+- domain_suffix:
+    name: Propeller 点击广告
+    match: onclickalgo.com
+    policy: REJECT
+- domain_suffix:
+    name: Propeller 点击广告备用
+    match: onclickperformance.com
+    policy: REJECT
+- domain_suffix:
+    name: Propeller 点击广告预测
+    match: onclickprediction.com
+    policy: REJECT
+- domain_suffix:
+    name: Propeller 点击广告短域
+    match: onclckmn.com
+    policy: REJECT
+- domain_suffix:
+    name: 18comic 广告点击追踪
+    match: trcktr.com
+    policy: REJECT
+- domain_suffix:
+    name: FingerprintJS 指纹追踪 CDN
+    match: fpcdn.io
+    policy: REJECT
+- and:
+    name: YouTube googlevideo UDP/QUIC 阻断
+    match:
+    - domain_suffix:
+        match: googlevideo.com
+    - protocol:
+        match: udp
+    policy: REJECT
+- and:
+    name: YouTube API UDP/QUIC 阻断
+    match:
+    - domain:
+        match: youtubei.googleapis.com
+    - protocol:
+        match: udp
+    policy: REJECT
+- geoip:
+    match: CN
+    policy: DIRECT
+- default:
+    policy: 🧭 兜底分流
+map_locals:
+- match: ^https://18comic\.(?:org|vip)/templates/frontend/airav/js/jquery\.avs.*?\.js.*
+  status_code: 200
+  headers:
+    Content-Type: application/javascript
+  body: ''
+- match: ^https://acs\.m\.goofish\.com/gw/mtop\.taobao\.idlecommerce\.splash\.ads/
+  status_code: 200
+  headers:
+    Content-Type: application/json
+  body: '{}'
+mitm:
+  hostnames:
+    includes:
+    - '*.doubleclick.net'
+    - '*.googlesyndication.com'
+    - '*.googleadservices.com'
+    - '*.admob.com'
+    - '*.revenuecat.com'
+    - '*.appsflyer.com'
+    - '*.adjust.com'
+    - '*.branch.io'
+    - acs.m.goofish.com
+    - app.bilibili.com
+    - x.com
+    - 18comic.vip
+    - 18comic.org
+    - '*.youtube.com'
+    - '*.googlevideo.com'
+    - '*.ytimg.com'
+    - youtubei.googleapis.com
+    excludes:
+    - '*.toutiao.com'
+    - '*.amemv.com'
+    - '*.bytedance.com'
+    - '*.douyin.com'
+    - '*.bank.*'
+    - '*.boc.cn'
+    - '*.icbc.com.cn'
+    - '*.ccb.com'
+    - '*.abc.cn'
+    - '*.pingan.com.cn'
+    - '*.alipay.com'
+    - '*.taobao.com'
+    - '*.17wanxiao.com'
+    - '*.wanxiao.com'
+    - xqh5.17wanxiao.com
+    - '*.17wclass.com'
+    - '*.17weike.com'
+modules:
+- url: https://loon.103516.xyz/Plugin/BaiduNetDisk.lpx
+  enabled: true
+- name: Origo Ad Lite
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
+  enabled: false
+- name: Origo Ad Balanced
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
+  enabled: true
+- name: Origo Ad Powerful
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
+  enabled: false
+- url: https://loon.103516.xyz/Plugin/X_Web.lpx
+  enabled: false
+- url: https://loon.103516.xyz/Plugin/Xueqiu.lpx
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/YouTube.lpx
+  compat_arguments:
+    blockUpload: 'false'
+    blockShorts: 'false'
+    blockImmersive: 'true'
+    captionLang: zh-Hans
+    lyricLang: zh-Hans
+    debug: 'false'
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/Reddit.lpx
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/RedNote.lpx
+  compat_arguments:
+    rednote-feedtime: 'false'
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/NeteaseMusic.lpx
+  compat_arguments:
+    FX: 'false'
+    MY: 'false'
+    DT: 'false'
+    GZ: 'false'
+    PRGG: 'false'
+    PRRK: 'false'
+    PRDRD: 'false'
+    PRSCVPT: 'false'
+    PRST: 'false'
+    PRRR: 'false'
+    HMPR: 'false'
+    PRMST: 'false'
+    PRCN: 'false'
+    Music163_VIP_Shared: 'true'
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/IPPure.lpx
+  enabled: false
+- url: https://loon.103516.xyz/Plugin/ChinaMobile.lpx
+  compat_arguments:
+    enable_capture: 'false'
+    enable_cron: 'false'
+    service: 'false'
+    silent: 'false'
+    debug: 'false'
+  enabled: false
+- url: https://loon.103516.xyz/Plugin/Bilibili.lpx
+  compat_arguments:
+    displayUpList: auto
+    purifyComment: 'true'
+    optimizeRequest: 'true'
+    sponsorBlock: 'true'
+    logLevel: error
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/BodianMusic.lpx
+  enabled: true
+- url: https://loon.103516.xyz/Plugin/AppStoreMonitor.lpx
+  compat_arguments:
+    bark_sound: system
+  enabled: false
+- name: SubStore
+  url: https://raw.githubusercontent.com/sub-store-org/Sub-Store/refs/heads/master/config/Egern.yaml
+  enabled: false
+- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/MyBlockAds.module
+  enabled: false
+- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module
+  enabled: false
+- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module
+  enabled: false

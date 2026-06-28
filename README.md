@@ -66,6 +66,20 @@ dist/origo15-module-snippet.yaml
 
 如果还不够，再手动换 `powerful`。不要同时开三档，开 Powerful 时建议关掉 Lite/Balanced，避免重复处理。
 
+## Origo VPN 模板
+
+公开模板位于：
+
+```text
+https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml
+```
+
+模板来自个人 `origo20.yaml`，但已经脱敏：
+
+- 外部订阅 URL 改为 `YOUR_ORIGO_SUB_TOKEN`、`YOUR_VALTROGEN_ACCESS_KEY`、`YOUR_SANMAO_TOKEN`、`YOUR_PQ_TOKEN` 占位。
+- 移除了 `ca_p12` 和 `ca_passphrase`，避免公开 Egern CA 证书。
+- 保留策略组、规则、MITM hostnames、模块开关和 Origo Ad Balanced 接入方式。
+
 ## GitHub Actions 自动更新
 
 仓库里已经带了工作流：
