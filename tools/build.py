@@ -27,19 +27,25 @@ RULE_PREFIXES_LITE = (
     "IP-ASN,",
 )
 
-SECTION_ORDER = ["Rule", "URL Rewrite", "Map Local"]
-POWERFUL_SECTION_ORDER = ["General", "Rule", "URL Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
+SECTION_ORDER = ["Rule", "URL Rewrite", "Rewrite", "Map Local"]
+POWERFUL_SECTION_ORDER = ["Argument", "General", "Rule", "URL Rewrite", "Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
 
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def fetch_text(url: str, cache_path: Path, use_cache: bool) -> str:
+def fetch_text(url: str, cache_path: Path, use_cache: bool, user_agent: str | None = None) -> str:
     if use_cache and cache_path.exists():
         return cache_path.read_text(encoding="utf-8", errors="replace")
 
-    req = urllib.request.Request(url, headers={"User-Agent": "origo-ad/1.0"})
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": user_agent or "origo-ad/1.0",
+            "Referer": "https://loonlab.103516.xyz/Plugin/",
+        },
+    )
     with urllib.request.urlopen(req, timeout=30) as res:
         data = res.read().decode("utf-8", errors="replace")
     cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +66,7 @@ def parse_sections(text: str) -> Tuple[List[str], Dict[str, List[str]]]:
         line = raw.rstrip()
         match = re.match(r"^\[(.+)]$", line.strip())
         if match:
-            current = match.group(1).strip()
+            current = normalize_section(match.group(1).strip())
             sections.setdefault(current, [])
             continue
 
@@ -72,6 +78,13 @@ def parse_sections(text: str) -> Tuple[List[str], Dict[str, List[str]]]:
         sections.setdefault(current, []).append(line)
 
     return meta, sections
+
+
+def normalize_section(section: str) -> str:
+    normalized = section.strip()
+    if normalized.lower() == "mitm":
+        return "MITM"
+    return normalized
 
 
 def meaningful_entries(lines: Iterable[str]) -> List[str]:
@@ -98,6 +111,20 @@ def dedupe_keep_order(entries: Iterable[str]) -> List[str]:
 def lite_rule_filter(entry: str) -> bool:
     upper = entry.upper()
     return upper.startswith(RULE_PREFIXES_LITE)
+
+
+def balanced_rewrite_filter(entry: str) -> bool:
+    lower = entry.lower()
+    heavy_markers = (
+        "response-body",
+        "script-path",
+        "requires-body",
+        "jq-path",
+        " request-body",
+        " http-response",
+        " http-request",
+    )
+    return not any(marker in lower for marker in heavy_markers)
 
 
 def build_module(
@@ -190,13 +217,13 @@ def main() -> int:
     }
 
     all_lite_rules: List[str] = []
-    all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Map Local": []}
+    all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Rewrite": [], "Map Local": []}
     all_powerful: Dict[str, List[str]] = {section: [] for section in POWERFUL_SECTION_ORDER}
     source_hashes: List[str] = []
 
     for source in sources:
         cache_path = CACHE_DIR / f"{source['name']}.module"
-        text = fetch_text(source["url"], cache_path, args.use_cache)
+        text = fetch_text(source["url"], cache_path, args.use_cache, source.get("user_agent"))
         source_hash = sha256_text(text)
         source_hashes.append(source_hash)
         _meta, sections = parse_sections(text)
@@ -205,11 +232,14 @@ def main() -> int:
         lite_rules = [entry for entry in rules if lite_rule_filter(entry)]
         balanced_rules = rules
         url_rewrites = meaningful_entries(sections.get("URL Rewrite", []))
+        rewrites = meaningful_entries(sections.get("Rewrite", []))
+        balanced_rewrites = [entry for entry in rewrites if balanced_rewrite_filter(entry)]
         map_locals = meaningful_entries(sections.get("Map Local", []))
 
         all_lite_rules.extend(lite_rules)
         all_balanced["Rule"].extend(balanced_rules)
         all_balanced["URL Rewrite"].extend(url_rewrites)
+        all_balanced["Rewrite"].extend(balanced_rewrites)
         all_balanced["Map Local"].extend(map_locals)
         for section in POWERFUL_SECTION_ORDER:
             all_powerful[section].extend(meaningful_entries(sections.get(section, [])))
@@ -224,6 +254,7 @@ def main() -> int:
                 "kept_balanced_counts": {
                     "Rule": len(balanced_rules),
                     "URL Rewrite": len(url_rewrites),
+                    "Rewrite": len(balanced_rewrites),
                     "Map Local": len(map_locals),
                 },
                 "kept_powerful_counts": {

@@ -9,6 +9,36 @@
       "name": "blackmatrix7 AdvertisingLite",
       "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule",
       "description": "Actively maintained AdvertisingLite rewrite module from blackmatrix7/ios_rule_script."
+    },
+    {
+      "name": "LoonLab Bilibili",
+      "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
+      "description": "Pure ad blocking LoonLab plugin for Bilibili.",
+      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+    },
+    {
+      "name": "LoonLab X Web",
+      "url": "https://loon.103516.xyz/Plugin/X_Web.lpx",
+      "description": "Pure ad blocking LoonLab plugin for X web timeline ads.",
+      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+    },
+    {
+      "name": "LoonLab Xueqiu",
+      "url": "https://loon.103516.xyz/Plugin/Xueqiu.lpx",
+      "description": "Pure ad blocking LoonLab plugin for Xueqiu.",
+      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+    },
+    {
+      "name": "LoonLab Reddit",
+      "url": "https://loon.103516.xyz/Plugin/Reddit.lpx",
+      "description": "Pure ad blocking LoonLab plugin for Reddit promotions.",
+      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+    },
+    {
+      "name": "LoonLab RedNote",
+      "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
+      "description": "Pure ad blocking LoonLab plugin for RedNote/Xiaohongshu ads.",
+      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
     }
   ]
 }

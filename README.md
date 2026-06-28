@@ -15,12 +15,12 @@
 
 - `dist/origo-ad-balanced.module`
   - 折中版。
-  - 保留 `Rule`、`URL Rewrite`、`Map Local`。
+  - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`。
   - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
 
 - `dist/origo-ad-powerful.module`
   - 最强版。
-  - 保留 `Rule`、`URL Rewrite`、`Map Local`、`Body Rewrite`、`Script`、`MITM`。
+  - 保留 `Argument`、`Rule`、`URL Rewrite`、`Rewrite`、`Map Local`、`Body Rewrite`、`Script`、`MITM`。
   - 去广告最强，但会重新引入响应体处理和脚本执行，更耗电。
 
 - `dist/origo15-module-snippet.yaml`
@@ -80,6 +80,7 @@ dist/origo15-module-snippet.yaml
 - 拉取 `sources.json` 里的活跃上游模块。
 - 重新生成 `dist/origo-ad-lite.module`、`dist/origo-ad-balanced.module` 和 `dist/origo-ad-powerful.module`。
 - 确认 lite / balanced 里没有 `[Body Rewrite]`、`[Script]`、`script_url`、`body_required`。
+- 纯去广告 LoonLab 模块会被合并进生成产物；解锁会员、功能增强、定时任务类模块建议继续作为独立模块按需开启。
 - 只有上游内容真的变了，才自动 commit 并 push。
 
 推到 GitHub 后，Egern 可以直接引用 raw URL：
@@ -124,5 +125,13 @@ gh repo create origo-ad --public --source=. --remote=origin --push
 
 - `fmz200/wool_scripts` 的 `Surge/module/blockAds.module`
 - `blackmatrix7/ios_rule_script` 的 `rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule`
+- `LoonLab / 103516` 的纯去广告插件：
+  - `Bilibili.lpx`
+  - `X_Web.lpx`
+  - `Xueqiu.lpx`
+  - `Reddit.lpx`
+  - `RedNote.lpx`
 
 生成器每次会重新拉取上游，输出报告里会记录时间和数量。
+
+没有合并进 `origo-ad` 的 LoonLab 插件主要是带解锁或功能增强的模块，例如 `BaiduNetDisk.lpx`、`YouTube.lpx`、`NeteaseMusic.lpx`、`BodianMusic.lpx`、`ChinaMobile.lpx`、`IPPure.lpx`、`AppStoreMonitor.lpx`。这些更适合在 Egern 配置里保持独立开关。

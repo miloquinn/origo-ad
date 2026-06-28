@@ -18,6 +18,7 @@
       "kept_balanced_counts": {
         "Rule": 250,
         "URL Rewrite": 517,
+        "Rewrite": 0,
         "Map Local": 800
       },
       "kept_powerful_counts": {
@@ -56,11 +57,197 @@
       "kept_balanced_counts": {
         "Rule": 0,
         "URL Rewrite": 1229,
+        "Rewrite": 0,
         "Map Local": 0
       },
       "kept_powerful_counts": {
         "General": 1,
         "URL Rewrite": 1229,
+        "MITM": 1
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ],
+        "powerful": []
+      }
+    },
+    {
+      "name": "LoonLab Bilibili",
+      "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
+      "sha256": "05c872edaf2481634bbfabae5b8bc24ed1006fed6c5cdfbf36f77889e221dc96",
+      "raw_counts": {
+        "Argument": 5,
+        "Rule": 6,
+        "Rewrite": 18,
+        "Script": 4,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 5,
+      "kept_balanced_counts": {
+        "Rule": 6,
+        "URL Rewrite": 0,
+        "Rewrite": 3,
+        "Map Local": 0
+      },
+      "kept_powerful_counts": {
+        "Argument": 5,
+        "Rule": 6,
+        "Rewrite": 18,
+        "Script": 4,
+        "MITM": 1
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ],
+        "powerful": []
+      }
+    },
+    {
+      "name": "LoonLab X Web",
+      "url": "https://loon.103516.xyz/Plugin/X_Web.lpx",
+      "sha256": "48c9e22a2bcb90098dcdc1c9b3dc1f7c167564aa4db0b5b6c849c6831677c9af",
+      "raw_counts": {
+        "Argument": 1,
+        "Rewrite": 0,
+        "Script": 2,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 0,
+      "kept_balanced_counts": {
+        "Rule": 0,
+        "URL Rewrite": 0,
+        "Rewrite": 0,
+        "Map Local": 0
+      },
+      "kept_powerful_counts": {
+        "Argument": 1,
+        "Script": 2,
+        "MITM": 1
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ],
+        "powerful": []
+      }
+    },
+    {
+      "name": "LoonLab Xueqiu",
+      "url": "https://loon.103516.xyz/Plugin/Xueqiu.lpx",
+      "sha256": "6a4266be73b929c6d1ca7d2a298c4452db8f33ccfe82bc3c0fe8a7970dfd1b5b",
+      "raw_counts": {
+        "Rewrite": 20,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 0,
+      "kept_balanced_counts": {
+        "Rule": 0,
+        "URL Rewrite": 0,
+        "Rewrite": 18,
+        "Map Local": 0
+      },
+      "kept_powerful_counts": {
+        "Rewrite": 20,
+        "MITM": 1
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ],
+        "powerful": []
+      }
+    },
+    {
+      "name": "LoonLab Reddit",
+      "url": "https://loon.103516.xyz/Plugin/Reddit.lpx",
+      "sha256": "d74abc88e76c34130a7436b7e8965ba2d954fdd82567ed8a9caaefdc4776c837",
+      "raw_counts": {
+        "Rewrite": 1,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 0,
+      "kept_balanced_counts": {
+        "Rule": 0,
+        "URL Rewrite": 0,
+        "Rewrite": 0,
+        "Map Local": 0
+      },
+      "kept_powerful_counts": {
+        "Rewrite": 1,
+        "MITM": 1
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ],
+        "powerful": []
+      }
+    },
+    {
+      "name": "LoonLab RedNote",
+      "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
+      "sha256": "cc9f29df9b9212bcd62f1091fa3d258d269c941e92f6101320c2a1d465ce789f",
+      "raw_counts": {
+        "Argument": 1,
+        "Rule": 6,
+        "Rewrite": 11,
+        "Script": 13,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 5,
+      "kept_balanced_counts": {
+        "Rule": 6,
+        "URL Rewrite": 0,
+        "Rewrite": 7,
+        "Map Local": 0
+      },
+      "kept_powerful_counts": {
+        "Argument": 1,
+        "Rule": 6,
+        "Rewrite": 11,
+        "Script": 13,
         "MITM": 1
       },
       "dropped_sections": {
@@ -83,27 +270,30 @@
     "lite": {
       "path": "dist/origo-ad-lite.module",
       "counts": {
-        "Rule": 150
+        "Rule": 155
       }
     },
     "balanced": {
       "path": "dist/origo-ad-balanced.module",
       "counts": {
-        "Rule": 202,
+        "Rule": 209,
         "URL Rewrite": 1745,
+        "Rewrite": 28,
         "Map Local": 800
       }
     },
     "powerful": {
       "path": "dist/origo-ad-powerful.module",
       "counts": {
+        "Argument": 7,
         "General": 1,
-        "Rule": 202,
+        "Rule": 209,
         "URL Rewrite": 1745,
+        "Rewrite": 50,
         "Body Rewrite": 85,
         "Map Local": 800,
-        "Script": 220,
-        "MITM": 2
+        "Script": 239,
+        "MITM": 7
       }
     }
   }
