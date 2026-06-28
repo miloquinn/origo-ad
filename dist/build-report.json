@@ -306,5 +306,10 @@
       },
       "mitm_host_count": 1212
     }
+  },
+  "script_mirrors": {
+    "https://loon.103516.xyz/Script/X_Web/XWebEnhance.js": "https://github.com/miloquinn/origo-ad/raw/main/dist/scripts/loonlab-xweb-enhance.js",
+    "https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js": "https://github.com/miloquinn/origo-ad/raw/main/dist/scripts/kelee-redpaper-remove-ads.js",
+    "https://loon.103516.xyz/Script/RedNote/rednote-feedtime.js": "https://github.com/miloquinn/origo-ad/raw/main/dist/scripts/loonlab-rednote-feedtime.js"
   }
 }

@@ -55,6 +55,23 @@ SUPPLEMENTAL_MITM_HOSTNAMES = [
     "youtubei.googleapis.com",
 ]
 
+LOONLAB_USER_AGENT = "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+
+SCRIPT_MIRRORS = {
+    "https://loon.103516.xyz/Script/X_Web/XWebEnhance.js": {
+        "path": "scripts/loonlab-xweb-enhance.js",
+        "user_agent": LOONLAB_USER_AGENT,
+    },
+    "https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js": {
+        "path": "scripts/kelee-redpaper-remove-ads.js",
+        "user_agent": LOONLAB_USER_AGENT,
+    },
+    "https://loon.103516.xyz/Script/RedNote/rednote-feedtime.js": {
+        "path": "scripts/loonlab-rednote-feedtime.js",
+        "user_agent": LOONLAB_USER_AGENT,
+    },
+}
+
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -156,6 +173,13 @@ def balanced_rewrite_filter(entry: str) -> bool:
     return not any(marker in lower for marker in heavy_markers)
 
 
+def rewrite_script_paths(entry: str, mirrored_urls: Dict[str, str]) -> str:
+    rewritten = entry
+    for source_url, mirror_url in mirrored_urls.items():
+        rewritten = rewritten.replace(source_url, mirror_url)
+    return rewritten
+
+
 def mitm_filter(entry: str) -> bool:
     return entry.lower().startswith("hostname") and "=" in entry
 
@@ -251,6 +275,19 @@ modules:
 """
 
 
+def build_script_mirrors(base_url: str, use_cache: bool) -> Dict[str, str]:
+    mirrored_urls: Dict[str, str] = {}
+    for source_url, mirror in SCRIPT_MIRRORS.items():
+        relative_path = mirror["path"]
+        cache_path = CACHE_DIR / ("mirror-" + relative_path.replace("/", "__"))
+        text = fetch_text(source_url, cache_path, use_cache, mirror.get("user_agent"))
+        output_path = DIST_DIR / relative_path
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(text, encoding="utf-8")
+        mirrored_urls[source_url] = f"{base_url.rstrip('/')}/{relative_path}"
+    return mirrored_urls
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build battery-oriented Egern adblock modules.")
     parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE, help="Existing Egern profile for context.")
@@ -267,6 +304,8 @@ def main() -> int:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
     sources = read_json(SOURCES_FILE)["sources"]
+    base = args.base_url.rstrip("/")
+    mirrored_script_urls = build_script_mirrors(base, args.use_cache)
     report = {
         "generated_from": "upstream source hashes",
         "profile": None,
@@ -303,6 +342,8 @@ def main() -> int:
         all_balanced["MITM"].extend(mitm)
         for section in POWERFUL_SECTION_ORDER:
             entries = [entry for entry in meaningful_entries(sections.get(section, [])) if generated_entry_filter(entry)]
+            if section == "Script":
+                entries = [rewrite_script_paths(entry, mirrored_script_urls) for entry in entries]
             if section == "MITM":
                 entries = [entry for entry in entries if mitm_filter(entry)]
             all_powerful[section].extend(entries)
@@ -375,7 +416,6 @@ def main() -> int:
     balanced_path.write_text(balanced_module, encoding="utf-8")
     powerful_path.write_text(powerful_module, encoding="utf-8")
 
-    base = args.base_url.rstrip("/")
     snippet = make_snippet(
         f"{base}/origo-ad-lite.module",
         f"{base}/origo-ad-balanced.module",
@@ -415,6 +455,9 @@ def main() -> int:
             "counts": {section: len(entries) for section, entries in powerful_sections.items() if entries},
             "mitm_host_count": mitm_host_count(powerful_sections.get("MITM", [])),
         },
+    }
+    report["script_mirrors"] = {
+        source_url: mirror_url for source_url, mirror_url in mirrored_script_urls.items()
     }
     (DIST_DIR / "build-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
