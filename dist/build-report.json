@@ -1,0 +1,86 @@
+{
+  "generated_from": "upstream source hashes",
+  "profile": null,
+  "sources": [
+    {
+      "name": "StartUpAds",
+      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module",
+      "sha256": "f47c42dea33fdc2957a5fdb255717e9120f9da31063de6d73978e44449bd9d7d",
+      "raw_counts": {
+        "Rule": 5,
+        "URL Rewrite": 14,
+        "Body Rewrite": 17,
+        "Map Local": 430,
+        "Script": 42,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 5,
+      "kept_balanced_counts": {
+        "Rule": 5,
+        "URL Rewrite": 14,
+        "Map Local": 430
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ]
+      }
+    },
+    {
+      "name": "BlockAds",
+      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module",
+      "sha256": "cba6e3c02155cb9fc7bbed44fc87695819a9900cf3842d5a95f0175c4e30a4c9",
+      "raw_counts": {
+        "Rule": 169,
+        "URL Rewrite": 442,
+        "Body Rewrite": 52,
+        "Map Local": 617,
+        "Script": 78,
+        "MITM": 1
+      },
+      "kept_lite_rule_count": 133,
+      "kept_balanced_counts": {
+        "Rule": 169,
+        "URL Rewrite": 442,
+        "Map Local": 617
+      },
+      "dropped_sections": {
+        "lite": [
+          "URL-REGEX in Rule",
+          "URL Rewrite",
+          "Body Rewrite",
+          "Map Local",
+          "Script"
+        ],
+        "balanced": [
+          "Body Rewrite",
+          "Script"
+        ]
+      }
+    }
+  ],
+  "tiers": {
+    "lite": {
+      "path": "dist/origo-adblock-lite.module",
+      "counts": {
+        "Rule": 132
+      }
+    },
+    "balanced": {
+      "path": "dist/origo-adblock-balanced.module",
+      "counts": {
+        "Rule": 167,
+        "URL Rewrite": 456,
+        "Map Local": 1017
+      }
+    }
+  }
+}

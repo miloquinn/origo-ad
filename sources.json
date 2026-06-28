@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "name": "StartUpAds",
+      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module",
+      "description": "Open-screen ad blocking module mirrored from sooyaaabo/Egern."
+    },
+    {
+      "name": "BlockAds",
+      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module",
+      "description": "General ad blocking module mirrored from sooyaaabo/Egern."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+name: Update Egern modules
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-egern-modules
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate battery-oriented modules
+        run: |
+          python tools/build.py \
+            --no-profile \
+            --base-url "https://raw.githubusercontent.com/${{ github.repository }}/main/dist"
+
+      - name: Verify generated modules stay script-free
+        run: |
+          ! grep -R -nE '\[Body Rewrite\]|\[Script\]|script_url|body_required|http-response|http_request' dist/origo-adblock-*.module
+
+      - name: Commit updated modules
+        run: |
+          if git diff --quiet -- dist; then
+            echo "No upstream changes detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git commit -m "Refresh generated Egern adblock modules" \
+            -m "The workflow rebuilds the lite and balanced modules from the configured upstream Egern modules. Generated output is deterministic, so this commit only appears when upstream content changes." \
+            -m "Constraint: Keep generated modules free of Body Rewrite and Script sections to reduce Egern battery cost." \
+            -m "Confidence: high" \
+            -m "Scope-risk: narrow" \
+            -m "Tested: tools/build.py --no-profile and script-free grep guard in GitHub Actions"
+          git push

@@ -1,0 +1,18 @@
+# 省电版模块接入片段
+# 先用 lite。如果广告明显变多，再把 lite 的 enabled 改 false，balanced 改 true。
+# 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
+
+modules:
+- name: Origo Battery AdBlock Lite
+  url: https://raw.githubusercontent.com/miloquinn/egern-battery-adblock/main/dist/origo-adblock-lite.module
+  enabled: true
+- name: Origo Battery AdBlock Balanced
+  url: https://raw.githubusercontent.com/miloquinn/egern-battery-adblock/main/dist/origo-adblock-balanced.module
+  enabled: false
+- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module
+  enabled: false
+- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module
+  enabled: false
+
+# 如果要进一步省电，建议把 scriptings 里的 YouTube/Bilibili/X 响应脚本也先关掉。
+# 那几条脚本需要 body_required，比普通域名拦截重很多。
