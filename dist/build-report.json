@@ -17,9 +17,10 @@
       "kept_lite_rule_count": 177,
       "kept_balanced_counts": {
         "Rule": 250,
-        "URL Rewrite": 517,
+        "URL Rewrite": 516,
         "Rewrite": 0,
-        "Map Local": 800
+        "Map Local": 800,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Rule": 250,
@@ -58,7 +59,8 @@
         "Rule": 0,
         "URL Rewrite": 1229,
         "Rewrite": 0,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "General": 1,
@@ -96,7 +98,8 @@
         "Rule": 6,
         "URL Rewrite": 0,
         "Rewrite": 3,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Argument": 5,
@@ -135,7 +138,8 @@
         "Rule": 0,
         "URL Rewrite": 0,
         "Rewrite": 0,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Argument": 1,
@@ -170,7 +174,8 @@
         "Rule": 0,
         "URL Rewrite": 0,
         "Rewrite": 18,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Rewrite": 20,
@@ -204,7 +209,8 @@
         "Rule": 0,
         "URL Rewrite": 0,
         "Rewrite": 0,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Rewrite": 1,
@@ -241,7 +247,8 @@
         "Rule": 6,
         "URL Rewrite": 0,
         "Rewrite": 7,
-        "Map Local": 0
+        "Map Local": 0,
+        "MITM": 1
       },
       "kept_powerful_counts": {
         "Argument": 1,
@@ -277,9 +284,10 @@
       "path": "dist/origo-ad-balanced.module",
       "counts": {
         "Rule": 209,
-        "URL Rewrite": 1745,
+        "URL Rewrite": 1744,
         "Rewrite": 28,
-        "Map Local": 800
+        "Map Local": 800,
+        "MITM": 7
       }
     },
     "powerful": {
@@ -288,7 +296,7 @@
         "Argument": 7,
         "General": 1,
         "Rule": 209,
-        "URL Rewrite": 1745,
+        "URL Rewrite": 1744,
         "Rewrite": 50,
         "Body Rewrite": 85,
         "Map Local": 800,

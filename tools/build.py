@@ -27,7 +27,7 @@ RULE_PREFIXES_LITE = (
     "IP-ASN,",
 )
 
-SECTION_ORDER = ["Rule", "URL Rewrite", "Rewrite", "Map Local"]
+SECTION_ORDER = ["Rule", "URL Rewrite", "Rewrite", "Map Local", "MITM"]
 POWERFUL_SECTION_ORDER = ["Argument", "General", "Rule", "URL Rewrite", "Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
 
 
@@ -108,6 +108,10 @@ def dedupe_keep_order(entries: Iterable[str]) -> List[str]:
     return result
 
 
+def generated_entry_filter(entry: str) -> bool:
+    return entry.strip().lower() != "hostname - reject"
+
+
 def lite_rule_filter(entry: str) -> bool:
     upper = entry.upper()
     return upper.startswith(RULE_PREFIXES_LITE)
@@ -125,6 +129,10 @@ def balanced_rewrite_filter(entry: str) -> bool:
         " http-request",
     )
     return not any(marker in lower for marker in heavy_markers)
+
+
+def mitm_filter(entry: str) -> bool:
+    return entry.lower().startswith("hostname")
 
 
 def build_module(
@@ -169,17 +177,17 @@ def source_stats(sections: Dict[str, List[str]]) -> Dict[str, int]:
 
 def make_snippet(lite_url: str, balanced_url: str, powerful_url: str) -> str:
     return f"""# 省电版模块接入片段
-# 先用 lite。如果广告明显变多，再把 lite 的 enabled 改 false，balanced 改 true。
-# powerful 是最强档，包含脚本/MITM/响应体处理，去广告强但更耗电，默认别开。
+# 先用 balanced。它保留 MITM 让 HTTPS 去广告生效，但不跑脚本和响应体处理。
+# lite 最省电但只保留低成本规则；powerful 是最强档，包含脚本/响应体处理，更耗电。
 # 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
 
 modules:
 - name: Origo Ad Lite
   url: {lite_url}
-  enabled: true
+  enabled: false
 - name: Origo Ad Balanced
   url: {balanced_url}
-  enabled: false
+  enabled: true
 - name: Origo Ad Powerful
   url: {powerful_url}
   enabled: false
@@ -188,8 +196,7 @@ modules:
 - url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule
   enabled: false
 
-# 如果要进一步省电，建议把 scriptings 里的 YouTube/Bilibili/X 响应脚本也先关掉。
-# 那几条脚本需要 body_required，比普通域名拦截重很多。
+# 如果要进一步省电，可以改用 lite；如果要更强去广告，再手动开 powerful。
 """
 
 
@@ -217,7 +224,7 @@ def main() -> int:
     }
 
     all_lite_rules: List[str] = []
-    all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Rewrite": [], "Map Local": []}
+    all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Rewrite": [], "Map Local": [], "MITM": []}
     all_powerful: Dict[str, List[str]] = {section: [] for section in POWERFUL_SECTION_ORDER}
     source_hashes: List[str] = []
 
@@ -228,21 +235,26 @@ def main() -> int:
         source_hashes.append(source_hash)
         _meta, sections = parse_sections(text)
         stats = source_stats(sections)
-        rules = meaningful_entries(sections.get("Rule", []))
+        rules = [entry for entry in meaningful_entries(sections.get("Rule", [])) if generated_entry_filter(entry)]
         lite_rules = [entry for entry in rules if lite_rule_filter(entry)]
         balanced_rules = rules
-        url_rewrites = meaningful_entries(sections.get("URL Rewrite", []))
-        rewrites = meaningful_entries(sections.get("Rewrite", []))
+        url_rewrites = [entry for entry in meaningful_entries(sections.get("URL Rewrite", [])) if generated_entry_filter(entry)]
+        rewrites = [entry for entry in meaningful_entries(sections.get("Rewrite", [])) if generated_entry_filter(entry)]
         balanced_rewrites = [entry for entry in rewrites if balanced_rewrite_filter(entry)]
-        map_locals = meaningful_entries(sections.get("Map Local", []))
+        map_locals = [entry for entry in meaningful_entries(sections.get("Map Local", [])) if generated_entry_filter(entry)]
+        mitm = [entry for entry in meaningful_entries(sections.get("MITM", [])) if generated_entry_filter(entry) and mitm_filter(entry)]
 
         all_lite_rules.extend(lite_rules)
         all_balanced["Rule"].extend(balanced_rules)
         all_balanced["URL Rewrite"].extend(url_rewrites)
         all_balanced["Rewrite"].extend(balanced_rewrites)
         all_balanced["Map Local"].extend(map_locals)
+        all_balanced["MITM"].extend(mitm)
         for section in POWERFUL_SECTION_ORDER:
-            all_powerful[section].extend(meaningful_entries(sections.get(section, [])))
+            entries = [entry for entry in meaningful_entries(sections.get(section, [])) if generated_entry_filter(entry)]
+            if section == "MITM":
+                entries = [entry for entry in entries if mitm_filter(entry)]
+            all_powerful[section].extend(entries)
 
         report["sources"].append(
             {
@@ -256,6 +268,7 @@ def main() -> int:
                     "URL Rewrite": len(url_rewrites),
                     "Rewrite": len(balanced_rewrites),
                     "Map Local": len(map_locals),
+                    "MITM": len(mitm),
                 },
                 "kept_powerful_counts": {
                     section: len(meaningful_entries(sections.get(section, [])))
@@ -287,7 +300,7 @@ def main() -> int:
         "Origo Ad Balanced",
         source_records,
         balanced_sections,
-        "Keeps rules, URL rewrite, and map local; drops body rewrite and scripts.",
+        "Keeps rules, URL rewrite, map local, and MITM; drops body rewrite and scripts.",
         build_id,
     )
     powerful_module = build_module(

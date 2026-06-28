@@ -1,15 +1,15 @@
 # 省电版模块接入片段
-# 先用 lite。如果广告明显变多，再把 lite 的 enabled 改 false，balanced 改 true。
-# powerful 是最强档，包含脚本/MITM/响应体处理，去广告强但更耗电，默认别开。
+# 先用 balanced。它保留 MITM 让 HTTPS 去广告生效，但不跑脚本和响应体处理。
+# lite 最省电但只保留低成本规则；powerful 是最强档，包含脚本/响应体处理，更耗电。
 # 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
 
 modules:
 - name: Origo Ad Lite
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
-  enabled: true
+  enabled: false
 - name: Origo Ad Balanced
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
-  enabled: false
+  enabled: true
 - name: Origo Ad Powerful
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
   enabled: false
@@ -18,5 +18,4 @@ modules:
 - url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule
   enabled: false
 
-# 如果要进一步省电，建议把 scriptings 里的 YouTube/Bilibili/X 响应脚本也先关掉。
-# 那几条脚本需要 body_required，比普通域名拦截重很多。
+# 如果要进一步省电，可以改用 lite；如果要更强去广告，再手动开 powerful。

@@ -15,7 +15,7 @@
 
 - `dist/origo-ad-balanced.module`
   - 折中版。
-  - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`。
+  - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`、`MITM`。
   - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
 
 - `dist/origo-ad-powerful.module`
@@ -51,9 +51,9 @@ cd /Users/xiaoyuan/work/origo-ad
 
 ## 推荐接入方式
 
-先用 `lite`。
+先用 `balanced`。
 
-把 `dist/origo-ad-lite.module` 放到一个 Egern 能访问的 HTTPS URL，然后在 Egern 配置里把原来的重模块关掉，新增这个轻量模块。
+把 `dist/origo-ad-balanced.module` 放到一个 Egern 能访问的 HTTPS URL，然后在 Egern 配置里把原来的重模块关掉，新增这个折中模块。
 
 配置片段示例会生成到：
 
@@ -61,7 +61,7 @@ cd /Users/xiaoyuan/work/origo-ad
 dist/origo15-module-snippet.yaml
 ```
 
-如果广告回来了，再换 `balanced`。
+如果还想进一步省电，再换 `lite`，但 HTTPS rewrite / map local 类去广告会明显变弱。
 
 如果还不够，再手动换 `powerful`。不要同时开三档，开 Powerful 时建议关掉 Lite/Balanced，避免重复处理。
 
@@ -117,7 +117,7 @@ gh repo create origo-ad --public --source=. --remote=origin --push
 3. `URL-REGEX` 规则
 4. 普通 `DOMAIN` / `DOMAIN-SUFFIX` / `IP-CIDR` 拦截
 
-所以 lite 默认把 1、2、3 都删掉；balanced 删掉 1；powerful 全部保留。
+所以 lite 默认把 1、2、3 都删掉；balanced 保留 MITM 和 rewrite 但删掉 1；powerful 全部保留。
 
 ## 上游来源
 
