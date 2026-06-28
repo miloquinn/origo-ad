@@ -30,6 +30,31 @@ RULE_PREFIXES_LITE = (
 SECTION_ORDER = ["Rule", "URL Rewrite", "Rewrite", "Map Local", "MITM"]
 POWERFUL_SECTION_ORDER = ["Argument", "General", "Rule", "URL Rewrite", "Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
 
+SUPPLEMENTAL_MITM_HOSTNAMES = [
+    "*.doubleclick.net",
+    "*.googlesyndication.com",
+    "*.googleadservices.com",
+    "*.admob.com",
+    "*.ads.*",
+    "*.ad.*",
+    "*.analytics.*",
+    "*.tracking.*",
+    "*.log.*",
+    "*.revenuecat.com",
+    "*.appsflyer.com",
+    "*.adjust.com",
+    "*.branch.io",
+    "acs.m.goofish.com",
+    "app.bilibili.com",
+    "x.com",
+    "18comic.vip",
+    "18comic.org",
+    "*.youtube.com",
+    "*.googlevideo.com",
+    "*.ytimg.com",
+    "youtubei.googleapis.com",
+]
+
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -132,7 +157,32 @@ def balanced_rewrite_filter(entry: str) -> bool:
 
 
 def mitm_filter(entry: str) -> bool:
-    return entry.lower().startswith("hostname")
+    return entry.lower().startswith("hostname") and "=" in entry
+
+
+def mitm_hosts_from_entry(entry: str) -> List[str]:
+    if not mitm_filter(entry):
+        return []
+    rhs = entry.split("=", 1)[1].replace("%APPEND%", "").strip()
+    return [host.strip() for host in rhs.split(",") if host.strip()]
+
+
+def combined_mitm_entries(entries: Iterable[str]) -> List[str]:
+    hosts: List[str] = []
+    for entry in entries:
+        hosts.extend(mitm_hosts_from_entry(entry))
+    hosts.extend(SUPPLEMENTAL_MITM_HOSTNAMES)
+    unique_hosts = dedupe_keep_order(hosts)
+    if not unique_hosts:
+        return []
+    return ["hostname = %APPEND% " + ", ".join(unique_hosts)]
+
+
+def mitm_host_count(entries: Iterable[str]) -> int:
+    hosts: List[str] = []
+    for entry in entries:
+        hosts.extend(mitm_hosts_from_entry(entry))
+    return len(dedupe_keep_order(hosts))
 
 
 def build_module(
@@ -286,6 +336,8 @@ def main() -> int:
     lite_sections = {"Rule": dedupe_keep_order(all_lite_rules)}
     balanced_sections = {section: dedupe_keep_order(entries) for section, entries in all_balanced.items()}
     powerful_sections = {section: dedupe_keep_order(entries) for section, entries in all_powerful.items()}
+    balanced_sections["MITM"] = combined_mitm_entries(balanced_sections.get("MITM", []))
+    powerful_sections["MITM"] = combined_mitm_entries(powerful_sections.get("MITM", []))
 
     source_records = [{"name": item["name"], "url": item["url"]} for item in sources]
     build_id = hashlib.sha256("\n".join(source_hashes).encode("utf-8")).hexdigest()
@@ -352,10 +404,12 @@ def main() -> int:
         "balanced": {
             "path": str(balanced_path.relative_to(ROOT)),
             "counts": {section: len(entries) for section, entries in balanced_sections.items()},
+            "mitm_host_count": mitm_host_count(balanced_sections.get("MITM", [])),
         },
         "powerful": {
             "path": str(powerful_path.relative_to(ROOT)),
             "counts": {section: len(entries) for section, entries in powerful_sections.items() if entries},
+            "mitm_host_count": mitm_host_count(powerful_sections.get("MITM", [])),
         },
     }
     (DIST_DIR / "build-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

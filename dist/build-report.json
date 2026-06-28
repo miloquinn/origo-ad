@@ -287,8 +287,9 @@
         "URL Rewrite": 1744,
         "Rewrite": 28,
         "Map Local": 800,
-        "MITM": 7
-      }
+        "MITM": 1
+      },
+      "mitm_host_count": 1212
     },
     "powerful": {
       "path": "dist/origo-ad-powerful.module",
@@ -301,8 +302,9 @@
         "Body Rewrite": 85,
         "Map Local": 800,
         "Script": 239,
-        "MITM": 7
-      }
+        "MITM": 1
+      },
+      "mitm_host_count": 1212
     }
   }
 }

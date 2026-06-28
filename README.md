@@ -16,6 +16,7 @@
 - `dist/origo-ad-balanced.module`
   - 折中版。
   - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`、`MITM`。
+  - `MITM` 会合并为一条 `hostname = %APPEND% ...`，并补入旧配置里的 Google/YouTube/归因统计等泛域名。
   - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
 
 - `dist/origo-ad-powerful.module`
