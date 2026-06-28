@@ -11,6 +11,21 @@ Origo Ad 是一组面向 Egern 的去广告模块和 Origo VPN 配置模板。
 - Powerful: [dist/origo-ad-powerful.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module)
 - Origo VPN 模板: [dist/origo-vpn-template.yaml](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml)
 
+## 使用声明
+
+> Caution
+
+- 禁止在中华人民共和国境内平台公开传播本仓库内容，禁止将本仓库内容用于任何商业用途或非法用途。
+- 本仓库内容仅供个人学习、测试和研究使用。使用者应自行评估合法性、准确性、完整性和有效性，并自行承担相关风险。
+- 本仓库会整理、转换和引用网络公开资源，尽量保留原作者署名和来源信息。感谢各位原作者和维护者的劳动成果；如认为内容侵犯了您的版权或其他合法权益，请联系处理删除或修改。
+- 本仓库中的脚本、规则、模块和模板不提供任何可用性或安全性保证。因使用本仓库内容导致的账号、网络、设备、服务或数据损失，维护者概不负责。
+- 禁止在社交媒体、自媒体平台及其他公共场合转载、发布、传播或二次分发本仓库资源。查看、使用或复制本仓库内容，即视为已经阅读并接受本声明。
+- 本声明可能随时补充或修改；若本仓库引用的上游项目声明更严格，应同时遵守上游项目要求。
+
+> Important
+
+本仓库部分上游资源来自或参考 [sooyaaabo/LoonLab](https://github.com/sooyaaabo/LoonLab) 及其公开插件生态。请尊重原作者声明、署名和使用边界。
+
 ## 模块档位
 
 运行生成器后会得到：
