@@ -1,6 +1,6 @@
 # Origo Ad
 
-这个小项目把你现在用的两个 Egern 去广告模块重新打包成更省电的版本。
+这个小项目把仍在维护的去广告模块重新打包成更省电的 Egern 模块。
 
 目标不是追求“挡得最狠”，而是降低 iPhone 上 Egern 的持续处理成本：少做 HTTPS 解密、少跑响应脚本、少读响应 body。
 
@@ -48,7 +48,7 @@ cd /Users/xiaoyuan/work/origo-ad
 
 先用 `lite`。
 
-把 `dist/origo-ad-lite.module` 放到一个 Egern 能访问的 HTTPS URL，然后在 Egern 配置里把原来两个重模块关掉，新增这个轻量模块。
+把 `dist/origo-ad-lite.module` 放到一个 Egern 能访问的 HTTPS URL，然后在 Egern 配置里把原来的重模块关掉，新增这个轻量模块。
 
 配置片段示例会生成到：
 
@@ -70,7 +70,7 @@ dist/origo15-module-snippet.yaml
 
 - 每 6 小时自动运行一次。
 - 也可以在 GitHub Actions 页面手动点 `Run workflow`。
-- 拉取 `sources.json` 里的上游模块。
+- 拉取 `sources.json` 里的活跃上游模块。
 - 重新生成 `dist/origo-ad-lite.module` 和 `dist/origo-ad-balanced.module`。
 - 确认生成模块里没有 `[Body Rewrite]`、`[Script]`、`script_url`、`body_required`。
 - 只有上游内容真的变了，才自动 commit 并 push。
@@ -113,9 +113,9 @@ gh repo create origo-ad --public --source=. --remote=origin --push
 
 ## 上游来源
 
-上游 URL 在 `sources.json`：
+上游 URL 在 `sources.json`。当前默认源：
 
-- `sooyaaabo/Egern` 的 `StartUpAds.module`
-- `sooyaaabo/Egern` 的 `BlockAds.module`
+- `fmz200/wool_scripts` 的 `Surge/module/blockAds.module`
+- `blackmatrix7/ios_rule_script` 的 `rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule`
 
 生成器每次会重新拉取上游，输出报告里会记录时间和数量。

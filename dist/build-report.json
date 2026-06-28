@@ -3,22 +3,22 @@
   "profile": null,
   "sources": [
     {
-      "name": "StartUpAds",
-      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module",
-      "sha256": "f47c42dea33fdc2957a5fdb255717e9120f9da31063de6d73978e44449bd9d7d",
+      "name": "fmz200 blockAds",
+      "url": "https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module",
+      "sha256": "a1cf36e44bd7ac064108f957114be24c5128be97355f885303f64505ab1833b9",
       "raw_counts": {
-        "Rule": 5,
-        "URL Rewrite": 14,
-        "Body Rewrite": 17,
-        "Map Local": 430,
-        "Script": 42,
+        "Rule": 250,
+        "URL Rewrite": 517,
+        "Body Rewrite": 85,
+        "Map Local": 800,
+        "Script": 220,
         "MITM": 1
       },
-      "kept_lite_rule_count": 5,
+      "kept_lite_rule_count": 177,
       "kept_balanced_counts": {
-        "Rule": 5,
-        "URL Rewrite": 14,
-        "Map Local": 430
+        "Rule": 250,
+        "URL Rewrite": 517,
+        "Map Local": 800
       },
       "dropped_sections": {
         "lite": [
@@ -35,22 +35,19 @@
       }
     },
     {
-      "name": "BlockAds",
-      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module",
-      "sha256": "cba6e3c02155cb9fc7bbed44fc87695819a9900cf3842d5a95f0175c4e30a4c9",
+      "name": "blackmatrix7 AdvertisingLite",
+      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule",
+      "sha256": "37c6ce2f47750fc3cacdee1dbeeca2e5d4ce5be046ad0e49791d2f52366fbbf2",
       "raw_counts": {
-        "Rule": 169,
-        "URL Rewrite": 442,
-        "Body Rewrite": 52,
-        "Map Local": 617,
-        "Script": 78,
+        "General": 1,
+        "URL Rewrite": 1229,
         "MITM": 1
       },
-      "kept_lite_rule_count": 133,
+      "kept_lite_rule_count": 0,
       "kept_balanced_counts": {
-        "Rule": 169,
-        "URL Rewrite": 442,
-        "Map Local": 617
+        "Rule": 0,
+        "URL Rewrite": 1229,
+        "Map Local": 0
       },
       "dropped_sections": {
         "lite": [
@@ -71,15 +68,15 @@
     "lite": {
       "path": "dist/origo-ad-lite.module",
       "counts": {
-        "Rule": 132
+        "Rule": 150
       }
     },
     "balanced": {
       "path": "dist/origo-ad-balanced.module",
       "counts": {
-        "Rule": 167,
-        "URL Rewrite": 456,
-        "Map Local": 1017
+        "Rule": 202,
+        "URL Rewrite": 1745,
+        "Map Local": 800
       }
     }
   }

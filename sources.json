@@ -1,14 +1,14 @@
 {
   "sources": [
     {
-      "name": "StartUpAds",
-      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module",
-      "description": "Open-screen ad blocking module mirrored from sooyaaabo/Egern."
+      "name": "fmz200 blockAds",
+      "url": "https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module",
+      "description": "Actively maintained broad app and mini-program ad blocking module from fmz200/wool_scripts."
     },
     {
-      "name": "BlockAds",
-      "url": "https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module",
-      "description": "General ad blocking module mirrored from sooyaaabo/Egern."
+      "name": "blackmatrix7 AdvertisingLite",
+      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule",
+      "description": "Actively maintained AdvertisingLite rewrite module from blackmatrix7/ios_rule_script."
     }
   ]
 }

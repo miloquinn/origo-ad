@@ -9,9 +9,9 @@ modules:
 - name: Origo Ad Balanced
   url: https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist/origo-ad-balanced.module
   enabled: false
-- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/StartUpAds.module
+- url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module
   enabled: false
-- url: https://raw.githubusercontent.com/sooyaaabo/Egern/main/Module/BlockAds.module
+- url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule
   enabled: false
 
 # 如果要进一步省电，建议把 scriptings 里的 YouTube/Bilibili/X 响应脚本也先关掉。
