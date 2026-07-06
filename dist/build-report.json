@@ -234,26 +234,26 @@
     {
       "name": "LoonLab RedNote",
       "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
-      "sha256": "65391cfce0bd22931afc45c73fba6caacfa7b4deb8eae9ec9bce509a48496717",
+      "sha256": "4d12f8b1dbfd0d3f80f7f2cac27515d79ab749f07e5a1a9ef0fa053c186ebce2",
       "raw_counts": {
         "Argument": 1,
-        "Rule": 6,
-        "Rewrite": 11,
+        "Rule": 1,
+        "Rewrite": 9,
         "Script": 13,
         "MITM": 1
       },
-      "kept_lite_rule_count": 5,
+      "kept_lite_rule_count": 0,
       "kept_balanced_counts": {
-        "Rule": 6,
+        "Rule": 1,
         "URL Rewrite": 0,
-        "Rewrite": 7,
+        "Rewrite": 5,
         "Map Local": 0,
         "MITM": 1
       },
       "kept_powerful_counts": {
         "Argument": 1,
-        "Rule": 6,
-        "Rewrite": 11,
+        "Rule": 1,
+        "Rewrite": 9,
         "Script": 13,
         "MITM": 1
       },
@@ -285,7 +285,7 @@
       "counts": {
         "Rule": 209,
         "URL Rewrite": 1744,
-        "Rewrite": 28,
+        "Rewrite": 26,
         "Map Local": 800,
         "MITM": 1
       },
@@ -298,7 +298,7 @@
         "General": 1,
         "Rule": 209,
         "URL Rewrite": 1744,
-        "Rewrite": 52,
+        "Rewrite": 50,
         "Body Rewrite": 85,
         "Map Local": 800,
         "Script": 239,
