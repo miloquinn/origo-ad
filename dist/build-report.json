@@ -85,7 +85,7 @@
     {
       "name": "LoonLab Bilibili",
       "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
-      "sha256": "b19634ff6b5ba7d7062b4f8925d2d7eb79222875eba55eca0276b2818d657ef0",
+      "sha256": "e891470d780f6bea55cafd2b3b05499891ad4d053c2a5592f7551ee15717acf3",
       "raw_counts": {
         "Argument": 5,
         "Rule": 6,
@@ -234,17 +234,17 @@
     {
       "name": "LoonLab RedNote",
       "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
-      "sha256": "4d12f8b1dbfd0d3f80f7f2cac27515d79ab749f07e5a1a9ef0fa053c186ebce2",
+      "sha256": "033b57631beef5e87daefab8d155688a5ace8417504358e65510e601f44cff28",
       "raw_counts": {
         "Argument": 1,
-        "Rule": 1,
+        "Rule": 6,
         "Rewrite": 9,
         "Script": 13,
         "MITM": 1
       },
-      "kept_lite_rule_count": 0,
+      "kept_lite_rule_count": 5,
       "kept_balanced_counts": {
-        "Rule": 1,
+        "Rule": 6,
         "URL Rewrite": 0,
         "Rewrite": 5,
         "Map Local": 0,
@@ -252,7 +252,7 @@
       },
       "kept_powerful_counts": {
         "Argument": 1,
-        "Rule": 1,
+        "Rule": 6,
         "Rewrite": 9,
         "Script": 13,
         "MITM": 1
