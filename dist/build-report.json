@@ -85,26 +85,26 @@
     {
       "name": "LoonLab Bilibili",
       "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
-      "sha256": "e891470d780f6bea55cafd2b3b05499891ad4d053c2a5592f7551ee15717acf3",
+      "sha256": "e7f53547f996157935e567d7108e216b1379afb611d1c188c9c6547842bd27ac",
       "raw_counts": {
         "Argument": 5,
-        "Rule": 6,
-        "Rewrite": 20,
+        "Rule": 8,
+        "Rewrite": 22,
         "Script": 4,
         "MITM": 1
       },
       "kept_lite_rule_count": 5,
       "kept_balanced_counts": {
-        "Rule": 6,
+        "Rule": 8,
         "URL Rewrite": 0,
-        "Rewrite": 3,
+        "Rewrite": 5,
         "Map Local": 0,
         "MITM": 1
       },
       "kept_powerful_counts": {
         "Argument": 5,
-        "Rule": 6,
-        "Rewrite": 20,
+        "Rule": 8,
+        "Rewrite": 22,
         "Script": 4,
         "MITM": 1
       },
@@ -234,7 +234,7 @@
     {
       "name": "LoonLab RedNote",
       "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
-      "sha256": "033b57631beef5e87daefab8d155688a5ace8417504358e65510e601f44cff28",
+      "sha256": "2eec0413c60309a6c444581960252690f8c603e6cf6003c48553e119cbe689ce",
       "raw_counts": {
         "Argument": 1,
         "Rule": 6,
@@ -283,9 +283,9 @@
     "balanced": {
       "path": "dist/origo-ad-balanced.module",
       "counts": {
-        "Rule": 209,
+        "Rule": 211,
         "URL Rewrite": 1744,
-        "Rewrite": 26,
+        "Rewrite": 28,
         "Map Local": 800,
         "MITM": 1
       },
@@ -296,9 +296,9 @@
       "counts": {
         "Argument": 7,
         "General": 1,
-        "Rule": 209,
+        "Rule": 211,
         "URL Rewrite": 1744,
-        "Rewrite": 50,
+        "Rewrite": 52,
         "Body Rewrite": 85,
         "Map Local": 800,
         "Script": 239,
