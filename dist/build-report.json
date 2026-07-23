@@ -85,7 +85,7 @@
     {
       "name": "LoonLab Bilibili",
       "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
-      "sha256": "05f85ed233491e92ae67d396e0767fdc8b92c0474e4ecd9f3aa65fef773b1e0a",
+      "sha256": "65ff73d65a2a25116bad60906e73b75286d97aed7d01df73ae17121bad56bc81",
       "raw_counts": {
         "Argument": 5,
         "Rule": 8,
