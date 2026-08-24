@@ -164,21 +164,21 @@
     {
       "name": "LoonLab Xueqiu",
       "url": "https://loon.103516.xyz/Plugin/XueQiu.lpx",
-      "sha256": "4f74e16fd0e8943f6a79697d7f6d847ed64b95eccad5b9e493f7376e8ee08fff",
+      "sha256": "1c111c07651dde8758cbf8dcde092c3da80ba8ef982d4eced98cb15cb0f3eb7c",
       "raw_counts": {
-        "Rewrite": 20,
+        "Rewrite": 23,
         "MITM": 1
       },
       "kept_lite_rule_count": 0,
       "kept_balanced_counts": {
         "Rule": 0,
         "URL Rewrite": 0,
-        "Rewrite": 18,
+        "Rewrite": 21,
         "Map Local": 0,
         "MITM": 1
       },
       "kept_powerful_counts": {
-        "Rewrite": 20,
+        "Rewrite": 23,
         "MITM": 1
       },
       "dropped_sections": {
@@ -285,7 +285,7 @@
       "counts": {
         "Rule": 211,
         "URL Rewrite": 1744,
-        "Rewrite": 28,
+        "Rewrite": 31,
         "Map Local": 800,
         "MITM": 1
       },
@@ -298,7 +298,7 @@
         "General": 1,
         "Rule": 211,
         "URL Rewrite": 1744,
-        "Rewrite": 52,
+        "Rewrite": 55,
         "Body Rewrite": 85,
         "Map Local": 800,
         "Script": 239,
