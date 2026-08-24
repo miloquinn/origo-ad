@@ -163,8 +163,8 @@
     },
     {
       "name": "LoonLab Xueqiu",
-      "url": "https://loon.103516.xyz/Plugin/Xueqiu.lpx",
-      "sha256": "6a4266be73b929c6d1ca7d2a298c4452db8f33ccfe82bc3c0fe8a7970dfd1b5b",
+      "url": "https://loon.103516.xyz/Plugin/XueQiu.lpx",
+      "sha256": "4f74e16fd0e8943f6a79697d7f6d847ed64b95eccad5b9e493f7376e8ee08fff",
       "raw_counts": {
         "Rewrite": 20,
         "MITM": 1
