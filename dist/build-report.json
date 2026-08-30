@@ -85,7 +85,7 @@
     {
       "name": "LoonLab Bilibili",
       "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
-      "sha256": "e840bdda33456c0986703e0cd6e725a79feb1771aadee13f57ec0a23bd4fd1ff",
+      "sha256": "a31a0b3c73a2a6d15edf7990125757069ecb040d50014e8f685ef0cf9e4646f6",
       "raw_counts": {
         "Argument": 5,
         "Rule": 8,
@@ -234,7 +234,7 @@
     {
       "name": "LoonLab RedNote",
       "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
-      "sha256": "5cbd3de07e4a8c322f7694fc17de73f68638f657364d1b955a751f62697119e1",
+      "sha256": "7f79474cb9fa590bf399b04dd32c708e07cb8007b4eda75f3555ffa9b88d3875",
       "raw_counts": {
         "Argument": 1,
         "Rule": 6,
