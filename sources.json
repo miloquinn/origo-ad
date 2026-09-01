@@ -1,44 +1,64 @@
 {
+  "schema_version": 1,
+  "policy": "balanced-domain-only",
+  "safety": {
+    "final_min_rules": 40000,
+    "final_max_rules": 70000,
+    "source_max_delta_ratio": 0.2,
+    "source_max_delta_absolute": 2000,
+    "final_max_delta_ratio": 0.15,
+    "final_max_delta_absolute": 3000
+  },
   "sources": [
     {
-      "name": "fmz200 blockAds",
-      "url": "https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module",
-      "description": "Actively maintained broad app and mini-program ad blocking module from fmz200/wool_scripts."
+      "id": "hagezi-light",
+      "name": "HaGeZi Multi LIGHT",
+      "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt",
+      "homepage": "https://github.com/hagezi/dns-blocklists",
+      "license": "GPL-3.0-only",
+      "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
+      "format": "domains",
+      "default_rule": "DOMAIN",
+      "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
+      "min_entries": 35000,
+      "max_entries": 60000,
+      "max_bytes": 4000000,
+      "max_invalid_ratio": 0.001,
+      "max_delta_ratio": 0.15,
+      "max_delta_absolute": 3000
     },
     {
-      "name": "blackmatrix7 AdvertisingLite",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule",
-      "description": "Actively maintained AdvertisingLite rewrite module from blackmatrix7/ios_rule_script."
+      "id": "acl4ssr-banad",
+      "name": "ACL4SSR BanAD",
+      "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list",
+      "homepage": "https://github.com/ACL4SSR/ACL4SSR",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://github.com/ACL4SSR/ACL4SSR/blob/master/LICENSE",
+      "format": "classical",
+      "risk": "focused ad-network suffixes; keyword rules are intentionally excluded",
+      "min_entries": 450,
+      "max_entries": 800,
+      "max_bytes": 150000,
+      "max_invalid_ratio": 0.01,
+      "max_delta_ratio": 0.2,
+      "max_delta_absolute": 100
     },
     {
-      "name": "LoonLab Bilibili",
-      "url": "https://loon.103516.xyz/Plugin/Bilibili.lpx",
-      "description": "Pure ad blocking LoonLab plugin for Bilibili.",
-      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
-    },
-    {
-      "name": "LoonLab X Web",
-      "url": "https://loon.103516.xyz/Plugin/X_Web.lpx",
-      "description": "Pure ad blocking LoonLab plugin for X web timeline ads.",
-      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
-    },
-    {
-      "name": "LoonLab Xueqiu",
-      "url": "https://loon.103516.xyz/Plugin/Xueqiu.lpx",
-      "description": "Pure ad blocking LoonLab plugin for Xueqiu.",
-      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
-    },
-    {
-      "name": "LoonLab Reddit",
-      "url": "https://loon.103516.xyz/Plugin/Reddit.lpx",
-      "description": "Pure ad blocking LoonLab plugin for Reddit promotions.",
-      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
-    },
-    {
-      "name": "LoonLab RedNote",
-      "url": "https://loon.103516.xyz/Plugin/RedNote.lpx",
-      "description": "Pure ad blocking LoonLab plugin for RedNote/Xiaohongshu ads.",
-      "user_agent": "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
+      "id": "adguard-cname-ads",
+      "name": "AdGuard CNAME disguised ads",
+      "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt",
+      "homepage": "https://github.com/AdguardTeam/cname-trackers",
+      "license": "MIT",
+      "license_url": "https://github.com/AdguardTeam/cname-trackers/blob/master/LICENSE",
+      "format": "domains",
+      "default_rule": "DOMAIN",
+      "risk": "ads category only; wildcard entries retain suffix semantics",
+      "min_entries": 8000,
+      "max_entries": 16000,
+      "max_bytes": 1000000,
+      "max_invalid_ratio": 0.001,
+      "max_delta_ratio": 0.2,
+      "max_delta_absolute": 1000
     }
   ]
 }

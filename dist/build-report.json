@@ -1,0 +1,89 @@
+{
+  "artifacts": {
+    "origo-ad-balanced.list": {
+      "bytes": 1431547,
+      "sha256": "115147823251cbc86f1646ab2cbbde8e9517da4d7f7d6277029a90119431b4c4"
+    },
+    "origo-ad-balanced.module": {
+      "bytes": 1801444,
+      "sha256": "4379b6dfd9488b4c073541e83fb668ef5d1904cbc972136c1209c2600d2b6d7d"
+    }
+  },
+  "build_id": "095fc2b17f1fb2a48d32d39825f4f4a9d47b30b0628947fb3830e4310fd9716a",
+  "configuration": {
+    "allowlist_rule_count": 23,
+    "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
+    "policy": "balanced-domain-only",
+    "sources_sha256": "88040dc79ba4aa31c02e60f8404a9173a37686875efd6956f77722fa6add0e76"
+  },
+  "license": "GPL-3.0-only",
+  "schema_version": 1,
+  "sources": [
+    {
+      "accepted_unique": 41549,
+      "bytes": 801717,
+      "duplicates": 0,
+      "etag": "\"4dc144506de941a88008572ec7053063ffac9821a82f84e97575a37c8e423469\"",
+      "excluded_by_type": {},
+      "homepage": "https://github.com/hagezi/dns-blocklists",
+      "id": "hagezi-light",
+      "invalid": 0,
+      "last_modified": null,
+      "license": "GPL-3.0-only",
+      "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
+      "name": "HaGeZi Multi LIGHT",
+      "raw_candidates": 41549,
+      "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
+      "sha256": "488e8d464b9e0796ad1fcd0ac9b2d7fee9c5c69df39ca7d024f824627b7c621a",
+      "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
+    },
+    {
+      "accepted_unique": 563,
+      "bytes": 15550,
+      "duplicates": 0,
+      "etag": "\"ce90130a1c027c4eb9c5e430a0440fbf25d937679f90f051bf6b065a72c98bc4\"",
+      "excluded_by_type": {
+        "DOMAIN-KEYWORD": 24
+      },
+      "homepage": "https://github.com/ACL4SSR/ACL4SSR",
+      "id": "acl4ssr-banad",
+      "invalid": 1,
+      "last_modified": null,
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://github.com/ACL4SSR/ACL4SSR/blob/master/LICENSE",
+      "name": "ACL4SSR BanAD",
+      "raw_candidates": 588,
+      "risk": "focused ad-network suffixes; keyword rules are intentionally excluded",
+      "sha256": "27a5f6d018d428409d8da5d9f390a46298d505ae4941bb8172f052055abe7262",
+      "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list"
+    },
+    {
+      "accepted_unique": 11736,
+      "bytes": 269962,
+      "duplicates": 0,
+      "etag": "\"30dd174ea69bc512eb4863f9ddd95476267b62b1142fb590c89903453bbac453\"",
+      "excluded_by_type": {},
+      "homepage": "https://github.com/AdguardTeam/cname-trackers",
+      "id": "adguard-cname-ads",
+      "invalid": 3,
+      "last_modified": null,
+      "license": "MIT",
+      "license_url": "https://github.com/AdguardTeam/cname-trackers/blob/master/LICENSE",
+      "name": "AdGuard CNAME disguised ads",
+      "raw_candidates": 11739,
+      "risk": "ads category only; wildcard entries retain suffix semantics",
+      "sha256": "e80ccdbf8324aa7831a0f80b767436b7f47a719585ebbb74bbbc026dd0e639d7",
+      "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt"
+    }
+  ],
+  "summary": {
+    "allowlist_removed": 0,
+    "covered_exact": 772,
+    "domain_count": 52267,
+    "domain_suffix_count": 564,
+    "final": 52831,
+    "final_rule_count": 52831,
+    "input_unique": 53603,
+    "redundant_suffixes": 0
+  }
+}

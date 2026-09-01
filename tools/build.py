@@ -1,474 +1,586 @@
 #!/usr/bin/env python3
+"""Build deterministic, domain-only Origo ad-blocking artifacts."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
-import sys
+import tempfile
+import time
+import urllib.error
 import urllib.request
-from collections import OrderedDict
+from collections import Counter
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES_FILE = ROOT / "sources.json"
-CACHE_DIR = ROOT / "cache"
+ALLOWLIST_FILE = ROOT / "config" / "allowlist.txt"
 DIST_DIR = ROOT / "dist"
-DEFAULT_PROFILE = Path("/Users/xiaoyuan/Downloads/origo15.yaml")
-
-RULE_PREFIXES_LITE = (
-    "DOMAIN,",
-    "DOMAIN-SUFFIX,",
-    "DOMAIN-KEYWORD,",
-    "IP-CIDR,",
-    "IP-CIDR6,",
-    "IP-ASN,",
-)
-
-SECTION_ORDER = ["Rule", "URL Rewrite", "Rewrite", "Map Local", "MITM"]
-POWERFUL_SECTION_ORDER = ["Argument", "General", "Rule", "URL Rewrite", "Rewrite", "Body Rewrite", "Map Local", "Script", "MITM"]
-
-SUPPLEMENTAL_MITM_HOSTNAMES = [
-    "*.doubleclick.net",
-    "*.googlesyndication.com",
-    "*.googleadservices.com",
-    "*.admob.com",
-    "*.ads.*",
-    "*.ad.*",
-    "*.analytics.*",
-    "*.tracking.*",
-    "*.log.*",
-    "*.revenuecat.com",
-    "*.appsflyer.com",
-    "*.adjust.com",
-    "*.branch.io",
-    "acs.m.goofish.com",
-    "app.bilibili.com",
-    "x.com",
-    "18comic.vip",
-    "18comic.org",
-    "*.youtube.com",
-    "*.googlevideo.com",
-    "*.ytimg.com",
-    "youtubei.googleapis.com",
-]
-
-LOONLAB_USER_AGENT = "Loon/3.5.0 CFNetwork/1496.0.7 Darwin/23.5.0"
-
-SCRIPT_MIRRORS = {
-    "https://loon.103516.xyz/Script/X_Web/XWebEnhance.js": {
-        "path": "scripts/loonlab-xweb-enhance.js",
-        "user_agent": LOONLAB_USER_AGENT,
-    },
-    "https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js": {
-        "path": "scripts/kelee-redpaper-remove-ads.js",
-        "user_agent": LOONLAB_USER_AGENT,
-    },
-    "https://loon.103516.xyz/Script/RedNote/rednote-feedtime.js": {
-        "path": "scripts/loonlab-rednote-feedtime.js",
-        "user_agent": LOONLAB_USER_AGENT,
-    },
-}
+MODULE_NAME = "origo-ad-balanced.module"
+RULESET_NAME = "origo-ad-balanced.list"
+REPORT_NAME = "build-report.json"
+PROJECT_URL = "https://github.com/miloquinn/origo-ad"
+USER_AGENT = "origo-ad/2 (+https://github.com/miloquinn/origo-ad)"
+VALID_RULE_KINDS = {"DOMAIN", "DOMAIN-SUFFIX"}
+LABEL_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
 
 
-def read_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+class BuildError(RuntimeError):
+    """Raised when input or output fails a publication safety check."""
 
 
-def fetch_text(url: str, cache_path: Path, use_cache: bool, user_agent: str | None = None) -> str:
-    if use_cache and cache_path.exists():
-        return cache_path.read_text(encoding="utf-8", errors="replace")
+@dataclass(frozen=True, order=True)
+class Rule:
+    kind: str
+    domain: str
 
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": user_agent or "origo-ad/1.0",
-            "Referer": "https://loonlab.103516.xyz/Plugin/",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=30) as res:
-        data = res.read().decode("utf-8", errors="replace")
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(data, encoding="utf-8")
-    return data
+
+@dataclass
+class ParseResult:
+    rules: set[Rule] = field(default_factory=set)
+    raw_candidates: int = 0
+    invalid: int = 0
+    duplicates: int = 0
+    excluded_by_type: Counter[str] = field(default_factory=Counter)
+
+
+@dataclass(frozen=True)
+class FetchedSource:
+    text: str
+    sha256: str
+    byte_count: int
+    etag: str | None
+    last_modified: str | None
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 def sha256_text(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return sha256_bytes(text.encode("utf-8"))
 
 
-def parse_sections(text: str) -> Tuple[List[str], Dict[str, List[str]]]:
-    meta: List[str] = []
-    sections: Dict[str, List[str]] = OrderedDict()
-    current: str | None = None
+def read_json(path: Path) -> dict:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise BuildError(f"cannot read JSON from {path}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise BuildError(f"expected a JSON object in {path}")
+    return value
 
-    for raw in text.splitlines():
-        line = raw.rstrip()
-        match = re.match(r"^\[(.+)]$", line.strip())
-        if match:
-            current = normalize_section(match.group(1).strip())
-            sections.setdefault(current, [])
+
+def normalize_domain(value: str) -> str | None:
+    candidate = value.strip().lower()
+    if candidate.startswith("*."):
+        candidate = candidate[2:]
+    candidate = candidate.rstrip(".")
+    if not candidate or len(candidate) > 253 or "." not in candidate:
+        return None
+    if any(ord(char) > 127 for char in candidate):
+        return None
+    labels = candidate.split(".")
+    if all(label.isdigit() for label in labels):
+        return None
+    if any(not LABEL_RE.fullmatch(label) for label in labels):
+        return None
+    return candidate
+
+
+def parse_source(text: str, source: dict) -> ParseResult:
+    result = ParseResult()
+    source_format = source.get("format")
+    default_rule = source.get("default_rule", "DOMAIN")
+    if source_format not in {"domains", "classical"}:
+        raise BuildError(f"unsupported source format: {source_format!r}")
+    if default_rule not in VALID_RULE_KINDS:
+        raise BuildError(f"unsupported default rule: {default_rule!r}")
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip().lstrip("\ufeff")
+        if not line or line.startswith(("#", ";", "!")):
             continue
+        result.raw_candidates += 1
 
-        if current is None:
-            if line.startswith("#!"):
-                meta.append(line)
+        if source_format == "domains":
+            kind = "DOMAIN-SUFFIX" if line.startswith("*.") else default_rule
+            value = line
+        else:
+            parts = [part.strip() for part in line.split(",")]
+            kind = parts[0].upper() if parts else ""
+            if kind not in VALID_RULE_KINDS:
+                result.excluded_by_type[kind or "MALFORMED"] += 1
+                continue
+            if len(parts) < 2:
+                result.invalid += 1
+                continue
+            value = parts[1]
+
+        domain = normalize_domain(value)
+        if domain is None:
+            result.invalid += 1
             continue
+        rule = Rule(kind, domain)
+        if rule in result.rules:
+            result.duplicates += 1
+        result.rules.add(rule)
 
-        sections.setdefault(current, []).append(line)
-
-    return meta, sections
-
-
-def normalize_section(section: str) -> str:
-    normalized = section.strip()
-    if normalized.lower() == "mitm":
-        return "MITM"
-    return normalized
-
-
-def meaningful_entries(lines: Iterable[str]) -> List[str]:
-    entries: List[str] = []
-    for line in lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        entries.append(stripped)
-    return entries
-
-
-def dedupe_keep_order(entries: Iterable[str]) -> List[str]:
-    seen = set()
-    result = []
-    for entry in entries:
-        if entry in seen:
-            continue
-        seen.add(entry)
-        result.append(entry)
     return result
 
 
-def generated_entry_filter(entry: str) -> bool:
-    return entry.strip().lower() != "hostname - reject"
+def parse_allowlist(path: Path) -> set[Rule]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BuildError(f"cannot read allowlist {path}: {exc}") from exc
 
-
-def lite_rule_filter(entry: str) -> bool:
-    upper = entry.upper()
-    return upper.startswith(RULE_PREFIXES_LITE)
-
-
-def balanced_rewrite_filter(entry: str) -> bool:
-    lower = entry.lower()
-    heavy_markers = (
-        "response-body",
-        "script-path",
-        "requires-body",
-        "jq-path",
-        " request-body",
-        " http-response",
-        " http-request",
-    )
-    return not any(marker in lower for marker in heavy_markers)
-
-
-def rewrite_script_paths(entry: str, mirrored_urls: Dict[str, str]) -> str:
-    rewritten = entry
-    for source_url, mirror_url in mirrored_urls.items():
-        rewritten = rewritten.replace(source_url, mirror_url)
-    return rewritten
-
-
-def mitm_filter(entry: str) -> bool:
-    return entry.lower().startswith("hostname") and "=" in entry
-
-
-def mitm_hosts_from_entry(entry: str) -> List[str]:
-    if not mitm_filter(entry):
-        return []
-    rhs = entry.split("=", 1)[1].replace("%APPEND%", "").strip()
-    return [host.strip() for host in rhs.split(",") if host.strip()]
-
-
-def combined_mitm_entries(entries: Iterable[str]) -> List[str]:
-    hosts: List[str] = []
-    for entry in entries:
-        hosts.extend(mitm_hosts_from_entry(entry))
-    hosts.extend(SUPPLEMENTAL_MITM_HOSTNAMES)
-    unique_hosts = dedupe_keep_order(hosts)
-    if not unique_hosts:
-        return []
-    return ["hostname = %APPEND% " + ", ".join(unique_hosts)]
-
-
-def mitm_host_count(entries: Iterable[str]) -> int:
-    hosts: List[str] = []
-    for entry in entries:
-        hosts.extend(mitm_hosts_from_entry(entry))
-    return len(dedupe_keep_order(hosts))
-
-
-def build_module(
-    name: str,
-    description: str,
-    source_records: List[dict],
-    kept_sections: Dict[str, List[str]],
-    dropped_note: str,
-    build_id: str,
-    section_order: List[str] | None = None,
-) -> str:
-    lines = [
-        f"#!name={name}",
-        f"#!desc={description}",
-        "#!author=Generated by origo-ad",
-        "#!homepage=https://github.com/miloquinn/origo-ad",
-        f"#!generated-source-sha256={build_id}",
-        f"#!generated-note={dropped_note}",
-        "",
-        "# Sources:",
-    ]
-    for record in source_records:
-        lines.append(f"# - {record['name']}: {record['url']}")
-    lines.append("")
-
-    for section in section_order or SECTION_ORDER:
-        entries = kept_sections.get(section, [])
-        if not entries:
+    rules: set[Rule] = set()
+    for line_number, raw_line in enumerate(text.splitlines(), 1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
             continue
-        lines.append(f"[{section}]")
-        lines.extend(entries)
+        parts = [part.strip() for part in line.split(",", 1)]
+        if len(parts) == 1:
+            kind, value = "DOMAIN", parts[0]
+        else:
+            kind, value = parts[0].upper(), parts[1]
+        domain = normalize_domain(value)
+        if kind not in VALID_RULE_KINDS or domain is None:
+            raise BuildError(f"invalid allowlist entry at {path}:{line_number}: {raw_line!r}")
+        rules.add(Rule(kind, domain))
+    if not rules:
+        raise BuildError("allowlist must not be empty")
+    return rules
+
+
+def is_same_or_subdomain(domain: str, parent: str) -> bool:
+    return domain == parent or domain.endswith("." + parent)
+
+
+def conflicts_with_allowlist(block: Rule, allow: Rule) -> bool:
+    if block.kind == "DOMAIN":
+        if allow.kind == "DOMAIN":
+            return block.domain == allow.domain
+        return is_same_or_subdomain(block.domain, allow.domain)
+
+    if allow.kind == "DOMAIN":
+        return is_same_or_subdomain(allow.domain, block.domain)
+    return is_same_or_subdomain(block.domain, allow.domain) or is_same_or_subdomain(allow.domain, block.domain)
+
+
+def rule_sort_key(rule: Rule) -> tuple[str, int]:
+    return (rule.domain, 0 if rule.kind == "DOMAIN-SUFFIX" else 1)
+
+
+def merge_rules(rules: Iterable[Rule], allowlist: set[Rule]) -> tuple[list[Rule], dict[str, int]]:
+    unique = set(rules)
+    allowed = {
+        block
+        for block in unique
+        if any(conflicts_with_allowlist(block, allow) for allow in allowlist)
+    }
+    remaining = unique - allowed
+    suffixes = sorted(
+        (rule for rule in remaining if rule.kind == "DOMAIN-SUFFIX"),
+        key=lambda rule: (rule.domain.count("."), rule.domain),
+    )
+    kept_suffixes: list[Rule] = []
+    redundant_suffixes = 0
+    for rule in suffixes:
+        if any(is_same_or_subdomain(rule.domain, parent.domain) for parent in kept_suffixes):
+            redundant_suffixes += 1
+            continue
+        kept_suffixes.append(rule)
+
+    kept_exact: list[Rule] = []
+    covered_exact = 0
+    for rule in (item for item in remaining if item.kind == "DOMAIN"):
+        if any(is_same_or_subdomain(rule.domain, suffix.domain) for suffix in kept_suffixes):
+            covered_exact += 1
+            continue
+        kept_exact.append(rule)
+
+    merged = sorted([*kept_suffixes, *kept_exact], key=rule_sort_key)
+    return merged, {
+        "input_unique": len(unique),
+        "allowlist_removed": len(allowed),
+        "redundant_suffixes": redundant_suffixes,
+        "covered_exact": covered_exact,
+        "final": len(merged),
+    }
+
+
+def enforce_count(name: str, count: int, minimum: int, maximum: int) -> None:
+    if count < minimum or count > maximum:
+        raise BuildError(f"{name} count {count} is outside safe range [{minimum}, {maximum}]")
+
+
+def enforce_delta(name: str, previous: int, current: int, max_ratio: float, max_absolute: int) -> None:
+    if previous <= 0:
+        raise BuildError(f"{name} baseline count must be positive")
+    absolute = abs(current - previous)
+    ratio = absolute / previous
+    if ratio > max_ratio and absolute > max_absolute:
+        raise BuildError(
+            f"{name} changed from {previous} to {current} "
+            f"({ratio:.1%}, {absolute} rules), exceeding both safety limits"
+        )
+
+
+def fetch_source(source: dict) -> FetchedSource:
+    url = source["url"]
+    max_bytes = int(source["max_bytes"])
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": USER_AGENT, "Accept": "text/plain,application/octet-stream;q=0.9,*/*;q=0.1"},
+    )
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                status = getattr(response, "status", 200)
+                if status != 200:
+                    raise BuildError(f"{source['id']} returned HTTP {status}")
+                data = response.read(max_bytes + 1)
+                if len(data) > max_bytes:
+                    raise BuildError(f"{source['id']} exceeded max_bytes={max_bytes}")
+                content_type = response.headers.get_content_type()
+                if content_type not in {"text/plain", "application/octet-stream"}:
+                    raise BuildError(f"{source['id']} returned unexpected content type {content_type!r}")
+                try:
+                    text = data.decode("utf-8-sig")
+                except UnicodeDecodeError as exc:
+                    raise BuildError(f"{source['id']} is not valid UTF-8") from exc
+                return FetchedSource(
+                    text=text,
+                    sha256=sha256_bytes(data),
+                    byte_count=len(data),
+                    etag=response.headers.get("ETag"),
+                    last_modified=response.headers.get("Last-Modified"),
+                )
+        except (BuildError, OSError, urllib.error.URLError) as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(1 << attempt)
+    raise BuildError(f"failed to fetch required source {source['id']}: {last_error}")
+
+
+def source_report(source: dict, fetched: FetchedSource, parsed: ParseResult) -> dict:
+    return {
+        "id": source["id"],
+        "name": source["name"],
+        "url": source["url"],
+        "homepage": source["homepage"],
+        "license": source["license"],
+        "license_url": source["license_url"],
+        "risk": source["risk"],
+        "sha256": fetched.sha256,
+        "bytes": fetched.byte_count,
+        "etag": fetched.etag,
+        "last_modified": fetched.last_modified,
+        "raw_candidates": parsed.raw_candidates,
+        "accepted_unique": len(parsed.rules),
+        "invalid": parsed.invalid,
+        "duplicates": parsed.duplicates,
+        "excluded_by_type": dict(sorted(parsed.excluded_by_type.items())),
+    }
+
+
+def render_egern_module(rules: list[Rule], metadata: dict) -> str:
+    lines = [
+        "#!name=Origo Ad Balanced",
+        "#!desc=Balanced domain-only ad and tracker blocking; no MITM, rewrite, or script execution.",
+        "#!author=origo-ad contributors",
+        f"#!homepage={PROJECT_URL}",
+        "#!license=GPL-3.0-only",
+        f"#!generated-source-sha256={metadata['build_id']}",
+        f"#!rule-count={metadata['rule_count']}",
+        "",
+    ]
+    for source in metadata.get("sources", []):
+        lines.append(f"# Source: {source['name']} ({source['license']}) {source['url']}")
+    if metadata.get("sources"):
         lines.append("")
-
-    return "\n".join(lines).rstrip() + "\n"
-
-
-def source_stats(sections: Dict[str, List[str]]) -> Dict[str, int]:
-    stats = {}
-    for section, lines in sections.items():
-        stats[section] = len(meaningful_entries(lines))
-    return stats
+    lines.append("[Rule]")
+    lines.extend(f"{rule.kind},{rule.domain},REJECT" for rule in rules)
+    return "\n".join(lines) + "\n"
 
 
-def make_snippet(lite_url: str, balanced_url: str, powerful_url: str) -> str:
-    return f"""# 省电版模块接入片段
-# 先用 balanced。它保留 MITM 让 HTTPS 去广告生效，但不跑脚本和响应体处理。
-# lite 最省电但只保留低成本规则；powerful 是最强档，包含脚本/响应体处理，更耗电。
-# 注意：把下面的 URL 替换成你实际发布后的 HTTPS 地址。
-
-modules:
-- name: Origo Ad Lite
-  url: {lite_url}
-  enabled: false
-- name: Origo Ad Balanced
-  url: {balanced_url}
-  enabled: true
-- name: Origo Ad Powerful
-  url: {powerful_url}
-  enabled: false
-- url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module
-  enabled: false
-- url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule
-  enabled: false
-
-# 如果要进一步省电，可以改用 lite；如果要更强去广告，再手动开 powerful。
-"""
+def render_surge_ruleset(rules: list[Rule], metadata: dict) -> str:
+    lines = [
+        "# NAME: Origo Ad Balanced",
+        "# DESCRIPTION: Balanced domain-only ad and tracker blocking.",
+        f"# HOMEPAGE: {PROJECT_URL}",
+        "# LICENSE: GPL-3.0-only",
+        f"# SOURCE-SHA256: {metadata['build_id']}",
+        f"# RULES: {metadata['rule_count']}",
+    ]
+    for source in metadata.get("sources", []):
+        lines.append(f"# SOURCE: {source['name']} ({source['license']}) {source['url']}")
+    lines.append("")
+    lines.extend(f"{rule.kind},{rule.domain}" for rule in rules)
+    return "\n".join(lines) + "\n"
 
 
-def build_script_mirrors(base_url: str, use_cache: bool) -> Dict[str, str]:
-    mirrored_urls: Dict[str, str] = {}
-    for source_url, mirror in SCRIPT_MIRRORS.items():
-        relative_path = mirror["path"]
-        cache_path = CACHE_DIR / ("mirror-" + relative_path.replace("/", "__"))
-        text = fetch_text(source_url, cache_path, use_cache, mirror.get("user_agent"))
-        output_path = DIST_DIR / relative_path
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(text, encoding="utf-8")
-        mirrored_urls[source_url] = f"{base_url.rstrip('/')}/{relative_path}"
-    return mirrored_urls
+def make_report(
+    metadata: dict,
+    sources: list[dict],
+    rules: list[Rule],
+    merge_stats: dict,
+    module: str,
+    ruleset: str,
+) -> dict:
+    return {
+        "schema_version": 1,
+        "build_id": metadata["build_id"],
+        "license": "GPL-3.0-only",
+        "configuration": metadata.get("configuration", {}),
+        "sources": sources,
+        "summary": {
+            "final_rule_count": len(rules),
+            "domain_count": sum(rule.kind == "DOMAIN" for rule in rules),
+            "domain_suffix_count": sum(rule.kind == "DOMAIN-SUFFIX" for rule in rules),
+            **merge_stats,
+        },
+        "artifacts": {
+            MODULE_NAME: {"sha256": sha256_text(module), "bytes": len(module.encode("utf-8"))},
+            RULESET_NAME: {"sha256": sha256_text(ruleset), "bytes": len(ruleset.encode("utf-8"))},
+        },
+    }
+
+
+def _parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
+    build_id = ""
+    rules: list[Rule] = []
+    in_rule_section = not module
+    seen_rule_section = not module
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            if line.startswith("#!generated-source-sha256="):
+                build_id = line.split("=", 1)[1]
+            elif line.startswith("# SOURCE-SHA256:"):
+                build_id = line.split(":", 1)[1].strip()
+            continue
+        if module and line == "[Rule]":
+            if seen_rule_section:
+                raise BuildError("module contains duplicate [Rule] sections")
+            in_rule_section = True
+            seen_rule_section = True
+            continue
+        if line.startswith("["):
+            raise BuildError(f"unexpected module section {line}")
+        if not in_rule_section:
+            continue
+        parts = line.split(",")
+        expected_parts = 3 if module else 2
+        if len(parts) != expected_parts or (module and parts[2] != "REJECT"):
+            raise BuildError(f"invalid generated rule: {line}")
+        kind, domain = parts[0], parts[1]
+        if kind not in VALID_RULE_KINDS or normalize_domain(domain) != domain:
+            raise BuildError(f"invalid generated domain rule: {line}")
+        rules.append(Rule(kind, domain))
+    if not seen_rule_section:
+        raise BuildError("module is missing [Rule]")
+    if not build_id:
+        raise BuildError("artifact is missing source hash metadata")
+    return build_id, rules
+
+
+def validate_dist(dist_dir: Path, min_rules: int, max_rules: int) -> None:
+    module_path = dist_dir / MODULE_NAME
+    ruleset_path = dist_dir / RULESET_NAME
+    report_path = dist_dir / REPORT_NAME
+    for path in (module_path, ruleset_path, report_path):
+        if not path.is_file() or path.stat().st_size == 0:
+            raise BuildError(f"missing or empty artifact: {path}")
+
+    module = module_path.read_text(encoding="utf-8")
+    ruleset = ruleset_path.read_text(encoding="utf-8")
+    report = read_json(report_path)
+    module_build_id, module_rules = _parse_rendered_rules(module, module=True)
+    ruleset_build_id, ruleset_rules = _parse_rendered_rules(ruleset, module=False)
+    if module_rules != ruleset_rules:
+        raise BuildError("module and ruleset contain different rules")
+    if module_rules != sorted(set(module_rules), key=rule_sort_key):
+        raise BuildError("generated rules are duplicated or not deterministically sorted")
+    enforce_count("final artifact", len(module_rules), min_rules, max_rules)
+
+    report_build_id = report.get("build_id")
+    if len({module_build_id, ruleset_build_id, report_build_id}) != 1:
+        raise BuildError("artifact build IDs do not match")
+    if report.get("summary", {}).get("final_rule_count") != len(module_rules):
+        raise BuildError("report rule count does not match artifacts")
+    expected = report.get("artifacts", {})
+    actual = {MODULE_NAME: sha256_text(module), RULESET_NAME: sha256_text(ruleset)}
+    for name, digest in actual.items():
+        if expected.get(name, {}).get("sha256") != digest:
+            raise BuildError(f"artifact digest mismatch: {name}")
+
+
+def load_baseline(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    baseline = read_json(path)
+    if baseline.get("schema_version") != 1:
+        return None
+    return baseline
+
+
+def check_baseline(config: dict, baseline: dict | None, source_reports: list[dict], final_count: int) -> None:
+    if baseline is None:
+        return
+    safety = config["safety"]
+    source_settings = {source["id"]: source for source in config["sources"]}
+    previous_sources = {source["id"]: source for source in baseline.get("sources", [])}
+    for source in source_reports:
+        previous = previous_sources.get(source["id"])
+        if not previous:
+            continue
+        settings = source_settings[source["id"]]
+        enforce_delta(
+            f"source {source['id']}",
+            int(previous["accepted_unique"]),
+            int(source["accepted_unique"]),
+            float(settings.get("max_delta_ratio", safety["source_max_delta_ratio"])),
+            int(settings.get("max_delta_absolute", safety["source_max_delta_absolute"])),
+        )
+    previous_final = baseline.get("summary", {}).get("final_rule_count")
+    if previous_final:
+        enforce_delta(
+            "final artifact",
+            int(previous_final),
+            final_count,
+            float(safety["final_max_delta_ratio"]),
+            int(safety["final_max_delta_absolute"]),
+        )
+
+
+def write_artifacts(
+    dist_dir: Path,
+    files: dict[str, str],
+    min_rules: int,
+    max_rules: int,
+) -> None:
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".origo-ad-build-", dir=ROOT) as temp_name:
+        temp_dir = Path(temp_name)
+        staged: dict[str, Path] = {}
+        for name, content in files.items():
+            path = temp_dir / name
+            path.write_text(content, encoding="utf-8")
+            staged[name] = path
+        validate_dist(temp_dir, min_rules, max_rules)
+        for name, path in staged.items():
+            os.replace(path, dist_dir / name)
+
+
+def build(config_path: Path, allowlist_path: Path, dist_dir: Path, use_baseline: bool) -> dict:
+    config_bytes = config_path.read_bytes()
+    allowlist_bytes = allowlist_path.read_bytes()
+    config = read_json(config_path)
+    if config.get("schema_version") != 1 or not isinstance(config.get("sources"), list):
+        raise BuildError("sources.json must use schema_version 1 and contain a sources array")
+    safety = config.get("safety", {})
+    required_safety = {
+        "final_min_rules",
+        "final_max_rules",
+        "source_max_delta_ratio",
+        "source_max_delta_absolute",
+        "final_max_delta_ratio",
+        "final_max_delta_absolute",
+    }
+    if not required_safety.issubset(safety):
+        raise BuildError("sources.json is missing required safety settings")
+
+    baseline = load_baseline(dist_dir / REPORT_NAME) if use_baseline else None
+    all_rules: set[Rule] = set()
+    reports: list[dict] = []
+    source_digests: list[str] = []
+    for source in config["sources"]:
+        fetched = fetch_source(source)
+        parsed = parse_source(fetched.text, source)
+        enforce_count(
+            f"source {source['id']}",
+            len(parsed.rules),
+            int(source["min_entries"]),
+            int(source["max_entries"]),
+        )
+        invalid_ratio = parsed.invalid / max(parsed.raw_candidates, 1)
+        if invalid_ratio > float(source.get("max_invalid_ratio", 0.01)):
+            raise BuildError(f"source {source['id']} invalid ratio {invalid_ratio:.2%} is too high")
+        all_rules.update(parsed.rules)
+        reports.append(source_report(source, fetched, parsed))
+        source_digests.append(fetched.sha256)
+
+    allowlist = parse_allowlist(allowlist_path)
+    rules, merge_stats = merge_rules(all_rules, allowlist)
+    enforce_count(
+        "final artifact",
+        len(rules),
+        int(safety["final_min_rules"]),
+        int(safety["final_max_rules"]),
+    )
+    check_baseline(config, baseline, reports, len(rules))
+
+    build_material = "\n".join(
+        [sha256_bytes(config_bytes), sha256_bytes(allowlist_bytes), *source_digests]
+    )
+    build_id = sha256_text(build_material)
+    metadata = {
+        "build_id": build_id,
+        "rule_count": len(rules),
+        "sources": reports,
+        "configuration": {
+            "policy": config.get("policy"),
+            "sources_sha256": sha256_bytes(config_bytes),
+            "allowlist_sha256": sha256_bytes(allowlist_bytes),
+            "allowlist_rule_count": len(allowlist),
+        },
+    }
+    module = render_egern_module(rules, metadata)
+    ruleset = render_surge_ruleset(rules, metadata)
+    report = make_report(metadata, reports, rules, merge_stats, module, ruleset)
+    report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+    write_artifacts(
+        dist_dir,
+        {MODULE_NAME: module, RULESET_NAME: ruleset, REPORT_NAME: report_text},
+        int(safety["final_min_rules"]),
+        int(safety["final_max_rules"]),
+    )
+    validate_dist(dist_dir, int(safety["final_min_rules"]), int(safety["final_max_rules"]))
+    return report
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build battery-oriented Egern adblock modules.")
-    parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE, help="Existing Egern profile for context.")
-    parser.add_argument("--no-profile", action="store_true", help="Do not inspect the existing Egern profile.")
-    parser.add_argument("--use-cache", action="store_true", help="Use cached upstream modules if present.")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=SOURCES_FILE)
+    parser.add_argument("--allowlist", type=Path, default=ALLOWLIST_FILE)
+    parser.add_argument("--dist", type=Path, default=DIST_DIR)
     parser.add_argument(
-        "--base-url",
-        default="https://example.com/egern",
-        help="Base URL used in the generated snippet. Replace it with your real hosted URL.",
+        "--no-baseline",
+        action="store_true",
+        help="Skip comparison with the existing report (for reviewed bootstrap changes only).",
     )
     args = parser.parse_args()
-
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    DIST_DIR.mkdir(parents=True, exist_ok=True)
-
-    sources = read_json(SOURCES_FILE)["sources"]
-    base = args.base_url.rstrip("/")
-    mirrored_script_urls = build_script_mirrors(base, args.use_cache)
-    report = {
-        "generated_from": "upstream source hashes",
-        "profile": None,
-        "sources": [],
-        "tiers": {},
-    }
-
-    all_lite_rules: List[str] = []
-    all_balanced: Dict[str, List[str]] = {"Rule": [], "URL Rewrite": [], "Rewrite": [], "Map Local": [], "MITM": []}
-    all_powerful: Dict[str, List[str]] = {section: [] for section in POWERFUL_SECTION_ORDER}
-    source_hashes: List[str] = []
-
-    for source in sources:
-        cache_path = CACHE_DIR / f"{source['name']}.module"
-        text = fetch_text(source["url"], cache_path, args.use_cache, source.get("user_agent"))
-        source_hash = sha256_text(text)
-        source_hashes.append(source_hash)
-        _meta, sections = parse_sections(text)
-        stats = source_stats(sections)
-        rules = [entry for entry in meaningful_entries(sections.get("Rule", [])) if generated_entry_filter(entry)]
-        lite_rules = [entry for entry in rules if lite_rule_filter(entry)]
-        balanced_rules = rules
-        url_rewrites = [entry for entry in meaningful_entries(sections.get("URL Rewrite", [])) if generated_entry_filter(entry)]
-        rewrites = [entry for entry in meaningful_entries(sections.get("Rewrite", [])) if generated_entry_filter(entry)]
-        balanced_rewrites = [entry for entry in rewrites if balanced_rewrite_filter(entry)]
-        map_locals = [entry for entry in meaningful_entries(sections.get("Map Local", [])) if generated_entry_filter(entry)]
-        mitm = [entry for entry in meaningful_entries(sections.get("MITM", [])) if generated_entry_filter(entry) and mitm_filter(entry)]
-
-        all_lite_rules.extend(lite_rules)
-        all_balanced["Rule"].extend(balanced_rules)
-        all_balanced["URL Rewrite"].extend(url_rewrites)
-        all_balanced["Rewrite"].extend(balanced_rewrites)
-        all_balanced["Map Local"].extend(map_locals)
-        all_balanced["MITM"].extend(mitm)
-        for section in POWERFUL_SECTION_ORDER:
-            entries = [entry for entry in meaningful_entries(sections.get(section, [])) if generated_entry_filter(entry)]
-            if section == "Script":
-                entries = [rewrite_script_paths(entry, mirrored_script_urls) for entry in entries]
-            if section == "MITM":
-                entries = [entry for entry in entries if mitm_filter(entry)]
-            all_powerful[section].extend(entries)
-
-        report["sources"].append(
-            {
-                "name": source["name"],
-                "url": source["url"],
-                "sha256": source_hash,
-                "raw_counts": stats,
-                "kept_lite_rule_count": len(lite_rules),
-                "kept_balanced_counts": {
-                    "Rule": len(balanced_rules),
-                    "URL Rewrite": len(url_rewrites),
-                    "Rewrite": len(balanced_rewrites),
-                    "Map Local": len(map_locals),
-                    "MITM": len(mitm),
-                },
-                "kept_powerful_counts": {
-                    section: len(meaningful_entries(sections.get(section, [])))
-                    for section in POWERFUL_SECTION_ORDER
-                    if meaningful_entries(sections.get(section, []))
-                },
-                "dropped_sections": {
-                    "lite": ["URL-REGEX in Rule", "URL Rewrite", "Body Rewrite", "Map Local", "Script"],
-                    "balanced": ["Body Rewrite", "Script"],
-                    "powerful": [],
-                },
-            }
-        )
-
-    lite_sections = {"Rule": dedupe_keep_order(all_lite_rules)}
-    balanced_sections = {section: dedupe_keep_order(entries) for section, entries in all_balanced.items()}
-    powerful_sections = {section: dedupe_keep_order(entries) for section, entries in all_powerful.items()}
-    balanced_sections["MITM"] = combined_mitm_entries(balanced_sections.get("MITM", []))
-    powerful_sections["MITM"] = combined_mitm_entries(powerful_sections.get("MITM", []))
-
-    source_records = [{"name": item["name"], "url": item["url"]} for item in sources]
-    build_id = hashlib.sha256("\n".join(source_hashes).encode("utf-8")).hexdigest()
-    lite_module = build_module(
-        "Origo Ad Lite",
-        "最省电档：只保留低成本域名/IP 拦截规则，不做 HTTPS rewrite、MITM、脚本或响应体处理。",
-        source_records,
-        lite_sections,
-        "Keeps low-cost domain/IP rules only; drops URL regex/rewrite/map-local/body/script processing.",
-        build_id,
-    )
-    balanced_module = build_module(
-        "Origo Ad Balanced",
-        "日常推荐档：保留规则、URL Rewrite、Map Local 和 MITM，丢弃脚本与响应体处理以控制耗电。",
-        source_records,
-        balanced_sections,
-        "Keeps rules, URL rewrite, map local, and MITM; drops body rewrite and scripts.",
-        build_id,
-    )
-    powerful_module = build_module(
-        "Origo Ad Powerful",
-        "最强去广告档：保留脚本、响应体处理、MITM、Rewrite 和 Map Local，效果最强但更耗电。",
-        source_records,
-        powerful_sections,
-        "Maximum ad blocking; keeps rule, rewrite, map local, body rewrite, script, and MITM sections.",
-        build_id,
-        POWERFUL_SECTION_ORDER,
-    )
-
-    lite_path = DIST_DIR / "origo-ad-lite.module"
-    balanced_path = DIST_DIR / "origo-ad-balanced.module"
-    powerful_path = DIST_DIR / "origo-ad-powerful.module"
-    lite_path.write_text(lite_module, encoding="utf-8")
-    balanced_path.write_text(balanced_module, encoding="utf-8")
-    powerful_path.write_text(powerful_module, encoding="utf-8")
-
-    snippet = make_snippet(
-        f"{base}/origo-ad-lite.module",
-        f"{base}/origo-ad-balanced.module",
-        f"{base}/origo-ad-powerful.module",
-    )
-    (DIST_DIR / "origo15-module-snippet.yaml").write_text(snippet, encoding="utf-8")
-
-    if not args.no_profile and args.profile.exists():
-        profile_text = args.profile.read_text(encoding="utf-8", errors="replace")
-        report["profile"] = {
-            "path": str(args.profile),
-            "enabled_heavy_modules_seen": [
-                url
-                for url in [
-                    "https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/blockAds.module",
-                    "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule",
-                ]
-                if url in profile_text
-            ],
-            "body_required_count": profile_text.count("body_required: true"),
-            "scriptings_section_seen": "scriptings:" in profile_text,
-            "mitm_section_seen": "mitm:" in profile_text,
-        }
-
-    report["tiers"] = {
-        "lite": {
-            "path": str(lite_path.relative_to(ROOT)),
-            "counts": {section: len(entries) for section, entries in lite_sections.items()},
-        },
-        "balanced": {
-            "path": str(balanced_path.relative_to(ROOT)),
-            "counts": {section: len(entries) for section, entries in balanced_sections.items()},
-            "mitm_host_count": mitm_host_count(balanced_sections.get("MITM", [])),
-        },
-        "powerful": {
-            "path": str(powerful_path.relative_to(ROOT)),
-            "counts": {section: len(entries) for section, entries in powerful_sections.items() if entries},
-            "mitm_host_count": mitm_host_count(powerful_sections.get("MITM", [])),
-        },
-    }
-    report["script_mirrors"] = {
-        source_url: mirror_url for source_url, mirror_url in mirrored_script_urls.items()
-    }
-    (DIST_DIR / "build-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    print(f"wrote {lite_path}")
-    print(f"wrote {balanced_path}")
-    print(f"wrote {powerful_path}")
-    print(f"wrote {DIST_DIR / 'origo15-module-snippet.yaml'}")
-    print(f"wrote {DIST_DIR / 'build-report.json'}")
-    print("lite counts:", report["tiers"]["lite"]["counts"])
-    print("balanced counts:", report["tiers"]["balanced"]["counts"])
-    print("powerful counts:", report["tiers"]["powerful"]["counts"])
+    try:
+        report = build(args.config, args.allowlist, args.dist, not args.no_baseline)
+    except (BuildError, OSError, KeyError, TypeError, ValueError) as exc:
+        print(f"build failed: {exc}", file=os.sys.stderr)
+        return 1
+    print(f"wrote {args.dist / MODULE_NAME}")
+    print(f"wrote {args.dist / RULESET_NAME}")
+    print(f"wrote {args.dist / REPORT_NAME}")
+    print(f"rules: {report['summary']['final_rule_count']}")
+    print(f"build id: {report['build_id']}")
     return 0
 
 

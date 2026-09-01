@@ -1,0 +1,35 @@
+# Local false-positive protection. These are exact hosts, not broad service allowlists.
+# A parent DOMAIN-SUFFIX block is removed when it would cover one of these hosts.
+
+# Apple connectivity, updates, push, and certificate checks
+DOMAIN,captive.apple.com
+DOMAIN,gsp1.apple.com
+DOMAIN,init.itunes.apple.com
+DOMAIN,mesu.apple.com
+DOMAIN,ocsp.apple.com
+DOMAIN,push.apple.com
+DOMAIN,time.apple.com
+
+# Google and Android connectivity/authentication
+DOMAIN,accounts.google.com
+DOMAIN,clients3.google.com
+DOMAIN,connectivitycheck.gstatic.com
+DOMAIN,connectivitycheck.android.com
+
+# Microsoft authentication and productivity
+DOMAIN,login.live.com
+DOMAIN,login.microsoftonline.com
+DOMAIN,www.office.com
+
+# Developer infrastructure
+DOMAIN,api.github.com
+DOMAIN,github.com
+DOMAIN,objects.githubusercontent.com
+
+# Common Chinese authentication/payment endpoints
+DOMAIN,passport.bilibili.com
+DOMAIN,api.bilibili.com
+DOMAIN,login.taobao.com
+DOMAIN,passport.jd.com
+DOMAIN,pay.weixin.qq.com
+DOMAIN,weixin.qq.com

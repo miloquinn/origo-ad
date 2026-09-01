@@ -1,190 +1,73 @@
 # Origo Ad
 
-Origo Ad 是一组面向 Egern 的去广告模块和 Origo VPN 配置模板。
+Origo Ad 是一个独立的开源广告与追踪域名规则聚合项目。默认产物只包含域名级拦截：不执行第三方脚本，不做 URL/响应体重写，不要求 MITM，因此比旧版重写模块更容易审计，也更适合作为日常默认规则。
 
-它把仍在维护的上游去广告规则重新打包成三档：省电、日常、强力。默认思路不是一上来就把所有脚本和响应体处理全打开，而是在尽量保留广告拦截效果的同时，控制 iPhone 上 Egern 的耗电和误伤。
+## 稳定产物
 
-## 快速链接
+- [Egern 模块 `origo-ad-balanced.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module)：仓库当前明确支持的主产物，规则已带 `REJECT` 策略。
+- [Surge classical RULE-SET `origo-ad-balanced.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.list)：不带策略，供支持 `DOMAIN` / `DOMAIN-SUFFIX` RULE-SET 语法的客户端引用。
+- [生成报告 `build-report.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report.json)：记录每个上游的 URL、许可证、SHA-256、原始/接受/排除数量，以及最终产物摘要和哈希。
 
-- Lite: [dist/origo-ad-lite.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module)
-- Balanced: [dist/origo-ad-balanced.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module)
-- Powerful: [dist/origo-ad-powerful.module](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module)
-- Origo VPN 模板: [dist/origo-vpn-template.yaml](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml)
-
-## 使用声明
-
-> Caution
-
-- 禁止在中华人民共和国境内平台公开传播本仓库内容，禁止将本仓库内容用于任何商业用途或非法用途。
-- 本仓库内容仅供个人学习、测试和研究使用。使用者应自行评估合法性、准确性、完整性和有效性，并自行承担相关风险。
-- 本仓库会整理、转换和引用网络公开资源，尽量保留原作者署名和来源信息。感谢各位原作者和维护者的劳动成果；如认为内容侵犯了您的版权或其他合法权益，请联系处理删除或修改。
-- 本仓库中的脚本、规则、模块和模板不提供任何可用性或安全性保证。因使用本仓库内容导致的账号、网络、设备、服务或数据损失，维护者概不负责。
-- 禁止在社交媒体、自媒体平台及其他公共场合转载、发布、传播或二次分发本仓库资源。查看、使用或复制本仓库内容，即视为已经阅读并接受本声明。
-- 本声明可能随时补充或修改；若本仓库引用的上游项目声明更严格，应同时遵守上游项目要求。
-
-> Important
-
-本仓库部分上游资源来自或参考 [sooyaaabo/LoonLab](https://github.com/sooyaaabo/LoonLab) 及其公开插件生态。请尊重原作者声明、署名和使用边界。
-
-## 模块档位
-
-运行生成器后会得到：
-
-- `dist/origo-ad-lite.module`
-  - 最省电档。
-  - 只保留上游模块里低成本的域名/IP 类 `Rule` 拦截。
-  - 丢弃 `URL-REGEX`、`URL Rewrite`、`Body Rewrite`、`Map Local`、`MITM`、`Script`。
-  - 适合只想要基础拦截、优先省电的配置。
-
-- `dist/origo-ad-balanced.module`
-  - 日常推荐档。
-  - 保留 `Rule`、`URL Rewrite`、低成本 `Rewrite`、`Map Local`、`MITM`。
-  - `MITM` 会合并为一条 `hostname = %APPEND% ...`，并补入旧配置里的 Google/YouTube/归因统计等泛域名。
-  - 仍然丢弃 `Body Rewrite` 和 `Script`，这是最主要的省电点。
-  - 适合默认开启。
-
-- `dist/origo-ad-powerful.module`
-  - 最强去广告档。
-  - 保留 `Argument`、`Rule`、`URL Rewrite`、`Rewrite`、`Map Local`、`Body Rewrite`、`Script`、`MITM`。
-  - 去广告最强，但会重新引入响应体处理和脚本执行，更耗电，也更容易误伤。
-  - 适合某些 App 广告仍然明显时手动切换，不建议和 Lite/Balanced 同时开。
-
-- `dist/origo15-module-snippet.yaml`
-  - 可以复制到你的 Egern 配置里参考。
-  - 默认关闭原来的 `StartUpAds.module` / `BlockAds.module`，换成生成后的省电模块 URL 占位。
-
-- `dist/build-report.json`
-  - 记录上游来源、各 section 原始数量、保留数量、丢弃数量。
-
-## 本地生成
-
-```bash
-cd /Users/xiaoyuan/work/origo-ad
-/usr/bin/python3 tools/build.py
-```
-
-默认读取：
-
-```text
-/Users/xiaoyuan/Downloads/origo15.yaml
-```
-
-如果只是想重新生成模块，不需要读取原配置也可以：
-
-```bash
-/usr/bin/python3 tools/build.py --no-profile
-```
-
-## 推荐接入方式
-
-先用 `balanced`。
-
-在 Egern 配置里只开启一个 Origo Ad 档位。默认推荐：
+Egern 示例：
 
 ```yaml
 modules:
-- name: Origo Ad Lite
-  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
-  enabled: false
 - name: Origo Ad Balanced
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
   enabled: true
-- name: Origo Ad Powerful
-  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
-  enabled: false
 ```
 
-配置片段示例会生成到：
+本仓库没有修改或打包 Origo VPN 配置，也不再发布脚本、MITM 主机名或“解锁”类功能。
 
-```text
-dist/origo15-module-snippet.yaml
-```
+## 默认策略
 
-如果还想进一步省电，再换 `lite`，但 HTTPS rewrite / map local 类去广告会明显变弱。
+默认列表追求覆盖与误杀之间的平衡：
 
-如果还不够，再手动换 `powerful`。不要同时开三档，开 Powerful 时建议关掉 Lite/Balanced，避免重复处理。
+1. HaGeZi Multi LIGHT 提供经过低误杀治理的精确主机名基线；精确规则不会被擅自扩大成整个域名后缀。
+2. ACL4SSR BanAD 补充常见中文广告联盟；只接受 `DOMAIN` 和 `DOMAIN-SUFFIX`，高误杀风险的 `DOMAIN-KEYWORD`、IP 和 URL 正则会被统计后丢弃。
+3. AdGuard CNAME disguised ads 只补充 ads 分类；普通条目保持精确匹配，明确的 `*.` 条目才转换为后缀匹配。
+4. `config/allowlist.txt` 在合并前保护登录、支付、系统连通性、证书检查和开发基础设施等关键主机。如果某条上游后缀规则会覆盖受保护主机，该后缀规则整体不发布。
+5. 规则统一转为小写 ASCII hostname，拒绝 URL、IP、Unicode、非法标签，跨源去重，并删除已被更宽后缀覆盖的精确项。
 
-## Origo VPN 模板
+完整来源、许可证、活跃度和排除理由见 [SOURCES.md](SOURCES.md)。
 
-公开模板位于：
+## 本地构建与验证
 
-```text
-https://github.com/miloquinn/origo-ad/raw/main/dist/origo-vpn-template.yaml
-```
-
-模板来自个人 `origo20.yaml`，但已经脱敏：
-
-- 外部订阅 URL 改为 `YOUR_ORIGO_SUB_TOKEN`、`YOUR_VALTROGEN_ACCESS_KEY`、`YOUR_SANMAO_TOKEN`、`YOUR_PQ_TOKEN` 占位。
-- 移除了 `ca_p12` 和 `ca_passphrase`，避免公开 Egern CA 证书。
-- 保留策略组、规则、MITM hostnames、模块开关和 Origo Ad Balanced 接入方式。
-
-使用模板时，需要把占位符替换为自己的订阅信息；Egern CA 证书建议在本机重新生成或导入，不要使用公开文件承载私有证书。
-
-## GitHub Actions 自动更新
-
-仓库里已经带了工作流：
-
-```text
-.github/workflows/update-modules.yml
-```
-
-它会：
-
-- 每 6 小时自动运行一次。
-- 也可以在 GitHub Actions 页面手动点 `Run workflow`。
-- 拉取 `sources.json` 里的活跃上游模块。
-- 重新生成 `dist/origo-ad-lite.module`、`dist/origo-ad-balanced.module` 和 `dist/origo-ad-powerful.module`。
-- 确认 lite / balanced 里没有 `[Body Rewrite]`、`[Script]`、`script_url`、`body_required`。
-- 纯去广告 LoonLab 模块会被合并进生成产物；解锁会员、功能增强、定时任务类模块建议继续作为独立模块按需开启。
-- 只有上游内容真的变了，才自动 commit 并 push。
-
-Egern 可以直接引用 raw URL：
-
-```text
-https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
-```
-
-也可以本地生成时指定 URL：
+只需要 Python 3.10+ 标准库：
 
 ```bash
-/usr/bin/python3 tools/build.py --base-url "https://github.com/<你的 GitHub 用户名>/<仓库名>/raw/main/dist"
+python3 -m unittest discover -s tests -v
+python3 tools/build.py
+python3 tools/validate.py
 ```
 
-### 创建远程仓库
-
-如果你用 GitHub CLI：
+首次建立经过人工审查的新基线时，可以显式跳过旧报告的增减比较：
 
 ```bash
-cd /Users/xiaoyuan/work/origo-ad
-gh repo create origo-ad --public --source=. --remote=origin --push
+python3 tools/build.py --no-baseline
 ```
 
-之后 GitHub Actions 就会按计划自动更新。
+`--no-baseline` 不会跳过来源数量、输入大小、非法条目比例、最终数量、格式、空产物或哈希一致性校验；日常自动更新不会使用这个参数。
 
-## 省电原则
+## 发布安全门
 
-从重到轻大概是：
+生成器在写入 `dist` 前完成全部检查：
 
-1. `Script` / `Body Rewrite`
-2. 大量 `Map Local` / `URL Rewrite`
-3. `URL-REGEX` 规则
-4. 普通 `DOMAIN` / `DOMAIN-SUFFIX` / `IP-CIDR` 拦截
+- 三个必需上游均须成功返回 UTF-8 文本，且不能超过配置的字节上限。
+- 每个上游的规范化数量必须落在独立的最小/最大范围内。
+- 若已有 `dist/build-report.json`，每来源和最终产物都必须通过“相对变化 + 绝对变化”双阈值；小幅日常波动不会误报，大规模污染或清空会停止发布。
+- 最终产物必须非空、规则数在 40,000–70,000 之间、排序稳定、无重复，模块与 RULE-SET 内容必须一致。
+- 报告中的 SHA-256 必须与文件实际内容一致。
+- 所有产物先在临时目录完成，再替换 `dist`，失败不会发布新结果。
 
-所以 lite 默认把 1、2、3 都删掉；balanced 保留 MITM 和 rewrite 但删掉 1；powerful 全部保留。
+## GitHub Actions
 
-## 上游来源
+`.github/workflows/update-rules.yml` 每天 02:17 UTC 运行，也支持手动触发。流程依次运行单元测试、联网构建和离线验证。任何上游请求、格式或安全门失败都会使任务失败，并保留仓库中上一版已验证产物。
 
-上游 URL 在 `sources.json`。当前默认源：
+工作流只暂存 `dist`；如果内容没有变化，不会创建提交。若产物确实变化且全部验证通过，才会以 `github-actions[bot]` 提交并推送。并发更新不会互相取消，避免构建进行到一半时被中断。
 
-- `fmz200/wool_scripts` 的 `Surge/module/blockAds.module`
-- `blackmatrix7/ios_rule_script` 的 `rewrite/Surge/AdvertisingLite/AdvertisingLite.sgmodule`
-- `LoonLab / 103516` 的纯去广告插件：
-  - `Bilibili.lpx`
-  - `X_Web.lpx`
-  - `Xueqiu.lpx`
-  - `Reddit.lpx`
-  - `RedNote.lpx`
+## 许可证
 
-生成器每次会重新拉取上游，输出报告里会记录时间和数量。
+本项目代码及组合产物采用 `GPL-3.0-only`，见 [LICENSE](LICENSE)。每个上游仍保留自己的许可证与署名：HaGeZi 为 GPL-3.0，ACL4SSR 为 CC-BY-SA-4.0，AdGuard CNAME Trackers 为 MIT。Creative Commons 官方将 CC-BY-SA-4.0 到 GPLv3 定义为单向兼容；本项目在报告和 [SOURCES.md](SOURCES.md) 中保留来源、许可和改动说明。
 
-没有合并进 `origo-ad` 的 LoonLab 插件主要是带解锁或功能增强的模块，例如 `BaiduNetDisk.lpx`、`YouTube.lpx`、`NeteaseMusic.lpx`、`BodianMusic.lpx`、`ChinaMobile.lpx`、`IPPure.lpx`、`AppStoreMonitor.lpx`。这些更适合在 Egern 配置里保持独立开关。
+规则无法保证零误杀。遇到问题时，请先确认触发的具体域名，再提交最小化的 allowlist 修正；不要用放行整个顶级服务域的方式掩盖问题。
