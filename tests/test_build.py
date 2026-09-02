@@ -102,6 +102,22 @@ class MergeTests(unittest.TestCase):
         self.assertEqual(merged, [build.Rule("DOMAIN", "tracker.other.test")])
         self.assertEqual(stats["allowlist_removed"], 2)
 
+    def test_powerful_coverage_accepts_equivalent_or_broader_suffixes(self):
+        balanced = [
+            build.Rule("DOMAIN", "ads.example.com"),
+            build.Rule("DOMAIN-SUFFIX", "track.example.com"),
+        ]
+        powerful = [
+            build.Rule("DOMAIN-SUFFIX", "example.com"),
+            build.Rule("DOMAIN", "other.test"),
+        ]
+
+        self.assertEqual(build.missing_coverage(balanced, powerful), [])
+        self.assertEqual(
+            build.missing_coverage([build.Rule("DOMAIN-SUFFIX", "missing.test")], powerful),
+            [build.Rule("DOMAIN-SUFFIX", "missing.test")],
+        )
+
 
 class SafetyTests(unittest.TestCase):
     def test_rejects_empty_and_out_of_range_sources(self):
@@ -130,6 +146,32 @@ class RenderingTests(unittest.TestCase):
         self.assertIn("DOMAIN,ads.example", ruleset)
         self.assertNotIn(",REJECT", ruleset)
 
+    def test_renders_powerful_as_an_independent_domain_only_tier(self):
+        rules = [build.Rule("DOMAIN", "ads.example")]
+        metadata = {"build_id": "power123", "rule_count": 1}
+
+        module = build.render_egern_module(rules, metadata, tier="powerful")
+        ruleset = build.render_surge_ruleset(rules, metadata, tier="powerful")
+
+        self.assertIn("#!name=Origo Ad Powerful", module)
+        self.assertIn("Powerful domain-only", module)
+        self.assertIn("# NAME: Origo Ad Powerful", ruleset)
+        self.assertNotIn("[Script]", module)
+        self.assertNotIn("[MITM]", module)
+
+    def test_renders_lite_with_the_expected_public_artifact_names(self):
+        rules = [build.Rule("DOMAIN", "ads.example")]
+        metadata = {"build_id": "lite123", "rule_count": 1}
+
+        module = build.render_egern_module(rules, metadata, tier="lite")
+        names = build.artifact_names("lite")
+
+        self.assertIn("#!name=Origo Ad Lite", module)
+        self.assertIn("Lite exact-domain", module)
+        self.assertEqual(names.module, "origo-ad-lite.module")
+        self.assertEqual(names.ruleset, "origo-ad-lite.list")
+        self.assertEqual(names.report, "build-report-lite.json")
+
     def test_validator_detects_report_or_artifact_tampering(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             dist = Path(temp_dir)
@@ -146,6 +188,21 @@ class RenderingTests(unittest.TestCase):
             (dist / "origo-ad-balanced.list").write_text(ruleset + "DOMAIN,bad.example\n", encoding="utf-8")
             with self.assertRaises(build.BuildError):
                 build.validate_dist(dist, min_rules=1, max_rules=10)
+
+    def test_validator_supports_powerful_artifact_names(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            dist = Path(temp_dir)
+            rules = [build.Rule("DOMAIN-SUFFIX", "ads.example")]
+            metadata = {"build_id": "power123", "rule_count": 1}
+            module = build.render_egern_module(rules, metadata, tier="powerful")
+            ruleset = build.render_surge_ruleset(rules, metadata, tier="powerful")
+            names = build.artifact_names("powerful")
+            (dist / names.module).write_text(module, encoding="utf-8")
+            (dist / names.ruleset).write_text(ruleset, encoding="utf-8")
+            report = build.make_report(metadata, [], rules, {}, module, ruleset, tier="powerful")
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            build.validate_dist(dist, min_rules=1, max_rules=10, tier="powerful")
 
     def test_invalid_staged_artifacts_do_not_replace_verified_files(self):
         with tempfile.TemporaryDirectory() as temp_dir:

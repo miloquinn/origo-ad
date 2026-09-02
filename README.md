@@ -4,18 +4,30 @@ Origo Ad 是一个独立的开源广告与追踪域名规则聚合项目。默�
 
 ## 稳定产物
 
+- [Egern Lite 模块 `origo-ad-lite.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module)：最低开销档，只使用 LIGHT 精确域名基线。
+- [Surge Lite RULE-SET `origo-ad-lite.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.list)：Lite 的无策略版本。
 - [Egern 模块 `origo-ad-balanced.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module)：仓库当前明确支持的主产物，规则已带 `REJECT` 策略。
 - [Surge classical RULE-SET `origo-ad-balanced.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.list)：不带策略，供支持 `DOMAIN` / `DOMAIN-SUFFIX` RULE-SET 语法的客户端引用。
-- [生成报告 `build-report.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report.json)：记录每个上游的 URL、许可证、SHA-256、原始/接受/排除数量，以及最终产物摘要和哈希。
+- [Egern Powerful 模块 `origo-ad-powerful.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module)：更激进的可选档，仍然只有域名规则。
+- [Surge Powerful RULE-SET `origo-ad-powerful.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.list)：Powerful 的无策略版本。
+- 生成报告 [`build-report-lite.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report-lite.json)、[`build-report.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report.json) 与 [`build-report-powerful.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report-powerful.json)：分别记录三档的上游 URL、许可证、SHA-256、原始/接受/排除数量，以及最终产物摘要和哈希。
 
 Egern 示例：
 
 ```yaml
 modules:
+- name: Origo Ad Lite
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
+  enabled: false
 - name: Origo Ad Balanced
   url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
   enabled: true
+- name: Origo Ad Powerful
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
+  enabled: false
 ```
+
+三档不要同时启用。低开销优先时使用 Lite，日常默认使用 Balanced；明确需要更多追踪、遥测和应用内广告覆盖，并能自行处理误杀时再切换 Powerful。
 
 本仓库没有修改或打包 Origo VPN 配置，也不再发布脚本、MITM 主机名或“解锁”类功能。
 
@@ -29,6 +41,10 @@ modules:
 4. `config/allowlist.txt` 在合并前保护登录、支付、系统连通性、证书检查和开发基础设施等关键主机。如果某条上游后缀规则会覆盖受保护主机，该后缀规则整体不发布。
 5. 规则统一转为小写 ASCII hostname，拒绝 URL、IP、Unicode、非法标签，跨源去重，并删除已被更宽后缀覆盖的精确项。
 
+Lite 只保留 HaGeZi Multi LIGHT 的精确域名，并使用同一白名单和安全门。Balanced 在 Lite 基础上增加 ACL4SSR BanAD 与 AdGuard CNAME ads。
+
+Powerful 在同一安全边界内继承 Balanced 的 LIGHT 基线，再叠加 HaGeZi Multi PRO++ mini 和 ACL4SSR BanProgramAD，确保覆盖范围不会比 Balanced 窄。PRO++ mini 是为移动端/有限内存过滤器缩减后的激进列表；上游明确提醒可能误杀少量正常域名，因此它不是默认档。Powerful 仍不接受 `DOMAIN-KEYWORD`、IP、URL 正则、脚本、重写或 MITM。
+
 完整来源、许可证、活跃度和排除理由见 [SOURCES.md](SOURCES.md)。
 
 ## 本地构建与验证
@@ -37,14 +53,18 @@ modules:
 
 ```bash
 python3 -m unittest discover -s tests -v
+python3 tools/build.py --tier lite
 python3 tools/build.py
+python3 tools/build.py --tier powerful
 python3 tools/validate.py
 ```
 
 首次建立经过人工审查的新基线时，可以显式跳过旧报告的增减比较：
 
 ```bash
+python3 tools/build.py --tier lite --no-baseline
 python3 tools/build.py --no-baseline
+python3 tools/build.py --tier powerful --no-baseline
 ```
 
 `--no-baseline` 不会跳过来源数量、输入大小、非法条目比例、最终数量、格式、空产物或哈希一致性校验；日常自动更新不会使用这个参数。
@@ -53,16 +73,17 @@ python3 tools/build.py --no-baseline
 
 生成器在写入 `dist` 前完成全部检查：
 
-- 三个必需上游均须成功返回 UTF-8 文本，且不能超过配置的字节上限。
+- 当前档位的全部必需上游均须成功返回 UTF-8 文本，且不能超过配置的字节上限。
 - 每个上游的规范化数量必须落在独立的最小/最大范围内。
-- 若已有 `dist/build-report.json`，每来源和最终产物都必须通过“相对变化 + 绝对变化”双阈值；小幅日常波动不会误报，大规模污染或清空会停止发布。
-- 最终产物必须非空、规则数在 40,000–70,000 之间、排序稳定、无重复，模块与 RULE-SET 内容必须一致。
+- 若已有对应档位的生成报告，每来源和最终产物都必须通过“相对变化 + 绝对变化”双阈值；小幅日常波动不会误报，大规模污染或清空会停止发布。
+- 最终产物必须非空；Lite 必须在 35,000–60,000 条之间，Balanced 必须在 40,000–70,000 条之间，Powerful 必须在 60,000–90,000 条之间，且均须排序稳定、无重复、模块与 RULE-SET 内容一致。
+- 离线总验证还会检查 `Lite ⊆ Balanced ⊆ Powerful` 的语义覆盖关系。
 - 报告中的 SHA-256 必须与文件实际内容一致。
 - 所有产物先在临时目录完成，再替换 `dist`，失败不会发布新结果。
 
 ## GitHub Actions
 
-`.github/workflows/update-rules.yml` 每天 02:17 UTC 运行，也支持手动触发。流程依次运行单元测试、联网构建和离线验证。任何上游请求、格式或安全门失败都会使任务失败，并保留仓库中上一版已验证产物。
+`.github/workflows/update-rules.yml` 每天 02:17 UTC 运行，也支持手动触发。流程依次运行单元测试、联网构建 Lite、Balanced、Powerful 和三档离线验证。任何上游请求、格式或安全门失败都会使任务失败，并保留仓库中上一版已验证产物。
 
 工作流只暂存 `dist`；如果内容没有变化，不会创建提交。若产物确实变化且全部验证通过，才会以 `github-actions[bot]` 提交并推送。并发更新不会互相取消，避免构建进行到一半时被中断。
 

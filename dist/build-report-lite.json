@@ -1,0 +1,53 @@
+{
+  "artifacts": {
+    "origo-ad-lite.list": {
+      "bytes": 1093450,
+      "sha256": "75b12f2e77e553cc56cc8c6996f2bde05fe37d7eb2b1eb0509fd94af5547fe58"
+    },
+    "origo-ad-lite.module": {
+      "bytes": 1384719,
+      "sha256": "232c71545c9cdefc74154e0ce782f9c1a288782bcdda9dd55f142fe1b2d5dec4"
+    }
+  },
+  "build_id": "94360777e06e6b2bbc2fdc707ea5347cb3e7005665d944d924bef4b4f572393a",
+  "configuration": {
+    "allowlist_rule_count": 23,
+    "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
+    "policy": "lite-exact-domain-only",
+    "sources_sha256": "c996a820767c7be0a4338944b4487791f1374e2b463a1c9e2212447ee48fe778",
+    "tier": "lite"
+  },
+  "license": "GPL-3.0-only",
+  "schema_version": 1,
+  "sources": [
+    {
+      "accepted_unique": 41604,
+      "bytes": 802687,
+      "duplicates": 0,
+      "etag": "\"8399602df5fa62871302ddce79b435f9d5803065704bf1492f0d865f73d6e317\"",
+      "excluded_by_type": {},
+      "homepage": "https://github.com/hagezi/dns-blocklists",
+      "id": "hagezi-light",
+      "invalid": 0,
+      "last_modified": null,
+      "license": "GPL-3.0-only",
+      "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
+      "name": "HaGeZi Multi LIGHT",
+      "raw_candidates": 41604,
+      "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
+      "sha256": "87ec66035b8a6062d7bb0c45e3355d30142cf1545ad53706f811b431eaa7286a",
+      "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
+    }
+  ],
+  "summary": {
+    "allowlist_removed": 0,
+    "covered_exact": 0,
+    "domain_count": 41604,
+    "domain_suffix_count": 0,
+    "final": 41604,
+    "final_rule_count": 41604,
+    "input_unique": 41604,
+    "redundant_suffixes": 0
+  },
+  "tier": "lite"
+}

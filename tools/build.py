@@ -22,17 +22,44 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES_FILE = ROOT / "sources.json"
 ALLOWLIST_FILE = ROOT / "config" / "allowlist.txt"
 DIST_DIR = ROOT / "dist"
+LITE_MODULE_NAME = "origo-ad-lite.module"
+LITE_RULESET_NAME = "origo-ad-lite.list"
+LITE_REPORT_NAME = "build-report-lite.json"
 MODULE_NAME = "origo-ad-balanced.module"
 RULESET_NAME = "origo-ad-balanced.list"
 REPORT_NAME = "build-report.json"
+POWERFUL_MODULE_NAME = "origo-ad-powerful.module"
+POWERFUL_RULESET_NAME = "origo-ad-powerful.list"
+POWERFUL_REPORT_NAME = "build-report-powerful.json"
 PROJECT_URL = "https://github.com/miloquinn/origo-ad"
 USER_AGENT = "origo-ad/2 (+https://github.com/miloquinn/origo-ad)"
 VALID_RULE_KINDS = {"DOMAIN", "DOMAIN-SUFFIX"}
 LABEL_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
+TIER_DETAILS = {
+    "lite": {
+        "name": "Origo Ad Lite",
+        "description": "Lite exact-domain ad and tracker blocking for lower overhead; no MITM, rewrite, or script execution.",
+    },
+    "balanced": {
+        "name": "Origo Ad Balanced",
+        "description": "Balanced domain-only ad and tracker blocking; no MITM, rewrite, or script execution.",
+    },
+    "powerful": {
+        "name": "Origo Ad Powerful",
+        "description": "Powerful domain-only ad, tracker, telemetry, and badware blocking; no MITM, rewrite, or script execution.",
+    },
+}
 
 
 class BuildError(RuntimeError):
     """Raised when input or output fails a publication safety check."""
+
+
+@dataclass(frozen=True)
+class ArtifactNames:
+    module: str
+    ruleset: str
+    report: str
 
 
 @dataclass(frozen=True, order=True)
@@ -57,6 +84,16 @@ class FetchedSource:
     byte_count: int
     etag: str | None
     last_modified: str | None
+
+
+def artifact_names(tier: str) -> ArtifactNames:
+    if tier == "lite":
+        return ArtifactNames(LITE_MODULE_NAME, LITE_RULESET_NAME, LITE_REPORT_NAME)
+    if tier == "balanced":
+        return ArtifactNames(MODULE_NAME, RULESET_NAME, REPORT_NAME)
+    if tier == "powerful":
+        return ArtifactNames(POWERFUL_MODULE_NAME, POWERFUL_RULESET_NAME, POWERFUL_REPORT_NAME)
+    raise BuildError(f"unknown tier: {tier!r}")
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -164,6 +201,11 @@ def is_same_or_subdomain(domain: str, parent: str) -> bool:
     return domain == parent or domain.endswith("." + parent)
 
 
+def domain_suffixes(domain: str) -> tuple[str, ...]:
+    labels = domain.split(".")
+    return tuple(".".join(labels[index:]) for index in range(len(labels) - 1))
+
+
 def conflicts_with_allowlist(block: Rule, allow: Rule) -> bool:
     if block.kind == "DOMAIN":
         if allow.kind == "DOMAIN":
@@ -192,17 +234,19 @@ def merge_rules(rules: Iterable[Rule], allowlist: set[Rule]) -> tuple[list[Rule]
         key=lambda rule: (rule.domain.count("."), rule.domain),
     )
     kept_suffixes: list[Rule] = []
+    kept_suffix_domains: set[str] = set()
     redundant_suffixes = 0
     for rule in suffixes:
-        if any(is_same_or_subdomain(rule.domain, parent.domain) for parent in kept_suffixes):
+        if any(parent in kept_suffix_domains for parent in domain_suffixes(rule.domain)):
             redundant_suffixes += 1
             continue
         kept_suffixes.append(rule)
+        kept_suffix_domains.add(rule.domain)
 
     kept_exact: list[Rule] = []
     covered_exact = 0
     for rule in (item for item in remaining if item.kind == "DOMAIN"):
-        if any(is_same_or_subdomain(rule.domain, suffix.domain) for suffix in kept_suffixes):
+        if any(parent in kept_suffix_domains for parent in domain_suffixes(rule.domain)):
             covered_exact += 1
             continue
         kept_exact.append(rule)
@@ -215,6 +259,18 @@ def merge_rules(rules: Iterable[Rule], allowlist: set[Rule]) -> tuple[list[Rule]
         "covered_exact": covered_exact,
         "final": len(merged),
     }
+
+
+def missing_coverage(required: Iterable[Rule], candidate: Iterable[Rule]) -> list[Rule]:
+    candidate_rules = set(candidate)
+    candidate_suffixes = {rule.domain for rule in candidate_rules if rule.kind == "DOMAIN-SUFFIX"}
+    missing: list[Rule] = []
+    for rule in required:
+        if rule in candidate_rules:
+            continue
+        if not set(domain_suffixes(rule.domain)).intersection(candidate_suffixes):
+            missing.append(rule)
+    return sorted(missing, key=rule_sort_key)
 
 
 def enforce_count(name: str, count: int, minimum: int, maximum: int) -> None:
@@ -293,10 +349,13 @@ def source_report(source: dict, fetched: FetchedSource, parsed: ParseResult) -> 
     }
 
 
-def render_egern_module(rules: list[Rule], metadata: dict) -> str:
+def render_egern_module(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
+    details = TIER_DETAILS.get(tier)
+    if details is None:
+        raise BuildError(f"unknown tier: {tier!r}")
     lines = [
-        "#!name=Origo Ad Balanced",
-        "#!desc=Balanced domain-only ad and tracker blocking; no MITM, rewrite, or script execution.",
+        f"#!name={details['name']}",
+        f"#!desc={details['description']}",
         "#!author=origo-ad contributors",
         f"#!homepage={PROJECT_URL}",
         "#!license=GPL-3.0-only",
@@ -313,10 +372,13 @@ def render_egern_module(rules: list[Rule], metadata: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_surge_ruleset(rules: list[Rule], metadata: dict) -> str:
+def render_surge_ruleset(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
+    details = TIER_DETAILS.get(tier)
+    if details is None:
+        raise BuildError(f"unknown tier: {tier!r}")
     lines = [
-        "# NAME: Origo Ad Balanced",
-        "# DESCRIPTION: Balanced domain-only ad and tracker blocking.",
+        f"# NAME: {details['name']}",
+        f"# DESCRIPTION: {details['description']}",
         f"# HOMEPAGE: {PROJECT_URL}",
         "# LICENSE: GPL-3.0-only",
         f"# SOURCE-SHA256: {metadata['build_id']}",
@@ -336,9 +398,12 @@ def make_report(
     merge_stats: dict,
     module: str,
     ruleset: str,
+    tier: str = "balanced",
 ) -> dict:
+    names = artifact_names(tier)
     return {
         "schema_version": 1,
+        "tier": tier,
         "build_id": metadata["build_id"],
         "license": "GPL-3.0-only",
         "configuration": metadata.get("configuration", {}),
@@ -350,13 +415,13 @@ def make_report(
             **merge_stats,
         },
         "artifacts": {
-            MODULE_NAME: {"sha256": sha256_text(module), "bytes": len(module.encode("utf-8"))},
-            RULESET_NAME: {"sha256": sha256_text(ruleset), "bytes": len(ruleset.encode("utf-8"))},
+            names.module: {"sha256": sha256_text(module), "bytes": len(module.encode("utf-8"))},
+            names.ruleset: {"sha256": sha256_text(ruleset), "bytes": len(ruleset.encode("utf-8"))},
         },
     }
 
 
-def _parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
+def parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
     build_id = ""
     rules: list[Rule] = []
     in_rule_section = not module
@@ -394,10 +459,11 @@ def _parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
     return build_id, rules
 
 
-def validate_dist(dist_dir: Path, min_rules: int, max_rules: int) -> None:
-    module_path = dist_dir / MODULE_NAME
-    ruleset_path = dist_dir / RULESET_NAME
-    report_path = dist_dir / REPORT_NAME
+def validate_dist(dist_dir: Path, min_rules: int, max_rules: int, tier: str = "balanced") -> None:
+    names = artifact_names(tier)
+    module_path = dist_dir / names.module
+    ruleset_path = dist_dir / names.ruleset
+    report_path = dist_dir / names.report
     for path in (module_path, ruleset_path, report_path):
         if not path.is_file() or path.stat().st_size == 0:
             raise BuildError(f"missing or empty artifact: {path}")
@@ -405,8 +471,8 @@ def validate_dist(dist_dir: Path, min_rules: int, max_rules: int) -> None:
     module = module_path.read_text(encoding="utf-8")
     ruleset = ruleset_path.read_text(encoding="utf-8")
     report = read_json(report_path)
-    module_build_id, module_rules = _parse_rendered_rules(module, module=True)
-    ruleset_build_id, ruleset_rules = _parse_rendered_rules(ruleset, module=False)
+    module_build_id, module_rules = parse_rendered_rules(module, module=True)
+    ruleset_build_id, ruleset_rules = parse_rendered_rules(ruleset, module=False)
     if module_rules != ruleset_rules:
         raise BuildError("module and ruleset contain different rules")
     if module_rules != sorted(set(module_rules), key=rule_sort_key):
@@ -419,7 +485,7 @@ def validate_dist(dist_dir: Path, min_rules: int, max_rules: int) -> None:
     if report.get("summary", {}).get("final_rule_count") != len(module_rules):
         raise BuildError("report rule count does not match artifacts")
     expected = report.get("artifacts", {})
-    actual = {MODULE_NAME: sha256_text(module), RULESET_NAME: sha256_text(ruleset)}
+    actual = {names.module: sha256_text(module), names.ruleset: sha256_text(ruleset)}
     for name, digest in actual.items():
         if expected.get(name, {}).get("sha256") != digest:
             raise BuildError(f"artifact digest mismatch: {name}")
@@ -434,7 +500,13 @@ def load_baseline(path: Path) -> dict | None:
     return baseline
 
 
-def check_baseline(config: dict, baseline: dict | None, source_reports: list[dict], final_count: int) -> None:
+def check_baseline(
+    config: dict,
+    tier_config: dict,
+    baseline: dict | None,
+    source_reports: list[dict],
+    final_count: int,
+) -> None:
     if baseline is None:
         return
     safety = config["safety"]
@@ -458,8 +530,8 @@ def check_baseline(config: dict, baseline: dict | None, source_reports: list[dic
             "final artifact",
             int(previous_final),
             final_count,
-            float(safety["final_max_delta_ratio"]),
-            int(safety["final_max_delta_absolute"]),
+            float(tier_config["final_max_delta_ratio"]),
+            int(tier_config["final_max_delta_absolute"]),
         )
 
 
@@ -468,6 +540,7 @@ def write_artifacts(
     files: dict[str, str],
     min_rules: int,
     max_rules: int,
+    tier: str = "balanced",
 ) -> None:
     dist_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".origo-ad-build-", dir=ROOT) as temp_name:
@@ -477,34 +550,48 @@ def write_artifacts(
             path = temp_dir / name
             path.write_text(content, encoding="utf-8")
             staged[name] = path
-        validate_dist(temp_dir, min_rules, max_rules)
+        validate_dist(temp_dir, min_rules, max_rules, tier=tier)
         for name, path in staged.items():
             os.replace(path, dist_dir / name)
 
 
-def build(config_path: Path, allowlist_path: Path, dist_dir: Path, use_baseline: bool) -> dict:
-    config_bytes = config_path.read_bytes()
+def build(
+    config_path: Path,
+    allowlist_path: Path,
+    dist_dir: Path,
+    use_baseline: bool,
+    tier: str = "balanced",
+) -> dict:
     allowlist_bytes = allowlist_path.read_bytes()
     config = read_json(config_path)
     if config.get("schema_version") != 1 or not isinstance(config.get("sources"), list):
         raise BuildError("sources.json must use schema_version 1 and contain a sources array")
+    tier_config = config.get("tiers", {}).get(tier)
+    if not isinstance(tier_config, dict):
+        raise BuildError(f"sources.json is missing tier configuration for {tier!r}")
+
     safety = config.get("safety", {})
-    required_safety = {
+    required_safety = {"source_max_delta_ratio", "source_max_delta_absolute"}
+    required_tier_safety = {
         "final_min_rules",
         "final_max_rules",
-        "source_max_delta_ratio",
-        "source_max_delta_absolute",
         "final_max_delta_ratio",
         "final_max_delta_absolute",
     }
-    if not required_safety.issubset(safety):
-        raise BuildError("sources.json is missing required safety settings")
+    if not required_safety.issubset(safety) or not required_tier_safety.issubset(tier_config):
+        raise BuildError("sources.json is missing required source or tier safety settings")
 
-    baseline = load_baseline(dist_dir / REPORT_NAME) if use_baseline else None
+    names = artifact_names(tier)
+    selected_sources = [source for source in config["sources"] if tier in source.get("tiers", [])]
+    source_ids = [source.get("id") for source in selected_sources]
+    if not selected_sources or len(source_ids) != len(set(source_ids)):
+        raise BuildError(f"tier {tier!r} must contain at least one source with unique IDs")
+
+    baseline = load_baseline(dist_dir / names.report) if use_baseline else None
     all_rules: set[Rule] = set()
     reports: list[dict] = []
     source_digests: list[str] = []
-    for source in config["sources"]:
+    for source in selected_sources:
         fetched = fetch_source(source)
         parsed = parse_source(fetched.text, source)
         enforce_count(
@@ -522,16 +609,19 @@ def build(config_path: Path, allowlist_path: Path, dist_dir: Path, use_baseline:
 
     allowlist = parse_allowlist(allowlist_path)
     rules, merge_stats = merge_rules(all_rules, allowlist)
-    enforce_count(
-        "final artifact",
-        len(rules),
-        int(safety["final_min_rules"]),
-        int(safety["final_max_rules"]),
-    )
-    check_baseline(config, baseline, reports, len(rules))
+    minimum = int(tier_config["final_min_rules"])
+    maximum = int(tier_config["final_max_rules"])
+    enforce_count(f"{tier} final artifact", len(rules), minimum, maximum)
+    check_baseline(config, tier_config, baseline, reports, len(rules))
 
+    selected_config = json.dumps(
+        {"tier": tier, "settings": tier_config, "sources": selected_sources},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
     build_material = "\n".join(
-        [sha256_bytes(config_bytes), sha256_bytes(allowlist_bytes), *source_digests]
+        [sha256_bytes(selected_config), sha256_bytes(allowlist_bytes), *source_digests]
     )
     build_id = sha256_text(build_material)
     metadata = {
@@ -539,24 +629,26 @@ def build(config_path: Path, allowlist_path: Path, dist_dir: Path, use_baseline:
         "rule_count": len(rules),
         "sources": reports,
         "configuration": {
-            "policy": config.get("policy"),
-            "sources_sha256": sha256_bytes(config_bytes),
+            "tier": tier,
+            "policy": tier_config.get("policy"),
+            "sources_sha256": sha256_bytes(selected_config),
             "allowlist_sha256": sha256_bytes(allowlist_bytes),
             "allowlist_rule_count": len(allowlist),
         },
     }
-    module = render_egern_module(rules, metadata)
-    ruleset = render_surge_ruleset(rules, metadata)
-    report = make_report(metadata, reports, rules, merge_stats, module, ruleset)
+    module = render_egern_module(rules, metadata, tier=tier)
+    ruleset = render_surge_ruleset(rules, metadata, tier=tier)
+    report = make_report(metadata, reports, rules, merge_stats, module, ruleset, tier=tier)
     report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
     write_artifacts(
         dist_dir,
-        {MODULE_NAME: module, RULESET_NAME: ruleset, REPORT_NAME: report_text},
-        int(safety["final_min_rules"]),
-        int(safety["final_max_rules"]),
+        {names.module: module, names.ruleset: ruleset, names.report: report_text},
+        minimum,
+        maximum,
+        tier=tier,
     )
-    validate_dist(dist_dir, int(safety["final_min_rules"]), int(safety["final_max_rules"]))
+    validate_dist(dist_dir, minimum, maximum, tier=tier)
     return report
 
 
@@ -565,6 +657,7 @@ def main() -> int:
     parser.add_argument("--config", type=Path, default=SOURCES_FILE)
     parser.add_argument("--allowlist", type=Path, default=ALLOWLIST_FILE)
     parser.add_argument("--dist", type=Path, default=DIST_DIR)
+    parser.add_argument("--tier", choices=sorted(TIER_DETAILS), default="balanced")
     parser.add_argument(
         "--no-baseline",
         action="store_true",
@@ -572,13 +665,14 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        report = build(args.config, args.allowlist, args.dist, not args.no_baseline)
+        report = build(args.config, args.allowlist, args.dist, not args.no_baseline, tier=args.tier)
     except (BuildError, OSError, KeyError, TypeError, ValueError) as exc:
         print(f"build failed: {exc}", file=os.sys.stderr)
         return 1
-    print(f"wrote {args.dist / MODULE_NAME}")
-    print(f"wrote {args.dist / RULESET_NAME}")
-    print(f"wrote {args.dist / REPORT_NAME}")
+    names = artifact_names(args.tier)
+    print(f"wrote {args.dist / names.module}")
+    print(f"wrote {args.dist / names.ruleset}")
+    print(f"wrote {args.dist / names.report}")
     print(f"rules: {report['summary']['final_rule_count']}")
     print(f"build id: {report['build_id']}")
     return 0

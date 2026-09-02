@@ -1,21 +1,21 @@
 {
   "artifacts": {
-    "origo-ad-balanced.list": {
-      "bytes": 1432941,
-      "sha256": "0abdc3d6791277f20617784323fb2f271d7ebefaf8c2ea4cb1fc9d2808afd869"
+    "origo-ad-powerful.list": {
+      "bytes": 2255967,
+      "sha256": "e61356f4a658fd1218612949f7e6f121840a3d41f57a610e8f73854c58676fbf"
     },
-    "origo-ad-balanced.module": {
-      "bytes": 1803184,
-      "sha256": "231d71e3233a3bdc6f59d039895431dc8047613cb22a40eaa2eec6109562de44"
+    "origo-ad-powerful.module": {
+      "bytes": 2843441,
+      "sha256": "e474513cec1cf4b8beaca9e60a5bb2a600a1871ca16831b4709f6bfbf13ba4be"
     }
   },
-  "build_id": "0b816bfb9b2a6a290b3e813fb78623e8d8b5bbae6ea5888a5da04e20f38f2771",
+  "build_id": "41ee0fb220b013857ad84c0bfcf3ff4313daf128ee7ee8a13f3447ff66c70aa3",
   "configuration": {
     "allowlist_rule_count": 23,
     "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
-    "policy": "balanced-domain-only",
-    "sources_sha256": "5672d14941998adf020b31a50246b5067ced22312e9126b4125cd75a0a510ef1",
-    "tier": "balanced"
+    "policy": "powerful-domain-only",
+    "sources_sha256": "b017d80b7b5c0adb1f427476f0c08ed7eac5ba72cecc85a2c70058f213f2da91",
+    "tier": "powerful"
   },
   "license": "GPL-3.0-only",
   "schema_version": 1,
@@ -75,17 +75,56 @@
       "risk": "ads category only; wildcard entries retain suffix semantics",
       "sha256": "e80ccdbf8324aa7831a0f80b767436b7f47a719585ebbb74bbbc026dd0e639d7",
       "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt"
+    },
+    {
+      "accepted_unique": 67780,
+      "bytes": 1278329,
+      "duplicates": 0,
+      "etag": "\"726a09a7331315c04e9c83ef9ab9e579b87060c4943ecfb98df2e1373a3195cd\"",
+      "excluded_by_type": {},
+      "homepage": "https://github.com/hagezi/dns-blocklists",
+      "id": "hagezi-pro-plus-mini",
+      "invalid": 0,
+      "last_modified": null,
+      "license": "GPL-3.0-only",
+      "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
+      "name": "HaGeZi Multi PRO++ mini",
+      "raw_candidates": 67780,
+      "risk": "aggressive mobile-sized baseline; upstream warns that some legitimate domains may be blocked",
+      "sha256": "a33412c6fae067a4e09e56e813415c4980c2dcf8a4d843a91a2250e8428ae61e",
+      "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.plus.mini-onlydomains.txt"
+    },
+    {
+      "accepted_unique": 989,
+      "bytes": 32638,
+      "duplicates": 6,
+      "etag": "\"70840d7b35c481392c609764708928d0d2bbe4144cbbb161ab736845d20c6348\"",
+      "excluded_by_type": {
+        "DOMAIN-KEYWORD": 1,
+        "IP-CIDR": 19
+      },
+      "homepage": "https://github.com/ACL4SSR/ACL4SSR",
+      "id": "acl4ssr-banprogramad",
+      "invalid": 1,
+      "last_modified": null,
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://github.com/ACL4SSR/ACL4SSR/blob/master/LICENSE",
+      "name": "ACL4SSR BanProgramAD",
+      "raw_candidates": 1016,
+      "risk": "app-specific ad and analytics suffixes; upstream notes possible minor side effects",
+      "sha256": "35cefd7a4c01d2efa9b4c7928e21caa348f78a3f60b46d7d850f1e3334a5a766",
+      "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list"
     }
   ],
   "summary": {
     "allowlist_removed": 0,
-    "covered_exact": 772,
-    "domain_count": 52322,
-    "domain_suffix_count": 564,
-    "final": 52886,
-    "final_rule_count": 52886,
-    "input_unique": 53658,
-    "redundant_suffixes": 0
+    "covered_exact": 1133,
+    "domain_count": 82398,
+    "domain_suffix_count": 1521,
+    "final": 83919,
+    "final_rule_count": 83919,
+    "input_unique": 85072,
+    "redundant_suffixes": 20
   },
-  "tier": "balanced"
+  "tier": "powerful"
 }

@@ -1,13 +1,31 @@
 {
   "schema_version": 1,
-  "policy": "balanced-domain-only",
   "safety": {
-    "final_min_rules": 40000,
-    "final_max_rules": 70000,
     "source_max_delta_ratio": 0.2,
-    "source_max_delta_absolute": 2000,
-    "final_max_delta_ratio": 0.15,
-    "final_max_delta_absolute": 3000
+    "source_max_delta_absolute": 2000
+  },
+  "tiers": {
+    "lite": {
+      "policy": "lite-exact-domain-only",
+      "final_min_rules": 35000,
+      "final_max_rules": 60000,
+      "final_max_delta_ratio": 0.15,
+      "final_max_delta_absolute": 3000
+    },
+    "balanced": {
+      "policy": "balanced-domain-only",
+      "final_min_rules": 40000,
+      "final_max_rules": 70000,
+      "final_max_delta_ratio": 0.15,
+      "final_max_delta_absolute": 3000
+    },
+    "powerful": {
+      "policy": "powerful-domain-only",
+      "final_min_rules": 60000,
+      "final_max_rules": 90000,
+      "final_max_delta_ratio": 0.15,
+      "final_max_delta_absolute": 5000
+    }
   },
   "sources": [
     {
@@ -19,6 +37,11 @@
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "format": "domains",
       "default_rule": "DOMAIN",
+      "tiers": [
+        "lite",
+        "balanced",
+        "powerful"
+      ],
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
       "min_entries": 35000,
       "max_entries": 60000,
@@ -35,6 +58,10 @@
       "license": "CC-BY-SA-4.0",
       "license_url": "https://github.com/ACL4SSR/ACL4SSR/blob/master/LICENSE",
       "format": "classical",
+      "tiers": [
+        "balanced",
+        "powerful"
+      ],
       "risk": "focused ad-network suffixes; keyword rules are intentionally excluded",
       "min_entries": 450,
       "max_entries": 800,
@@ -52,6 +79,10 @@
       "license_url": "https://github.com/AdguardTeam/cname-trackers/blob/master/LICENSE",
       "format": "domains",
       "default_rule": "DOMAIN",
+      "tiers": [
+        "balanced",
+        "powerful"
+      ],
       "risk": "ads category only; wildcard entries retain suffix semantics",
       "min_entries": 8000,
       "max_entries": 16000,
@@ -59,6 +90,45 @@
       "max_invalid_ratio": 0.001,
       "max_delta_ratio": 0.2,
       "max_delta_absolute": 1000
+    },
+    {
+      "id": "hagezi-pro-plus-mini",
+      "name": "HaGeZi Multi PRO++ mini",
+      "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.plus.mini-onlydomains.txt",
+      "homepage": "https://github.com/hagezi/dns-blocklists",
+      "license": "GPL-3.0-only",
+      "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
+      "format": "domains",
+      "default_rule": "DOMAIN",
+      "tiers": [
+        "powerful"
+      ],
+      "risk": "aggressive mobile-sized baseline; upstream warns that some legitimate domains may be blocked",
+      "min_entries": 55000,
+      "max_entries": 85000,
+      "max_bytes": 5000000,
+      "max_invalid_ratio": 0.001,
+      "max_delta_ratio": 0.15,
+      "max_delta_absolute": 5000
+    },
+    {
+      "id": "acl4ssr-banprogramad",
+      "name": "ACL4SSR BanProgramAD",
+      "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
+      "homepage": "https://github.com/ACL4SSR/ACL4SSR",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://github.com/ACL4SSR/ACL4SSR/blob/master/LICENSE",
+      "format": "classical",
+      "tiers": [
+        "powerful"
+      ],
+      "risk": "app-specific ad and analytics suffixes; upstream notes possible minor side effects",
+      "min_entries": 800,
+      "max_entries": 1500,
+      "max_bytes": 250000,
+      "max_invalid_ratio": 0.01,
+      "max_delta_ratio": 0.2,
+      "max_delta_absolute": 200
     }
   ]
 }
