@@ -1,15 +1,15 @@
 {
   "artifacts": {
     "origo-ad-powerful.list": {
-      "bytes": 2250508,
-      "sha256": "f5aa0730fa9f3abda45bb3cb0c39c157669657c0b260fdc8348d89ce853896d3"
+      "bytes": 2257500,
+      "sha256": "d2ebc36a8f5b4cb18456c80f7de422f58f9afc555bb7aa169e4171ce4b4c4589"
     },
     "origo-ad-powerful.module": {
-      "bytes": 2836456,
-      "sha256": "7d2624e7a748e8245cbd2c6bff05e0613fbab93847f92d3ebbb380eaf54f1bc2"
+      "bytes": 2844442,
+      "sha256": "f95ab8a13e7b8e461f57cfe96d20e055fe740f7e39ed1d21f3efc69a57647df5"
     }
   },
-  "build_id": "c012dc579a3feff248f8b3d8c37c7115cdd78746ffaaa27bfdeee231fdd0d228",
+  "build_id": "faa31ab1e77137e6b4862692ab7617950a7ea8870bd6c0078d6d8392dccba64c",
   "configuration": {
     "allowlist_rule_count": 23,
     "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
@@ -21,10 +21,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 41538,
-      "bytes": 801523,
+      "accepted_unique": 41686,
+      "bytes": 805744,
       "duplicates": 0,
-      "etag": "\"bae5f0a0d6e36722c97c7dba5d02b0c3698e81f507ef0860a9aa28bdebfd75c1\"",
+      "etag": "\"e4ff6fa620d941cccf66471ddb30020c84837e2c885812fffd2ff0cce98622b6\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -33,9 +33,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 41538,
+      "raw_candidates": 41686,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "d253947460c56a64dd9cc0b94d3c719018de1fddeecddb9330499fa4ba487402",
+      "sha256": "4cc57265be260380d22d643167e3d9655921389019201e14767c535fb6f612e2",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     },
     {
@@ -77,10 +77,10 @@
       "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt"
     },
     {
-      "accepted_unique": 67562,
-      "bytes": 1274396,
+      "accepted_unique": 67665,
+      "bytes": 1279191,
       "duplicates": 0,
-      "etag": "\"1cc1876044c6d76c833142f3cf922f3cbc61aa38e04f8bca73a0e4ca42363bd2\"",
+      "etag": "\"f115b93eb2ed4448a50c0d7ed092479227fa03889d58c95deb6fca04c49d5c4e\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-pro-plus-mini",
@@ -89,9 +89,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi PRO++ mini",
-      "raw_candidates": 67562,
+      "raw_candidates": 67665,
       "risk": "aggressive mobile-sized baseline; upstream warns that some legitimate domains may be blocked",
-      "sha256": "e7fd08a7eb6a83113b8f9d2f269a6decdeec337c71db85329b12d7c104490414",
+      "sha256": "a14c99448cf98c1b56ef42d4c273f9e1041b039885f2246d5dc88ca94136aab9",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.plus.mini-onlydomains.txt"
     },
     {
@@ -119,11 +119,11 @@
   "summary": {
     "allowlist_removed": 0,
     "covered_exact": 1133,
-    "domain_count": 82180,
+    "domain_count": 82322,
     "domain_suffix_count": 1521,
-    "final": 83701,
-    "final_rule_count": 83701,
-    "input_unique": 84854,
+    "final": 83843,
+    "final_rule_count": 83843,
+    "input_unique": 84996,
     "redundant_suffixes": 20
   },
   "tier": "powerful"
