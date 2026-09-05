@@ -1,15 +1,15 @@
 {
   "artifacts": {
     "origo-ad-lite.list": {
-      "bytes": 1005151,
-      "sha256": "7230e8b32bb1a500a8b259d5fda32fa2cb077fe5b8b1d991d3f1e3ef2a1e42ab"
+      "bytes": 1012576,
+      "sha256": "17cb4fa0ea950a066820d0ce1c984e5af0a1b302ec71993b26aac935e69cad5d"
     },
     "origo-ad-lite.module": {
-      "bytes": 1269029,
-      "sha256": "e262070839cd05c7e8a491b65e6a43fe740d6589d73b5208e1c115f3d2597d6b"
+      "bytes": 1278148,
+      "sha256": "40eff35f86ccb398af6e77781436412ea77bc664417bc3b01046b4c8e5c3eadb"
     }
   },
-  "build_id": "e6b57ee04f171e4af9a677728bd2f4e64a80dd78ac94cc4b6db98ab5baacafbf",
+  "build_id": "476fcb7205ad610c9e5d5c08e6d4fd0c172521be41c6641c46602bda04453620",
   "configuration": {
     "allowlist_rule_count": 23,
     "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
@@ -21,10 +21,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 37691,
-      "bytes": 741779,
+      "accepted_unique": 37933,
+      "bytes": 747510,
       "duplicates": 0,
-      "etag": "\"3b71f6a3afa69d0584c90e21bf2fd9192df636b64baee77a6da85c8b538d1536\"",
+      "etag": "\"39ba28ad6449dfff98ca93f8f10a685065b08b1b7d07e496bdfe787b893ce64e\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -33,20 +33,20 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 37691,
+      "raw_candidates": 37933,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "def714cf1b2ebc72da68e7665ad643c3d32b83d3cef3d45a084ac94f958e56cf",
+      "sha256": "d50ff492024c8bb1d24bfc4e2a3064b809922273af28020600514c743e8c831a",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     }
   ],
   "summary": {
     "allowlist_removed": 0,
     "covered_exact": 0,
-    "domain_count": 37691,
+    "domain_count": 37933,
     "domain_suffix_count": 0,
-    "final": 37691,
-    "final_rule_count": 37691,
-    "input_unique": 37691,
+    "final": 37933,
+    "final_rule_count": 37933,
+    "input_unique": 37933,
     "redundant_suffixes": 0
   },
   "tier": "lite"
