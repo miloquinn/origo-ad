@@ -54,7 +54,7 @@ jobs:
           git add dist
           git commit -m "Keep all three ad-blocking tiers current without weakening publication gates" \
             -m "Daily lite, balanced, and powerful source refreshes are normalized, allowlisted, deduplicated, range-checked, compared with their previous verified reports, and validated before publication." \
-            -m "Constraint: Publish domain-only Egern/Surge artifacts; never mirror scripts, rewrites, or MITM configuration." \
+            -m "Constraint: Refresh domain sources and the reviewed local splash manifest only; never mirror remote scripts or automatically expand MITM hosts." \
             -m "Confidence: high" \
             -m "Scope-risk: narrow" \
             -m "Tested: python -m unittest discover -s tests -v; python tools/build.py --tier lite; python tools/build.py; python tools/build.py --tier powerful; python tools/validate.py"

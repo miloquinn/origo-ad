@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic, domain-only Origo ad-blocking artifacts."""
+"""Build deterministic Origo ad-blocking artifacts."""
 
 from __future__ import annotations
 
@@ -17,18 +17,23 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
+import splash
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES_FILE = ROOT / "sources.json"
 ALLOWLIST_FILE = ROOT / "config" / "allowlist.txt"
 DIST_DIR = ROOT / "dist"
 LITE_MODULE_NAME = "origo-ad-lite.module"
+LITE_SURGE_MODULE_NAME = "origo-ad-lite.sgmodule"
 LITE_RULESET_NAME = "origo-ad-lite.list"
 LITE_REPORT_NAME = "build-report-lite.json"
 MODULE_NAME = "origo-ad-balanced.module"
+SURGE_MODULE_NAME = "origo-ad-balanced.sgmodule"
 RULESET_NAME = "origo-ad-balanced.list"
 REPORT_NAME = "build-report.json"
 POWERFUL_MODULE_NAME = "origo-ad-powerful.module"
+POWERFUL_SURGE_MODULE_NAME = "origo-ad-powerful.sgmodule"
 POWERFUL_RULESET_NAME = "origo-ad-powerful.list"
 POWERFUL_REPORT_NAME = "build-report-powerful.json"
 PROJECT_URL = "https://github.com/miloquinn/origo-ad"
@@ -58,6 +63,7 @@ class BuildError(RuntimeError):
 @dataclass(frozen=True)
 class ArtifactNames:
     module: str
+    surge_module: str
     ruleset: str
     report: str
 
@@ -88,11 +94,16 @@ class FetchedSource:
 
 def artifact_names(tier: str) -> ArtifactNames:
     if tier == "lite":
-        return ArtifactNames(LITE_MODULE_NAME, LITE_RULESET_NAME, LITE_REPORT_NAME)
+        return ArtifactNames(LITE_MODULE_NAME, LITE_SURGE_MODULE_NAME, LITE_RULESET_NAME, LITE_REPORT_NAME)
     if tier == "balanced":
-        return ArtifactNames(MODULE_NAME, RULESET_NAME, REPORT_NAME)
+        return ArtifactNames(MODULE_NAME, SURGE_MODULE_NAME, RULESET_NAME, REPORT_NAME)
     if tier == "powerful":
-        return ArtifactNames(POWERFUL_MODULE_NAME, POWERFUL_RULESET_NAME, POWERFUL_REPORT_NAME)
+        return ArtifactNames(
+            POWERFUL_MODULE_NAME,
+            POWERFUL_SURGE_MODULE_NAME,
+            POWERFUL_RULESET_NAME,
+            POWERFUL_REPORT_NAME,
+        )
     raise BuildError(f"unknown tier: {tier!r}")
 
 
@@ -353,9 +364,14 @@ def render_egern_module(rules: list[Rule], metadata: dict, tier: str = "balanced
     details = TIER_DETAILS.get(tier)
     if details is None:
         raise BuildError(f"unknown tier: {tier!r}")
+    splash_entries = metadata.get("splash", {}).get("entries", [])
+    description = details["description"]
+    if splash_entries:
+        domain_description = description.split("; no MITM", 1)[0].replace("domain-only", "domain-level")
+        description = f"{domain_description}; blocks curated splash-ad URLs using HTTPS MITM; no scripts."
     lines = [
         f"#!name={details['name']}",
-        f"#!desc={details['description']}",
+        f"#!desc={description}",
         "#!author=origo-ad contributors",
         f"#!homepage={PROJECT_URL}",
         "#!license=GPL-3.0-only",
@@ -369,7 +385,8 @@ def render_egern_module(rules: list[Rule], metadata: dict, tier: str = "balanced
         lines.append("")
     lines.append("[Rule]")
     lines.extend(f"{rule.kind},{rule.domain},REJECT" for rule in rules)
-    return "\n".join(lines) + "\n"
+    rendered = "\n".join(lines) + "\n"
+    return rendered + splash.render_sections(splash_entries)
 
 
 def render_surge_ruleset(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
@@ -399,9 +416,10 @@ def make_report(
     module: str,
     ruleset: str,
     tier: str = "balanced",
+    surge_module: str | None = None,
 ) -> dict:
     names = artifact_names(tier)
-    return {
+    report = {
         "schema_version": 1,
         "tier": tier,
         "build_id": metadata["build_id"],
@@ -419,9 +437,30 @@ def make_report(
             names.ruleset: {"sha256": sha256_text(ruleset), "bytes": len(ruleset.encode("utf-8"))},
         },
     }
+    splash_report = metadata.get("splash")
+    if splash_report is not None:
+        report["splash"] = splash_report
+        surge_text = module if surge_module is None else surge_module
+        report["artifacts"][names.surge_module] = {
+            "sha256": sha256_text(surge_text),
+            "bytes": len(surge_text.encode("utf-8")),
+        }
+    return report
 
 
-def parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
+def parse_rendered_rules(
+    text: str,
+    module: bool,
+    splash_entries: list[dict] | None = None,
+) -> tuple[str, list[Rule]]:
+    if splash_entries is not None:
+        if not module:
+            raise BuildError("splash sections are only valid in modules")
+        expected_splash = splash.render_sections(splash_entries)
+        if expected_splash and not text.endswith(expected_splash):
+            raise BuildError("module splash sections do not match build report")
+        if expected_splash:
+            text = text[: -len(expected_splash)]
     build_id = ""
     rules: list[Rule] = []
     in_rule_section = not module
@@ -459,7 +498,13 @@ def parse_rendered_rules(text: str, module: bool) -> tuple[str, list[Rule]]:
     return build_id, rules
 
 
-def validate_dist(dist_dir: Path, min_rules: int, max_rules: int, tier: str = "balanced") -> None:
+def validate_dist(
+    dist_dir: Path,
+    min_rules: int,
+    max_rules: int,
+    tier: str = "balanced",
+    splash_manifest_path: Path | None = None,
+) -> None:
     names = artifact_names(tier)
     module_path = dist_dir / names.module
     ruleset_path = dist_dir / names.ruleset
@@ -471,7 +516,17 @@ def validate_dist(dist_dir: Path, min_rules: int, max_rules: int, tier: str = "b
     module = module_path.read_text(encoding="utf-8")
     ruleset = ruleset_path.read_text(encoding="utf-8")
     report = read_json(report_path)
-    module_build_id, module_rules = parse_rendered_rules(module, module=True)
+    splash_report = report.get("splash")
+    if splash_manifest_path is not None and splash_report is None:
+        raise BuildError("build report is missing splash metadata required by configuration")
+    splash_entries = splash_report.get("entries") if isinstance(splash_report, dict) else None
+    if splash_report is not None and not isinstance(splash_entries, list):
+        raise BuildError("report splash entries must be an array")
+    module_build_id, module_rules = parse_rendered_rules(
+        module,
+        module=True,
+        splash_entries=splash_entries,
+    )
     ruleset_build_id, ruleset_rules = parse_rendered_rules(ruleset, module=False)
     if module_rules != ruleset_rules:
         raise BuildError("module and ruleset contain different rules")
@@ -486,6 +541,35 @@ def validate_dist(dist_dir: Path, min_rules: int, max_rules: int, tier: str = "b
         raise BuildError("report rule count does not match artifacts")
     expected = report.get("artifacts", {})
     actual = {names.module: sha256_text(module), names.ruleset: sha256_text(ruleset)}
+    if splash_report is not None:
+        surge_path = dist_dir / names.surge_module
+        if not surge_path.is_file() or surge_path.stat().st_size == 0:
+            raise BuildError(f"missing or empty artifact: {surge_path}")
+        surge_module = surge_path.read_text(encoding="utf-8")
+        if surge_module != module:
+            raise BuildError(".module and .sgmodule artifacts differ")
+        actual[names.surge_module] = sha256_text(surge_module)
+
+        if splash_manifest_path is None:
+            raise BuildError("splash manifest is required to validate splash artifacts")
+        try:
+            manifest_bytes = splash_manifest_path.read_bytes()
+        except OSError as exc:
+            raise BuildError(f"cannot read splash manifest {splash_manifest_path}: {exc}") from exc
+        manifest = splash.load_manifest(splash_manifest_path)
+        selected_entries = splash.select_entries(manifest, module_rules)
+        manifest_sha256 = sha256_bytes(manifest_bytes)
+        expected_splash_report = {
+            "manifest_sha256": manifest_sha256,
+            "entries": selected_entries,
+            "excluded_by_domain_count": len(manifest["entries"]) - len(selected_entries),
+            "rule_count": len(selected_entries),
+            "mitm_host_count": len({entry["host"] for entry in selected_entries}),
+        }
+        if splash_report != expected_splash_report:
+            raise BuildError("report splash metadata does not match current manifest and domain rules")
+        if report.get("configuration", {}).get("splash_manifest_sha256") != manifest_sha256:
+            raise BuildError("report configuration does not identify the current splash manifest")
     for name, digest in actual.items():
         if expected.get(name, {}).get("sha256") != digest:
             raise BuildError(f"artifact digest mismatch: {name}")
@@ -541,6 +625,7 @@ def write_artifacts(
     min_rules: int,
     max_rules: int,
     tier: str = "balanced",
+    splash_manifest_path: Path | None = None,
 ) -> None:
     dist_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".origo-ad-build-", dir=ROOT) as temp_name:
@@ -550,7 +635,13 @@ def write_artifacts(
             path = temp_dir / name
             path.write_text(content, encoding="utf-8")
             staged[name] = path
-        validate_dist(temp_dir, min_rules, max_rules, tier=tier)
+        validate_dist(
+            temp_dir,
+            min_rules,
+            max_rules,
+            tier=tier,
+            splash_manifest_path=splash_manifest_path,
+        )
         for name, path in staged.items():
             os.replace(path, dist_dir / name)
 
@@ -582,6 +673,19 @@ def build(
         raise BuildError("sources.json is missing required source or tier safety settings")
 
     names = artifact_names(tier)
+    splash_manifest_path: Path | None = None
+    splash_manifest: dict | None = None
+    splash_manifest_bytes: bytes | None = None
+    splash_setting = config.get("splash_rules")
+    if splash_setting is not None:
+        if not isinstance(splash_setting, str) or not splash_setting:
+            raise BuildError("splash_rules must be a non-empty path string")
+        splash_manifest_path = (config_path.parent / splash_setting).resolve()
+        try:
+            splash_manifest_bytes = splash_manifest_path.read_bytes()
+        except OSError as exc:
+            raise BuildError(f"cannot read splash manifest {splash_manifest_path}: {exc}") from exc
+        splash_manifest = splash.load_manifest(splash_manifest_path)
     selected_sources = [source for source in config["sources"] if tier in source.get("tiers", [])]
     source_ids = [source.get("id") for source in selected_sources]
     if not selected_sources or len(source_ids) != len(set(source_ids)):
@@ -614,8 +718,11 @@ def build(
     enforce_count(f"{tier} final artifact", len(rules), minimum, maximum)
     check_baseline(config, tier_config, baseline, reports, len(rules))
 
+    build_configuration = {"tier": tier, "settings": tier_config, "sources": selected_sources}
+    if splash_manifest_bytes is not None:
+        build_configuration["splash_manifest_sha256"] = sha256_bytes(splash_manifest_bytes)
     selected_config = json.dumps(
-        {"tier": tier, "settings": tier_config, "sources": selected_sources},
+        build_configuration,
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
@@ -636,19 +743,51 @@ def build(
             "allowlist_rule_count": len(allowlist),
         },
     }
+    if splash_manifest is not None and splash_manifest_bytes is not None:
+        metadata["configuration"]["splash_manifest_sha256"] = sha256_bytes(splash_manifest_bytes)
+        selected_splash_entries = splash.select_entries(splash_manifest, rules)
+        metadata["splash"] = {
+            "manifest_sha256": sha256_bytes(splash_manifest_bytes),
+            "entries": selected_splash_entries,
+            "excluded_by_domain_count": len(splash_manifest["entries"]) - len(selected_splash_entries),
+            "rule_count": len(selected_splash_entries),
+            "mitm_host_count": len({entry["host"] for entry in selected_splash_entries}),
+        }
     module = render_egern_module(rules, metadata, tier=tier)
     ruleset = render_surge_ruleset(rules, metadata, tier=tier)
-    report = make_report(metadata, reports, rules, merge_stats, module, ruleset, tier=tier)
+    surge_module = module if "splash" in metadata else None
+    report = make_report(
+        metadata,
+        reports,
+        rules,
+        merge_stats,
+        module,
+        ruleset,
+        tier=tier,
+        surge_module=surge_module,
+    )
     report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
     write_artifacts(
         dist_dir,
-        {names.module: module, names.ruleset: ruleset, names.report: report_text},
+        {
+            names.module: module,
+            **({names.surge_module: surge_module} if surge_module is not None else {}),
+            names.ruleset: ruleset,
+            names.report: report_text,
+        },
         minimum,
         maximum,
         tier=tier,
+        splash_manifest_path=splash_manifest_path,
     )
-    validate_dist(dist_dir, minimum, maximum, tier=tier)
+    validate_dist(
+        dist_dir,
+        minimum,
+        maximum,
+        tier=tier,
+        splash_manifest_path=splash_manifest_path,
+    )
     return report
 
 
@@ -671,6 +810,8 @@ def main() -> int:
         return 1
     names = artifact_names(args.tier)
     print(f"wrote {args.dist / names.module}")
+    if "splash" in report:
+        print(f"wrote {args.dist / names.surge_module}")
     print(f"wrote {args.dist / names.ruleset}")
     print(f"wrote {args.dist / names.report}")
     print(f"rules: {report['summary']['final_rule_count']}")

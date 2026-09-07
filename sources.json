@@ -130,5 +130,6 @@
       "max_delta_ratio": 0.2,
       "max_delta_absolute": 200
     }
-  ]
+  ],
+  "splash_rules": "config/splash.json"
 }

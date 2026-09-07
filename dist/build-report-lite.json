@@ -1,30 +1,35 @@
 {
   "artifacts": {
     "origo-ad-lite.list": {
-      "bytes": 993710,
-      "sha256": "d555dab329ad0056c90a415ac361d527ffa6f1acc0ed8b4cdad57a5d3273ebdc"
+      "bytes": 979011,
+      "sha256": "40cf628148f32bbf5d5e6b9799fdf0d51cfd3412f9b1e262e3c410794d83e181"
     },
     "origo-ad-lite.module": {
-      "bytes": 1254018,
-      "sha256": "9cd2575982500e725e2515324ad694e0b569f21d638eb50ce03c3772280e5e15"
+      "bytes": 1239999,
+      "sha256": "c2da2c0acc840329adf2656c731f7784f6e1749c86b6de7a5b0b72b79e83d28a"
+    },
+    "origo-ad-lite.sgmodule": {
+      "bytes": 1239999,
+      "sha256": "c2da2c0acc840329adf2656c731f7784f6e1749c86b6de7a5b0b72b79e83d28a"
     }
   },
-  "build_id": "2cef8c72b777d5e88508f318f2f529e5ad020b74a3fb9c16e24d20af626b5d9e",
+  "build_id": "5afe429c848f96e8ce31bb897aa8c7d90181a3318c5ae44a296ae5c2c385c381",
   "configuration": {
     "allowlist_rule_count": 23,
     "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
     "policy": "lite-exact-domain-only",
-    "sources_sha256": "c996a820767c7be0a4338944b4487791f1374e2b463a1c9e2212447ee48fe778",
+    "sources_sha256": "f85ce75cd6fa07241dbee4f3a7e9f565691ad0c76e79d1e22fdba76171958d4e",
+    "splash_manifest_sha256": "058c230862a704c2e7c24472e7230d938e8cdfc573cf4763b31cc96189eba011",
     "tier": "lite"
   },
   "license": "GPL-3.0-only",
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 37181,
-      "bytes": 733908,
+      "accepted_unique": 36608,
+      "bytes": 723220,
       "duplicates": 0,
-      "etag": "\"69c3cf50629eba9e9e7d0cd3578bf4e27b482cb4eb1788fc23724d669438fe16\"",
+      "etag": "\"a9027c6cf2b2e0a2bfa5fb218bb983681c41e6d0b8ad02a681323c2be5371cc6\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -33,20 +38,382 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 37181,
+      "raw_candidates": 36608,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "413ff253c4f8054b2cc960aa8a3404de73478f1c4c66b3105f615376b604ed6a",
+      "sha256": "600b0da87a6dd0cbe89d25b29b2c2cf69bd39d73e86c5e80559b782510cbcf38",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     }
   ],
+  "splash": {
+    "entries": [
+      {
+        "app": "腾讯地图",
+        "host": "4gimg.map.qq.com",
+        "id": "qqmap",
+        "match": "subtree",
+        "path": "/mwaSplash/",
+        "source_line": 724
+      },
+      {
+        "app": "Zepp",
+        "host": "api-mifit-cn2.zepp.com",
+        "id": "zepp",
+        "match": "exact",
+        "path": "/discovery/mi/cards/startpage_ad",
+        "source_line": 712
+      },
+      {
+        "app": "applovefrom",
+        "host": "api.applovefrom.com",
+        "id": "applovefrom",
+        "match": "subtree",
+        "path": "/api/v{version}/splash/",
+        "source_line": 703
+      },
+      {
+        "app": "联想社区",
+        "host": "api.club.lenovo.cn",
+        "id": "lenovo-club",
+        "match": "exact",
+        "path": "/common/open_ad",
+        "source_line": 383
+      },
+      {
+        "app": "城市服务接口",
+        "host": "api.internetofcity.cn",
+        "id": "internetofcity",
+        "match": "exact",
+        "path": "/api/resource/anon/popups/getSplashList",
+        "source_line": 363
+      },
+      {
+        "app": "来疯直播",
+        "host": "api.laifeng.com",
+        "id": "laifeng",
+        "match": "exact",
+        "path": "/v{version}/start/ads",
+        "source_line": 360
+      },
+      {
+        "app": "麦当劳",
+        "host": "api.mcd.cn",
+        "id": "mcd",
+        "match": "exact",
+        "path": "/bff/portal/home/splash",
+        "source_line": 358
+      },
+      {
+        "app": "拼多多",
+        "host": "api.pinduoduo.com",
+        "id": "pinduoduo",
+        "match": "exact",
+        "path": "/api/cappuccino/splash",
+        "source_line": 391
+      },
+      {
+        "app": "waitwaitpay",
+        "host": "api.waitwaitpay.com",
+        "id": "waitwaitpay",
+        "match": "exact",
+        "path": "//api/splash",
+        "source_line": 673
+      },
+      {
+        "app": "拼多多",
+        "host": "api.yangkeduo.com",
+        "id": "yangkeduo",
+        "match": "exact",
+        "path": "/api/cappuccino/splash",
+        "source_line": 391
+      },
+      {
+        "app": "追书神器",
+        "host": "api.zhuishushenqi.com",
+        "id": "zhuishushenqi",
+        "match": "exact",
+        "path": "/splashes/ios",
+        "source_line": 662
+      },
+      {
+        "app": "CSDN",
+        "host": "app-gw.csdn.net",
+        "id": "csdn-app",
+        "match": "exact",
+        "path": "/cms-app/v{version}/home_page/open_advertisement",
+        "source_line": 657
+      },
+      {
+        "app": "好奇心日报",
+        "host": "app3.qdaily.com",
+        "id": "qdaily-app",
+        "match": "exact",
+        "path": "/app3/boot_advertisements.json",
+        "source_line": 333
+      },
+      {
+        "app": "百度开屏广告接口",
+        "host": "baichuan.baidu.com",
+        "id": "baidu-launch",
+        "match": "exact",
+        "path": "/rs/adpmobile/launch",
+        "source_line": 310
+      },
+      {
+        "app": "美味不用等",
+        "host": "capi.mwee.cn",
+        "id": "mwee",
+        "match": "exact",
+        "path": "/app-api/V{version}/app/getstartad",
+        "source_line": 640
+      },
+      {
+        "app": "去哪儿",
+        "host": "client.qunar.com",
+        "id": "qunar",
+        "match": "exact",
+        "path": "/pitcher-proxy",
+        "query": "qrt=p_splashAd",
+        "source_line": 288
+      },
+      {
+        "app": "途家",
+        "host": "client.tujia.com",
+        "id": "tujia",
+        "match": "exact",
+        "path": "/bnbapp-node/app/portal/getStartPictureAdvertising",
+        "source_line": 287
+      },
+      {
+        "app": "天翼云盘",
+        "host": "cloud.189.cn",
+        "id": "tianyi-cloud",
+        "match": "subtree",
+        "path": "/include/splash/",
+        "source_line": 286
+      },
+      {
+        "app": "叨鱼",
+        "host": "daoyu.sdo.com",
+        "id": "daoyu",
+        "match": "exact",
+        "path": "/api/userCommon/getAppStartAd",
+        "source_line": 271
+      },
+      {
+        "app": "CSDN",
+        "host": "gw.csdn.net",
+        "id": "csdn",
+        "match": "exact",
+        "path": "/cms-app/v{version}/home_page/open_advertisement",
+        "source_line": 222
+      },
+      {
+        "app": "考拉海购",
+        "host": "gw.kaola.com",
+        "id": "kaola",
+        "match": "exact",
+        "path": "/gw/dgmobile/newOpenAd",
+        "source_line": 221
+      },
+      {
+        "app": "两步路",
+        "host": "helper.2bulu.com",
+        "id": "2bulu",
+        "match": "exact",
+        "path": "/getSplash",
+        "source_line": 8
+      },
+      {
+        "app": "财经网",
+        "host": "m.caijing.com.cn",
+        "id": "caijing-news",
+        "match": "exact",
+        "path": "/startup_ad_ios.html",
+        "source_line": 595
+      },
+      {
+        "app": "途牛",
+        "host": "m.tuniu.com",
+        "id": "tuniu",
+        "match": "subtree",
+        "path": "/api/operation/splash/",
+        "source_line": 591
+      },
+      {
+        "app": "起点读书",
+        "host": "mage.if.qidian.com",
+        "id": "qidian",
+        "match": "exact",
+        "path": "/argus/api/v{version}/client/getsplashscreen",
+        "source_line": 171
+      },
+      {
+        "app": "起点读书",
+        "host": "magev6.if.qidian.com",
+        "id": "qidian-v6",
+        "match": "exact",
+        "path": "/argus/api/v{version}/client/getsplashscreen",
+        "source_line": 587
+      },
+      {
+        "app": "漫画人",
+        "host": "mangaapi.manhuaren.com",
+        "id": "manhuaren",
+        "match": "exact",
+        "path": "/v{version}/public/getStartPageAds",
+        "source_line": 167
+      },
+      {
+        "app": "大众点评",
+        "host": "mapi.dianping.com",
+        "id": "dianping",
+        "match": "exact",
+        "path": "/mapi/operating/loadsplashconfig",
+        "source_line": 163
+      },
+      {
+        "app": "美图开屏接口",
+        "host": "mea.meitudata.com",
+        "id": "meitu-endpoint",
+        "match": "exact",
+        "path": "/kaiping",
+        "source_line": 156
+      },
+      {
+        "app": "美图开屏素材",
+        "host": "mea.meitudata.com",
+        "id": "meitu",
+        "match": "subtree",
+        "path": "/kaiping/",
+        "source_line": 156
+      },
+      {
+        "app": "百度输入法",
+        "host": "mime.baidu.com",
+        "id": "baidu-ime",
+        "match": "exact",
+        "path": "/v5/start_screen_ads/list",
+        "source_line": 149
+      },
+      {
+        "app": "好奇心日报",
+        "host": "notch.qdaily.com",
+        "id": "qdaily",
+        "match": "exact",
+        "path": "/api/v{version}/boot_ad",
+        "source_line": 129
+      },
+      {
+        "app": "看天下",
+        "host": "open3.vistastory.com",
+        "id": "vista",
+        "match": "exact",
+        "path": "/v{version}/api/index/loading_ad",
+        "source_line": 124
+      },
+      {
+        "app": "e代驾",
+        "host": "pic.edaijia.cn",
+        "id": "edaijia",
+        "match": "subtree",
+        "path": "/adsplash/",
+        "source_line": 553
+      },
+      {
+        "app": "票根开屏素材",
+        "host": "pss.txffp.com",
+        "id": "piaogen",
+        "match": "subtree",
+        "path": "/piaogen/images/launchScreen/",
+        "source_line": 550
+      },
+      {
+        "app": "腾讯游戏助手",
+        "host": "qt.qq.com",
+        "id": "qq-mengyou",
+        "match": "exact",
+        "path": "/lua/mengyou/get_splash_screen_info",
+        "source_line": 94
+      },
+      {
+        "app": "腾讯新闻",
+        "host": "r.inews.qq.com",
+        "id": "qqnews",
+        "match": "exact",
+        "path": "/getSplash",
+        "source_line": 91
+      },
+      {
+        "app": "AppSo",
+        "host": "sso.ifanr.com",
+        "id": "appso",
+        "match": "subtree",
+        "path": "/jiong/IOS/appso/splash/",
+        "source_line": 67
+      },
+      {
+        "app": "Jump",
+        "host": "switch.jumpvg.com",
+        "id": "jump",
+        "match": "exact",
+        "path": "/jump/getlaunchad",
+        "source_line": 529
+      },
+      {
+        "app": "微店",
+        "host": "thor.weidian.com",
+        "id": "weidian",
+        "match": "subtree",
+        "path": "/ares/home.splash/",
+        "source_line": 527
+      },
+      {
+        "app": "微博国际版",
+        "host": "weibointl.api.weibo.cn",
+        "id": "weibo-intl",
+        "match": "exact",
+        "path": "/portal.php",
+        "query": "a=get_coopen_ads",
+        "source_line": 511
+      },
+      {
+        "app": "bodivis",
+        "host": "www.bodivis.com.cn",
+        "id": "bodivis",
+        "match": "exact",
+        "path": "/app/splashAdvertise",
+        "source_line": 509
+      },
+      {
+        "app": "QQ 音乐",
+        "host": "y.gtimg.cn",
+        "id": "qqmusic",
+        "match": "subtree",
+        "path": "/music/common/upload/t_splash_info/",
+        "source_line": 25
+      },
+      {
+        "app": "盖得排行",
+        "host": "zone.guiderank-app.com",
+        "id": "guiderank",
+        "match": "exact",
+        "path": "/guiderank-web/app/ad/listLaunchADByCity.do",
+        "source_line": 19
+      }
+    ],
+    "excluded_by_domain_count": 1,
+    "manifest_sha256": "058c230862a704c2e7c24472e7230d938e8cdfc573cf4763b31cc96189eba011",
+    "mitm_host_count": 43,
+    "rule_count": 44
+  },
   "summary": {
     "allowlist_removed": 0,
     "covered_exact": 0,
-    "domain_count": 37181,
+    "domain_count": 36608,
     "domain_suffix_count": 0,
-    "final": 37181,
-    "final_rule_count": 37181,
-    "input_unique": 37181,
+    "final": 36608,
+    "final_rule_count": 36608,
+    "input_unique": 36608,
     "redundant_suffixes": 0
   },
   "tier": "lite"

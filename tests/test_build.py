@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -133,6 +134,59 @@ class SafetyTests(unittest.TestCase):
 
 
 class RenderingTests(unittest.TestCase):
+    def _write_splash_manifest(self, directory: Path) -> tuple[Path, dict]:
+        manifest = {
+            "schema_version": 1,
+            "entries": [
+                {
+                    "id": "covered-app",
+                    "app": "Covered",
+                    "host": "ads.covered.example",
+                    "path": "/getSplash",
+                    "match": "exact",
+                    "source_line": 1,
+                },
+                {
+                    "id": "selected-app",
+                    "app": "Selected",
+                    "host": "api.selected.example",
+                    "path": "/v{version}/launchad",
+                    "match": "exact",
+                    "source_line": 2,
+                },
+            ],
+        }
+        path = directory / "splash.json"
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        return path, manifest
+
+    def _write_splash_artifacts(self, dist: Path, manifest_path: Path) -> tuple[dict, str, str]:
+        manifest = build.splash.load_manifest(manifest_path)
+        rules = [build.Rule("DOMAIN", "ads.covered.example")]
+        entries = build.splash.select_entries(manifest, rules)
+        splash_report = {
+            "manifest_sha256": build.sha256_bytes(manifest_path.read_bytes()),
+            "entries": entries,
+            "excluded_by_domain_count": 1,
+            "rule_count": 1,
+            "mitm_host_count": 1,
+        }
+        metadata = {
+            "build_id": "splash123",
+            "rule_count": 1,
+            "configuration": {"splash_manifest_sha256": splash_report["manifest_sha256"]},
+            "splash": splash_report,
+        }
+        module = build.render_egern_module(rules, metadata)
+        ruleset = build.render_surge_ruleset(rules, metadata)
+        names = build.artifact_names("balanced")
+        report = build.make_report(metadata, [], rules, {}, module, ruleset, surge_module=module)
+        (dist / names.module).write_text(module, encoding="utf-8")
+        (dist / names.surge_module).write_text(module, encoding="utf-8")
+        (dist / names.ruleset).write_text(ruleset, encoding="utf-8")
+        (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+        return report, module, ruleset
+
     def test_renders_stable_egern_and_ruleset_formats(self):
         rules = [build.Rule("DOMAIN", "ads.example"), build.Rule("DOMAIN-SUFFIX", "tracker.example")]
         metadata = {"build_id": "abc123", "rule_count": 2}
@@ -171,6 +225,174 @@ class RenderingTests(unittest.TestCase):
         self.assertEqual(names.module, "origo-ad-lite.module")
         self.assertEqual(names.ruleset, "origo-ad-lite.list")
         self.assertEqual(names.report, "build-report-lite.json")
+
+    def test_splash_rules_are_only_added_to_script_free_modules(self):
+        rules = [build.Rule("DOMAIN", "ads.example")]
+        entries = [
+            {
+                "id": "sample-app",
+                "app": "Sample",
+                "host": "api.sample.example",
+                "path": "/getSplash",
+                "match": "exact",
+                "source_line": 1,
+            }
+        ]
+        metadata = {
+            "build_id": "splash123",
+            "rule_count": 1,
+            "splash": {"entries": entries},
+        }
+
+        module = build.render_egern_module(rules, metadata)
+        ruleset = build.render_surge_ruleset(rules, metadata)
+
+        self.assertIn("using HTTPS MITM", module)
+        self.assertIn("[URL Rewrite]", module)
+        self.assertIn("[MITM]", module)
+        self.assertNotIn("[Script]", module)
+        self.assertNotIn("[URL Rewrite]", ruleset)
+        self.assertNotIn("[MITM]", ruleset)
+        self.assertIn("domain-only", ruleset)
+
+    def test_splash_validator_requires_identical_sgmodule(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            report, module, _ = self._write_splash_artifacts(dist, manifest_path)
+            names = build.artifact_names("balanced")
+
+            build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+            (dist / names.surge_module).write_text(module + "# changed\n", encoding="utf-8")
+            report["artifacts"][names.surge_module]["sha256"] = build.sha256_text(module + "# changed\n")
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            with self.assertRaisesRegex(build.BuildError, "artifacts differ"):
+                build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+
+    def test_splash_staging_failure_preserves_verified_files(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            staged = root / "staged"
+            staged.mkdir()
+            self._write_splash_artifacts(staged, manifest_path)
+            names = build.artifact_names("balanced")
+            for name in (names.module, names.surge_module, names.ruleset, names.report):
+                (dist / name).write_text("previous verified artifact\n", encoding="utf-8")
+            incomplete_files = {
+                name: (staged / name).read_text(encoding="utf-8")
+                for name in (names.module, names.ruleset, names.report)
+            }
+
+            with self.assertRaisesRegex(build.BuildError, "missing or empty artifact"):
+                build.write_artifacts(
+                    dist,
+                    incomplete_files,
+                    1,
+                    10,
+                    splash_manifest_path=manifest_path,
+                )
+
+            for name in (names.module, names.surge_module, names.ruleset, names.report):
+                self.assertEqual((dist / name).read_text(encoding="utf-8"), "previous verified artifact\n")
+
+    def test_splash_validator_rejects_section_tampering_even_with_updated_hash(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            report, module, _ = self._write_splash_artifacts(dist, manifest_path)
+            names = build.artifact_names("balanced")
+            tampered = module.replace("_ reject", "_ reject-dict", 1)
+            (dist / names.module).write_text(tampered, encoding="utf-8")
+            (dist / names.surge_module).write_text(tampered, encoding="utf-8")
+            report["artifacts"][names.module]["sha256"] = build.sha256_text(tampered)
+            report["artifacts"][names.surge_module]["sha256"] = build.sha256_text(tampered)
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            with self.assertRaisesRegex(build.BuildError, "splash sections"):
+                build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+
+    def test_splash_validator_rejects_report_entries_that_differ_from_manifest(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            report, _, _ = self._write_splash_artifacts(dist, manifest_path)
+            names = build.artifact_names("balanced")
+            report["splash"]["excluded_by_domain_count"] = 0
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            with self.assertRaisesRegex(build.BuildError, "does not match current manifest"):
+                build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+
+    def test_full_build_adds_splash_artifacts_and_keeps_ruleset_domain_only(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            allowlist = root / "allowlist.txt"
+            allowlist.write_text("DOMAIN,allowed.example\n", encoding="utf-8")
+            manifest_path, _ = self._write_splash_manifest(root)
+            config = {
+                "schema_version": 1,
+                "safety": {"source_max_delta_ratio": 1, "source_max_delta_absolute": 10},
+                "tiers": {
+                    tier: {
+                        "policy": f"{tier}-test",
+                        "final_min_rules": 1,
+                        "final_max_rules": 10,
+                        "final_max_delta_ratio": 1,
+                        "final_max_delta_absolute": 10,
+                    }
+                    for tier in build.TIER_DETAILS
+                },
+                "sources": [
+                    {
+                        "id": "fixture",
+                        "name": "Fixture",
+                        "url": "https://example.test/rules",
+                        "homepage": "https://example.test",
+                        "license": "MIT",
+                        "license_url": "https://example.test/license",
+                        "format": "domains",
+                        "default_rule": "DOMAIN",
+                        "tiers": list(build.TIER_DETAILS),
+                        "risk": "fixture",
+                        "min_entries": 1,
+                        "max_entries": 10,
+                        "max_bytes": 1000,
+                    }
+                ],
+                "splash_rules": manifest_path.name,
+            }
+            config_path = root / "sources.json"
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            fetched = build.FetchedSource(
+                text="ads.covered.example\ndomain-only.example\n",
+                sha256=build.sha256_text("fixture"),
+                byte_count=8,
+                etag=None,
+                last_modified=None,
+            )
+
+            with mock.patch.object(build, "fetch_source", return_value=fetched):
+                for tier in build.TIER_DETAILS:
+                    report = build.build(config_path, allowlist, dist, use_baseline=False, tier=tier)
+                    names = build.artifact_names(tier)
+                    module = (dist / names.module).read_text(encoding="utf-8")
+                    self.assertEqual(module, (dist / names.surge_module).read_text(encoding="utf-8"))
+                    self.assertIn("[URL Rewrite]", module)
+                    self.assertNotIn("[Script]", module)
+                    self.assertNotIn("[URL Rewrite]", (dist / names.ruleset).read_text(encoding="utf-8"))
+                    self.assertEqual(report["splash"]["excluded_by_domain_count"], 1)
+                    self.assertIn(names.surge_module, report["artifacts"])
 
     def test_validator_detects_report_or_artifact_tampering(self):
         with tempfile.TemporaryDirectory() as temp_dir:

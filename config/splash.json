@@ -1,0 +1,435 @@
+{
+  "schema_version": 1,
+  "scope": "Dedicated opening-ad endpoints only; same reviewed set in all three tiers. URL rejects, no scripts or remote response assets.",
+  "reference": {
+    "repository": "https://github.com/deezertidal/Surge_Module",
+    "repository_commit": "5cc38f47de2ccb13ed8b06d99a1d753cd3afb3c9",
+    "module_url": "https://yfamilys.com/module/adultraplus.sgmodule",
+    "snapshot_sha256": "9fb716007047858bc2236f0e25ce8da1bcd7f4d1f61f89c770b0c233c4ca0963",
+    "snapshot_date": "2026-09-07",
+    "note": "Endpoint facts from user-supplied snapshot; manually authored bounded patterns. Repository currently links to externally hosted modules; snapshot is not claimed to match repository commit."
+  },
+  "entries": [
+    {
+      "id": "2bulu",
+      "app": "两步路",
+      "host": "helper.2bulu.com",
+      "path": "/getSplash",
+      "match": "exact",
+      "source_line": 8
+    },
+    {
+      "id": "guiderank",
+      "app": "盖得排行",
+      "host": "zone.guiderank-app.com",
+      "path": "/guiderank-web/app/ad/listLaunchADByCity.do",
+      "match": "exact",
+      "source_line": 19
+    },
+    {
+      "id": "qqmusic",
+      "app": "QQ 音乐",
+      "host": "y.gtimg.cn",
+      "path": "/music/common/upload/t_splash_info/",
+      "match": "subtree",
+      "source_line": 25
+    },
+    {
+      "id": "appso",
+      "app": "AppSo",
+      "host": "sso.ifanr.com",
+      "path": "/jiong/IOS/appso/splash/",
+      "match": "subtree",
+      "source_line": 67
+    },
+    {
+      "id": "qqnews",
+      "app": "腾讯新闻",
+      "host": "r.inews.qq.com",
+      "path": "/getSplash",
+      "match": "exact",
+      "source_line": 91
+    },
+    {
+      "id": "qq-mengyou",
+      "app": "腾讯游戏助手",
+      "host": "qt.qq.com",
+      "path": "/lua/mengyou/get_splash_screen_info",
+      "match": "exact",
+      "source_line": 94
+    },
+    {
+      "id": "vista",
+      "app": "看天下",
+      "host": "open3.vistastory.com",
+      "path": "/v{version}/api/index/loading_ad",
+      "match": "exact",
+      "source_line": 124
+    },
+    {
+      "id": "dianping",
+      "app": "大众点评",
+      "host": "mapi.dianping.com",
+      "path": "/mapi/operating/loadsplashconfig",
+      "match": "exact",
+      "source_line": 163
+    },
+    {
+      "id": "manhuaren",
+      "app": "漫画人",
+      "host": "mangaapi.manhuaren.com",
+      "path": "/v{version}/public/getStartPageAds",
+      "match": "exact",
+      "source_line": 167
+    },
+    {
+      "id": "qidian",
+      "app": "起点读书",
+      "host": "mage.if.qidian.com",
+      "path": "/argus/api/v{version}/client/getsplashscreen",
+      "match": "exact",
+      "source_line": 171
+    },
+    {
+      "id": "qidian-v6",
+      "app": "起点读书",
+      "host": "magev6.if.qidian.com",
+      "path": "/argus/api/v{version}/client/getsplashscreen",
+      "match": "exact",
+      "source_line": 587
+    },
+    {
+      "id": "daoyu",
+      "app": "叨鱼",
+      "host": "daoyu.sdo.com",
+      "path": "/api/userCommon/getAppStartAd",
+      "match": "exact",
+      "source_line": 271
+    },
+    {
+      "id": "tianyi-cloud",
+      "app": "天翼云盘",
+      "host": "cloud.189.cn",
+      "path": "/include/splash/",
+      "match": "subtree",
+      "source_line": 286
+    },
+    {
+      "id": "mwee",
+      "app": "美味不用等",
+      "host": "capi.mwee.cn",
+      "path": "/app-api/V{version}/app/getstartad",
+      "match": "exact",
+      "source_line": 640
+    },
+    {
+      "id": "mcd",
+      "app": "麦当劳",
+      "host": "api.mcd.cn",
+      "path": "/bff/portal/home/splash",
+      "match": "exact",
+      "source_line": 358
+    },
+    {
+      "id": "internetofcity",
+      "app": "城市服务接口",
+      "host": "api.internetofcity.cn",
+      "path": "/api/resource/anon/popups/getSplashList",
+      "match": "exact",
+      "source_line": 363
+    },
+    {
+      "id": "pinduoduo",
+      "app": "拼多多",
+      "host": "api.pinduoduo.com",
+      "path": "/api/cappuccino/splash",
+      "match": "exact",
+      "source_line": 391
+    },
+    {
+      "id": "yangkeduo",
+      "app": "拼多多",
+      "host": "api.yangkeduo.com",
+      "path": "/api/cappuccino/splash",
+      "match": "exact",
+      "source_line": 391
+    },
+    {
+      "id": "amap",
+      "app": "高德地图",
+      "host": "amap-aos-info-nogw.amap.com",
+      "path": "/ws/aos/alimama/splash_screen_rt",
+      "match": "exact",
+      "source_line": 406
+    },
+    {
+      "id": "bodivis",
+      "app": "bodivis",
+      "host": "www.bodivis.com.cn",
+      "path": "/app/splashAdvertise",
+      "match": "exact",
+      "source_line": 509
+    },
+    {
+      "id": "weidian",
+      "app": "微店",
+      "host": "thor.weidian.com",
+      "path": "/ares/home.splash/",
+      "match": "subtree",
+      "source_line": 527
+    },
+    {
+      "id": "jump",
+      "app": "Jump",
+      "host": "switch.jumpvg.com",
+      "path": "/jump/getlaunchad",
+      "match": "exact",
+      "source_line": 529
+    },
+    {
+      "id": "edaijia",
+      "app": "e代驾",
+      "host": "pic.edaijia.cn",
+      "path": "/adsplash/",
+      "match": "subtree",
+      "source_line": 553
+    },
+    {
+      "id": "tuniu",
+      "app": "途牛",
+      "host": "m.tuniu.com",
+      "path": "/api/operation/splash/",
+      "match": "subtree",
+      "source_line": 591
+    },
+    {
+      "id": "zhuishushenqi",
+      "app": "追书神器",
+      "host": "api.zhuishushenqi.com",
+      "path": "/splashes/ios",
+      "match": "exact",
+      "source_line": 662
+    },
+    {
+      "id": "waitwaitpay",
+      "app": "waitwaitpay",
+      "host": "api.waitwaitpay.com",
+      "path": "//api/splash",
+      "match": "exact",
+      "source_line": 673
+    },
+    {
+      "id": "applovefrom",
+      "app": "applovefrom",
+      "host": "api.applovefrom.com",
+      "path": "/api/v{version}/splash/",
+      "match": "subtree",
+      "source_line": 703
+    },
+    {
+      "id": "qqmap",
+      "app": "腾讯地图",
+      "host": "4gimg.map.qq.com",
+      "path": "/mwaSplash/",
+      "match": "subtree",
+      "source_line": 724
+    },
+    {
+      "id": "qdaily",
+      "app": "好奇心日报",
+      "host": "notch.qdaily.com",
+      "path": "/api/v{version}/boot_ad",
+      "match": "exact",
+      "source_line": 129
+    },
+    {
+      "id": "meitu",
+      "app": "美图开屏素材",
+      "host": "mea.meitudata.com",
+      "path": "/kaiping/",
+      "match": "subtree",
+      "source_line": 156
+    },
+    {
+      "id": "kaola",
+      "app": "考拉海购",
+      "host": "gw.kaola.com",
+      "path": "/gw/dgmobile/newOpenAd",
+      "match": "exact",
+      "source_line": 221
+    },
+    {
+      "id": "csdn",
+      "app": "CSDN",
+      "host": "gw.csdn.net",
+      "path": "/cms-app/v{version}/home_page/open_advertisement",
+      "match": "exact",
+      "source_line": 222
+    },
+    {
+      "id": "csdn-app",
+      "app": "CSDN",
+      "host": "app-gw.csdn.net",
+      "path": "/cms-app/v{version}/home_page/open_advertisement",
+      "match": "exact",
+      "source_line": 657
+    },
+    {
+      "id": "qdaily-app",
+      "app": "好奇心日报",
+      "host": "app3.qdaily.com",
+      "path": "/app3/boot_advertisements.json",
+      "match": "exact",
+      "source_line": 333
+    },
+    {
+      "id": "laifeng",
+      "app": "来疯直播",
+      "host": "api.laifeng.com",
+      "path": "/v{version}/start/ads",
+      "match": "exact",
+      "source_line": 360
+    },
+    {
+      "id": "lenovo-club",
+      "app": "联想社区",
+      "host": "api.club.lenovo.cn",
+      "path": "/common/open_ad",
+      "match": "exact",
+      "source_line": 383
+    },
+    {
+      "id": "piaogen",
+      "app": "票根开屏素材",
+      "host": "pss.txffp.com",
+      "path": "/piaogen/images/launchScreen/",
+      "match": "subtree",
+      "source_line": 550
+    },
+    {
+      "id": "caijing-news",
+      "app": "财经网",
+      "host": "m.caijing.com.cn",
+      "path": "/startup_ad_ios.html",
+      "match": "exact",
+      "source_line": 595
+    },
+    {
+      "id": "zepp",
+      "app": "Zepp",
+      "host": "api-mifit-cn2.zepp.com",
+      "path": "/discovery/mi/cards/startpage_ad",
+      "match": "exact",
+      "source_line": 712
+    },
+    {
+      "id": "qunar",
+      "app": "去哪儿",
+      "host": "client.qunar.com",
+      "path": "/pitcher-proxy",
+      "match": "exact",
+      "query": "qrt=p_splashAd",
+      "source_line": 288
+    },
+    {
+      "id": "weibo-intl",
+      "app": "微博国际版",
+      "host": "weibointl.api.weibo.cn",
+      "path": "/portal.php",
+      "match": "exact",
+      "query": "a=get_coopen_ads",
+      "source_line": 511
+    },
+    {
+      "id": "baidu-ime",
+      "app": "百度输入法",
+      "host": "mime.baidu.com",
+      "path": "/v5/start_screen_ads/list",
+      "match": "exact",
+      "source_line": 149
+    },
+    {
+      "id": "tujia",
+      "app": "途家",
+      "host": "client.tujia.com",
+      "path": "/bnbapp-node/app/portal/getStartPictureAdvertising",
+      "match": "exact",
+      "source_line": 287
+    },
+    {
+      "id": "baidu-launch",
+      "app": "百度开屏广告接口",
+      "host": "baichuan.baidu.com",
+      "path": "/rs/adpmobile/launch",
+      "match": "exact",
+      "source_line": 310
+    },
+    {
+      "id": "meitu-endpoint",
+      "app": "美图开屏接口",
+      "host": "mea.meitudata.com",
+      "path": "/kaiping",
+      "match": "exact",
+      "source_line": 156
+    }
+  ],
+  "exclusions": [
+    {
+      "category": "Generic startup/configuration, without an explicit ad discriminator",
+      "source_lines": [
+        41,
+        179,
+        259,
+        260,
+        317,
+        320,
+        328,
+        343,
+        356,
+        561,
+        621,
+        793,
+        834,
+        841,
+        862,
+        185,
+        195,
+        510,
+        538,
+        554,
+        651,
+        653,
+        710
+      ],
+      "reason": "May carry normal initialization or generic startup assets; no live response evidence proving ad-only semantics. Do not reject just because the URL says start or startup."
+    },
+    {
+      "category": "Financial/banking service MITM",
+      "source_lines": [
+        40,
+        197,
+        293,
+        630,
+        688
+      ],
+      "reason": "Keep banking, lending and brokerage-service TLS interception out of this general-purpose launch-ad module pending a separate device-verified scope."
+    },
+    {
+      "category": "Broad regex hostnames, whole-IP ranges and mixed-purpose alternations",
+      "reason": "Retain only literal-host and dedicated-ad branches; never reproduce generic wildcard/IP interception or unrelated account/update/recommendation branches."
+    },
+    {
+      "category": "Remote scripts and Map Local responses",
+      "reason": "This release preserves URL-reject behavior only. Script transformations and remote replacement bodies require separate per-app response review; never convert them blindly into rejects."
+    },
+    {
+      "category": "Mixed startup payload or insufficiently specified URL shape",
+      "source_lines": [
+        418,
+        532,
+        541
+      ],
+      "reason": "One-stop start_up_with_ad may include normal initialization; broad path-to-tao_splash and adjson flag-prefix matching require captured complete URLs before defining safe literal path/query boundaries."
+    }
+  ]
+}

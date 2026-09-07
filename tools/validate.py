@@ -21,6 +21,12 @@ def main() -> int:
     args = parser.parse_args()
     try:
         config = build.read_json(args.config)
+        splash_setting = config.get("splash_rules")
+        splash_manifest_path = None
+        if splash_setting is not None:
+            if not isinstance(splash_setting, str) or not splash_setting:
+                raise build.BuildError("splash_rules must be a non-empty path string")
+            splash_manifest_path = (args.config.parent / splash_setting).resolve()
         tiers = sorted(config["tiers"]) if args.tier == "all" else [args.tier]
         for tier in tiers:
             safety = config["tiers"][tier]
@@ -29,14 +35,15 @@ def main() -> int:
                 int(safety["final_min_rules"]),
                 int(safety["final_max_rules"]),
                 tier=tier,
+                splash_manifest_path=splash_manifest_path,
             )
         if args.tier == "all":
             tier_rules = {}
             for tier in ("lite", "balanced", "powerful"):
                 names = build.artifact_names(tier)
                 _, tier_rules[tier] = build.parse_rendered_rules(
-                    (args.dist / names.module).read_text(encoding="utf-8"),
-                    module=True,
+                    (args.dist / names.ruleset).read_text(encoding="utf-8"),
+                    module=False,
                 )
             for narrower, broader in (("lite", "balanced"), ("balanced", "powerful")):
                 missing = build.missing_coverage(tier_rules[narrower], tier_rules[broader])

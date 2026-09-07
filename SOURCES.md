@@ -30,6 +30,24 @@ The included inputs are normalized to lowercase ASCII hostnames, invalid/non-dom
 
 - Moving branch URLs are intentional for daily refreshes; the build report records the exact downloaded SHA-256 and response metadata.
 - A source license change is a manual-review event. Do not merely edit `sources.json` to silence a mismatch.
-- Do not add executable scripts, redirects, response rewrites or MITM hostnames to either tier. Broad privacy/security categories require explicit Powerful-only review.
+- Do not import executable scripts, redirects or remote response payloads. The user-authorized splash lane may publish reviewed URL rejects and literal MITM hosts from `config/splash.json`; never convert shared API hosts into domain blocks. Broad privacy/security categories require explicit Powerful-only review.
 - Upstream allowlists are evidence, not automatic inputs. Add a local exception only after reproducing an Origo Ad false positive.
 - This review is engineering due diligence, not legal advice.
+
+
+## Curated opening-ad endpoints (2026-09-07)
+
+The user explicitly requested opening-ad blocking in all three tiers. The reviewed reference is [deezertidal/Surge_Module](https://github.com/deezertidal/Surge_Module), whose current tree at `5cc38f47de2ccb13ed8b06d99a1d753cd3afb3c9` contains a README, `files/` and `rule/`. Its README links to modules hosted on yfamilys.com. The GitHub tree does not contain the supplied ultra+ module or a root license file; we do not describe it as a licensed, vendored source or claim that the pasted snapshot corresponds to that commit.
+
+`config/splash.json` records the repository, module URL, user-supplied snapshot SHA-256 and source line for each endpoint fact. Origo independently renders bounded literal-host/path rules from 45 selected opening-ad endpoints. We do not vendor the original module, scripts, response files, or broad regular expressions. Only candidates originally using URL `reject` are selected; Map Local responses are not silently converted into connection failures. No automated scraper updates this lane.
+
+All tiers use the same reviewed candidates. Entries already covered by a tier's domain blocks are omitted from its URL/MITM sections. Thus we retain the existing domain semantics instead of adding DIRECT exceptions or removing broad blocks. The build report records selected entries and how many were already covered.
+
+Official implementation references:
+
+- [Egern FAQ: Surge module import](https://egernapp.com/zh-CN/docs/faq/)
+- [Surge URL Rewrite syntax and HTTPS requirement](https://manual.nssurge.com/http/url-rewrite.html)
+- [Surge module hostname append](https://manual.nssurge.com/profile/module.html)
+- [Surge HTTPS decryption](https://manual.nssurge.com/http/mitm.html)
+
+Verification covers generation, matching boundaries, negative URLs representing normal functionality, domain overlap, provenance hashes and tamper rejection. Client import, trusted-CA setup, certificate pinning and live App-version behavior require device verification and are not implied by static tests.
