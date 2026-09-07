@@ -1,15 +1,15 @@
 {
   "artifacts": {
     "origo-ad-balanced.list": {
-      "bytes": 1345939,
-      "sha256": "e0a82df63aed4edac251038fbf65e9e778fdd77eb8d9dc1c6a68f60aa00ad61b"
+      "bytes": 1332647,
+      "sha256": "fce03d96d7c254a1284fb8fdab24732d917633bdc737104d10d72bd9c49adb2b"
     },
     "origo-ad-balanced.module": {
-      "bytes": 1688910,
-      "sha256": "85673322c1144ced16f35006491aea662acb63b9f56f46fdbab0d65ab988f447"
+      "bytes": 1671838,
+      "sha256": "5ed59d9c6a076bb7d67d54be3c53d67555ab6fea04eafec6b0cd9bb74b8dbc0b"
     }
   },
-  "build_id": "e79abf76b53367893aa53be42c8a38e9c1dbdb76e96a63bcf62a6a937fe28fc6",
+  "build_id": "4f06b582a4b313b98ca09909b9530ddb8e0a0de4930f37a69f8c760bf1f3ce66",
   "configuration": {
     "allowlist_rule_count": 23,
     "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
@@ -21,10 +21,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 37702,
-      "bytes": 742990,
+      "accepted_unique": 37181,
+      "bytes": 733908,
       "duplicates": 0,
-      "etag": "\"ca75c518cf81b14fe358998760040f630cab919c5f69de1640ce497b6b2a670f\"",
+      "etag": "\"69c3cf50629eba9e9e7d0cd3578bf4e27b482cb4eb1788fc23724d669438fe16\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -33,9 +33,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 37702,
+      "raw_candidates": 37181,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "1272668a78c1788588de391f580113506a3f3360677098bbf5a06359451cce5b",
+      "sha256": "413ff253c4f8054b2cc960aa8a3404de73478f1c4c66b3105f615376b604ed6a",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     },
     {
@@ -79,12 +79,12 @@
   ],
   "summary": {
     "allowlist_removed": 0,
-    "covered_exact": 762,
-    "domain_count": 48426,
+    "covered_exact": 758,
+    "domain_count": 47886,
     "domain_suffix_count": 564,
-    "final": 48990,
-    "final_rule_count": 48990,
-    "input_unique": 49752,
+    "final": 48450,
+    "final_rule_count": 48450,
+    "input_unique": 49208,
     "redundant_suffixes": 0
   },
   "tier": "balanced"
