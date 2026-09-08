@@ -26,14 +26,17 @@ ALLOWLIST_FILE = ROOT / "config" / "allowlist.txt"
 DIST_DIR = ROOT / "dist"
 LITE_MODULE_NAME = "origo-ad-lite.module"
 LITE_SURGE_MODULE_NAME = "origo-ad-lite.sgmodule"
+LITE_EGERN_CONFIG_NAME = "origo-ad-lite.yaml"
 LITE_RULESET_NAME = "origo-ad-lite.list"
 LITE_REPORT_NAME = "build-report-lite.json"
 MODULE_NAME = "origo-ad-balanced.module"
 SURGE_MODULE_NAME = "origo-ad-balanced.sgmodule"
+EGERN_CONFIG_NAME = "origo-ad-balanced.yaml"
 RULESET_NAME = "origo-ad-balanced.list"
 REPORT_NAME = "build-report.json"
 POWERFUL_MODULE_NAME = "origo-ad-powerful.module"
 POWERFUL_SURGE_MODULE_NAME = "origo-ad-powerful.sgmodule"
+POWERFUL_EGERN_CONFIG_NAME = "origo-ad-powerful.yaml"
 POWERFUL_RULESET_NAME = "origo-ad-powerful.list"
 POWERFUL_REPORT_NAME = "build-report-powerful.json"
 PROJECT_URL = "https://github.com/miloquinn/origo-ad"
@@ -64,6 +67,7 @@ class BuildError(RuntimeError):
 class ArtifactNames:
     module: str
     surge_module: str
+    egern_config: str
     ruleset: str
     report: str
 
@@ -94,13 +98,20 @@ class FetchedSource:
 
 def artifact_names(tier: str) -> ArtifactNames:
     if tier == "lite":
-        return ArtifactNames(LITE_MODULE_NAME, LITE_SURGE_MODULE_NAME, LITE_RULESET_NAME, LITE_REPORT_NAME)
+        return ArtifactNames(
+            LITE_MODULE_NAME,
+            LITE_SURGE_MODULE_NAME,
+            LITE_EGERN_CONFIG_NAME,
+            LITE_RULESET_NAME,
+            LITE_REPORT_NAME,
+        )
     if tier == "balanced":
-        return ArtifactNames(MODULE_NAME, SURGE_MODULE_NAME, RULESET_NAME, REPORT_NAME)
+        return ArtifactNames(MODULE_NAME, SURGE_MODULE_NAME, EGERN_CONFIG_NAME, RULESET_NAME, REPORT_NAME)
     if tier == "powerful":
         return ArtifactNames(
             POWERFUL_MODULE_NAME,
             POWERFUL_SURGE_MODULE_NAME,
+            POWERFUL_EGERN_CONFIG_NAME,
             POWERFUL_RULESET_NAME,
             POWERFUL_REPORT_NAME,
         )
@@ -360,15 +371,30 @@ def source_report(source: dict, fetched: FetchedSource, parsed: ParseResult) -> 
     }
 
 
+def splash_processing_counts(entries: list[dict]) -> dict[str, int]:
+    native = splash.native_sections(entries)
+    surge_entries = [entry for entry in entries if "rewrite" not in entry]
+    return {
+        "rule_count": len(entries),
+        "surge_rule_count": len(surge_entries),
+        "egern_url_rewrite_count": len(native.get("url_rewrites", [])),
+        "egern_map_local_count": len(native.get("map_locals", [])),
+        "egern_body_rewrite_count": len(native.get("body_rewrites", [])),
+        "mitm_host_count": len({entry["host"] for entry in entries}),
+        "surge_mitm_host_count": len({entry["host"] for entry in surge_entries}),
+    }
+
+
 def render_egern_module(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
     details = TIER_DETAILS.get(tier)
     if details is None:
         raise BuildError(f"unknown tier: {tier!r}")
     splash_entries = metadata.get("splash", {}).get("entries", [])
     description = details["description"]
-    if splash_entries:
+    surge_entries = [entry for entry in splash_entries if "rewrite" not in entry]
+    if surge_entries:
         domain_description = description.split("; no MITM", 1)[0].replace("domain-only", "domain-level")
-        description = f"{domain_description}; blocks curated splash-ad URLs using HTTPS MITM; no scripts."
+        description = f"{domain_description}; blocks curated splash-ad URLs shared with Egern using HTTPS MITM; no scripts."
     lines = [
         f"#!name={details['name']}",
         f"#!desc={description}",
@@ -408,6 +434,37 @@ def render_surge_ruleset(rules: list[Rule], metadata: dict, tier: str = "balance
     return "\n".join(lines) + "\n"
 
 
+def render_egern_config(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
+    details = TIER_DETAILS.get(tier)
+    if details is None:
+        raise BuildError(f"unknown tier: {tier!r}")
+    splash_entries = metadata.get("splash", {}).get("entries", [])
+    description = details["description"]
+    if splash_entries:
+        domain_description = description.split("; no MITM", 1)[0].replace("domain-only", "domain-level")
+        description = (
+            f"{domain_description}; blocks curated splash-ad URLs using native URL rewrites, "
+            "local responses, and bounded body rewrites with HTTPS MITM; no remote scripts."
+        )
+    document = {
+        "name": details["name"],
+        "description": description,
+        "author": "origo-ad contributors",
+        "homepage": PROJECT_URL,
+        "rules": [
+            {
+                "domain" if rule.kind == "DOMAIN" else "domain_suffix": {
+                    "match": rule.domain,
+                    "policy": "REJECT",
+                }
+            }
+            for rule in rules
+        ],
+        **splash.native_sections(splash_entries),
+    }
+    return json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
 def make_report(
     metadata: dict,
     sources: list[dict],
@@ -417,6 +474,7 @@ def make_report(
     ruleset: str,
     tier: str = "balanced",
     surge_module: str | None = None,
+    egern_config: str | None = None,
 ) -> dict:
     names = artifact_names(tier)
     report = {
@@ -444,6 +502,12 @@ def make_report(
         report["artifacts"][names.surge_module] = {
             "sha256": sha256_text(surge_text),
             "bytes": len(surge_text.encode("utf-8")),
+        }
+        if egern_config is None:
+            raise BuildError("native Egern configuration is required for splash builds")
+        report["artifacts"][names.egern_config] = {
+            "sha256": sha256_text(egern_config),
+            "bytes": len(egern_config.encode("utf-8")),
         }
     return report
 
@@ -550,6 +614,15 @@ def validate_dist(
             raise BuildError(".module and .sgmodule artifacts differ")
         actual[names.surge_module] = sha256_text(surge_module)
 
+        egern_path = dist_dir / names.egern_config
+        if not egern_path.is_file() or egern_path.stat().st_size == 0:
+            raise BuildError(f"missing or empty artifact: {egern_path}")
+        egern_text = egern_path.read_text(encoding="utf-8")
+        try:
+            egern_document = json.loads(egern_text)
+        except json.JSONDecodeError as exc:
+            raise BuildError(f"invalid native Egern configuration: {exc}") from exc
+
         if splash_manifest_path is None:
             raise BuildError("splash manifest is required to validate splash artifacts")
         try:
@@ -563,16 +636,33 @@ def validate_dist(
             "manifest_sha256": manifest_sha256,
             "entries": selected_entries,
             "excluded_by_domain_count": len(manifest["entries"]) - len(selected_entries),
-            "rule_count": len(selected_entries),
-            "mitm_host_count": len({entry["host"] for entry in selected_entries}),
+            **splash_processing_counts(selected_entries),
         }
         if splash_report != expected_splash_report:
             raise BuildError("report splash metadata does not match current manifest and domain rules")
         if report.get("configuration", {}).get("splash_manifest_sha256") != manifest_sha256:
             raise BuildError("report configuration does not identify the current splash manifest")
+        reconstructed_metadata = {
+            "build_id": report_build_id,
+            "rule_count": len(module_rules),
+            "sources": report.get("sources", []),
+            "splash": splash_report,
+        }
+        expected_egern_text = render_egern_config(
+            module_rules,
+            reconstructed_metadata,
+            tier=tier,
+        )
+        if egern_document != json.loads(expected_egern_text):
+            raise BuildError("native Egern configuration does not match build report")
+        actual[names.egern_config] = sha256_text(egern_text)
     for name, digest in actual.items():
-        if expected.get(name, {}).get("sha256") != digest:
+        artifact_report = expected.get(name, {})
+        if artifact_report.get("sha256") != digest:
             raise BuildError(f"artifact digest mismatch: {name}")
+        artifact_path = dist_dir / name
+        if artifact_report.get("bytes") != artifact_path.stat().st_size:
+            raise BuildError(f"artifact byte count mismatch: {name}")
 
 
 def load_baseline(path: Path) -> dict | None:
@@ -750,12 +840,12 @@ def build(
             "manifest_sha256": sha256_bytes(splash_manifest_bytes),
             "entries": selected_splash_entries,
             "excluded_by_domain_count": len(splash_manifest["entries"]) - len(selected_splash_entries),
-            "rule_count": len(selected_splash_entries),
-            "mitm_host_count": len({entry["host"] for entry in selected_splash_entries}),
+            **splash_processing_counts(selected_splash_entries),
         }
     module = render_egern_module(rules, metadata, tier=tier)
     ruleset = render_surge_ruleset(rules, metadata, tier=tier)
     surge_module = module if "splash" in metadata else None
+    egern_config = render_egern_config(rules, metadata, tier=tier) if "splash" in metadata else None
     report = make_report(
         metadata,
         reports,
@@ -765,6 +855,7 @@ def build(
         ruleset,
         tier=tier,
         surge_module=surge_module,
+        egern_config=egern_config,
     )
     report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
@@ -773,6 +864,7 @@ def build(
         {
             names.module: module,
             **({names.surge_module: surge_module} if surge_module is not None else {}),
+            **({names.egern_config: egern_config} if egern_config is not None else {}),
             names.ruleset: ruleset,
             names.report: report_text,
         },
@@ -812,6 +904,7 @@ def main() -> int:
     print(f"wrote {args.dist / names.module}")
     if "splash" in report:
         print(f"wrote {args.dist / names.surge_module}")
+        print(f"wrote {args.dist / names.egern_config}")
     print(f"wrote {args.dist / names.ruleset}")
     print(f"wrote {args.dist / names.report}")
     print(f"rules: {report['summary']['final_rule_count']}")

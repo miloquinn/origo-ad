@@ -27,7 +27,9 @@ jobs:
           python-version: "3.11"
 
       - name: Run unit tests
-        run: python -m unittest discover -s tests -v
+        run: |
+          jq --version
+          python -m unittest discover -s tests -v
 
       - name: Fetch, build, and apply lite safety gates
         run: python tools/build.py --tier lite

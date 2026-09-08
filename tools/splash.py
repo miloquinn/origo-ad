@@ -1,6 +1,7 @@
 """Curated splash endpoints: literal hosts, bounded paths, no remote code."""
 from __future__ import annotations
 
+import base64
 import json
 import re
 from pathlib import Path
@@ -8,6 +9,45 @@ from pathlib import Path
 HOST_RE = re.compile(r"(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$")
 PATH_RE = re.compile(r"/[A-Za-z0-9_./{}-]+$")
 ENTRY_KEYS = {"id", "app", "host", "path", "match", "source_line"}
+OPTIONAL_KEYS = {"query", "response", "rewrite", "source_url"}
+RESPONSES = {
+    "empty-json": ("{}", "application/json"),
+    "empty": ("", "text/plain"),
+}
+# Native Egern filters keep the rest of each startup response intact. These are
+# finite, reviewed templates, not arbitrary code supplied by the manifest.
+BODY_REWRITES = {
+    'bilibili-preload': (
+        'if type != "object" then . elif (.data | type) != "object" then . '
+        'else .data |= del(.show, .event_list, .preload) end'
+    ),
+    'jd-start': (
+        'if type != "object" then . else '
+        '(if (.images | type) == "array" then .images = [] else . end) | '
+        '(if (.showTimesDaily | type) == "number" then .showTimesDaily = 0 else . end) end'
+    ),
+    'xhs-splash': (
+        'def defer_ad: if type == "object" then '
+        '.start_time = 3818332800 | .end_time = 3818419199 else . end; '
+        'if type != "object" then . elif (.data | type) != "object" then . '
+        'elif (.data.ads_groups | type) != "array" then . else '
+        '.data.ads_groups |= map(if type == "object" then defer_ad | '
+        'if (.ads | type) == "array" then .ads |= map(defer_ad) else . end '
+        'else . end) end'
+    ),
+}
+REWRITE_ROUTES = {
+    'bilibili-preload': {
+        (host, '/x/v2/splash/' + path, '')
+        for host in ('app.bilibili.com', 'app.biliapi.net')
+        for path in ('list', 'show', 'brand/list', 'event/list2')
+    },
+    'jd-start': {('api.m.jd.com', '/client.action', 'functionId=start')},
+    'xhs-splash': {('edith.xiaohongshu.com', '/api/sns/v{version}/system_service/splash_config', '')},
+}
+REVIEWED_LOCAL_ROUTES = {
+    ('wmapi.meituan.com', '/api/v7/loadInfo', ''),
+}
 
 
 def validate_entries(entries: list[dict]) -> None:
@@ -15,7 +55,7 @@ def validate_entries(entries: list[dict]) -> None:
         raise ValueError("splash entries must be a list of at most 100 reviewed endpoints")
     ids, routes = set(), set()
     for entry in entries:
-        if not isinstance(entry, dict) or set(entry) not in (ENTRY_KEYS, ENTRY_KEYS | {"query"}):
+        if not isinstance(entry, dict) or not ENTRY_KEYS.issubset(entry) or set(entry) - ENTRY_KEYS - OPTIONAL_KEYS:
             raise ValueError("invalid splash entry fields")
         for key in ("id", "app", "host", "path", "match"):
             if not isinstance(entry[key], str) or not entry[key] or any(c in entry[key] for c in '\r\n'):
@@ -32,15 +72,29 @@ def validate_entries(entries: list[dict]) -> None:
             raise ValueError('splash query must be one literal key=value discriminator')
         if query and entry['match'] != 'exact':
             raise ValueError('query-selected splash endpoint must use exact path matching')
-        if '..' in path or path == '/' or not re.search(r'splash|launchad|loading_ad|startpageads|getstartad|getappstartad|kaiping|boot_ad|newopenad|open_ad|launchscreen|start/ads|startup_ad|startpage_ad|start_screen_ads|getstartpictureadvertising|adpmobile/launch', path + query, re.I):
+        route = (entry['host'], path, query)
+        rewrite = entry.get('rewrite')
+        if 'rewrite' in entry and (not isinstance(rewrite, str) or rewrite not in BODY_REWRITES):
+            raise ValueError('splash rewrite must be a reviewed native template')
+        if rewrite and (route not in REWRITE_ROUTES[rewrite] or entry['match'] != 'exact' or 'response' in entry):
+            raise ValueError('splash rewrite must keep its reviewed route and response shape')
+        reviewed_route = (rewrite and route in REWRITE_ROUTES[rewrite]) or (
+            route in REVIEWED_LOCAL_ROUTES and entry.get('response') == 'empty-json' and entry['match'] == 'exact'
+        )
+        if '..' in path or path == '/' or (not reviewed_route and not re.search(r'splash|launchad|loading_ad|startpageads|getstartad|getappstartad|kaiping|boot_ad|newopenad|open_ad|launchscreen|start/ads|startup_ad|startpage_ad|start_screen_ads|getstartpictureadvertising|adpmobile/launch|launch_v2|openscreen|startpicture', path + query, re.I)):
             raise ValueError("splash path must identify a dedicated opening advertisement endpoint")
+        if not isinstance(entry.get('response', 'reject'), str) or entry.get('response', 'reject') not in {'reject', *RESPONSES}:
+            raise ValueError('splash response must be a reviewed local template')
+        if 'source_url' in entry and (not isinstance(entry['source_url'], str) or not re.fullmatch(
+            r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/blob/[a-f0-9]{40}/[^\s?#]+(?:#L[0-9]+(?:-L[0-9]+)?)?', entry['source_url']
+        )):
+            raise ValueError('splash source URL must reference a pinned source revision')
         if entry["match"] not in {"exact", "subtree"}:
             raise ValueError("invalid splash path matching mode")
         if entry["match"] == "subtree" and not path.endswith('/'):
             raise ValueError("splash subtree must end at a slash boundary")
         if type(entry["source_line"]) is not int or entry["source_line"] < 1:
             raise ValueError("splash endpoint needs a source line")
-        route = (entry['host'], path, entry.get('query', ''))
         if entry['id'] in ids or route in routes:
             raise ValueError("duplicate splash endpoint")
         ids.add(entry['id'])
@@ -85,7 +139,11 @@ def pattern(entry: dict) -> str:
     # Escape literal punctuation; numeric versions cannot escape their path segment.
     path = re.escape(entry['path']).replace(r'\{version\}', '[0-9]+')
     if entry.get('query'):
-        ending = r'\?' + re.escape(entry['query']) + r'(?:&|$)'
+        # API dispatch parameters may move within the query string. Match one
+        # exact value and refuse ambiguous duplicate dispatcher keys.
+        key = re.escape(entry['query'].split('=', 1)[0])
+        ending = r'\?(?:(?!' + key + r'=)[^&#]*&)*' + re.escape(entry['query'])
+        ending += r'(?:&(?!' + key + r'=)[^&#]*)*$'
     else:
         ending = '' if entry['match'] == 'subtree' else r'(?:\?|$)'
     return '^https?://' + re.escape(entry['host']) + path + ending
@@ -93,10 +151,52 @@ def pattern(entry: dict) -> str:
 
 def render_sections(entries: list[dict]) -> str:
     validate_entries(entries)
+    # Surge has no response_jq. Never degrade a partial JSON edit into rejecting
+    # the entire startup response on the compatibility module.
+    entries = [e for e in entries if not e.get('rewrite')]
     if not entries:
         return ''
-    lines = ['', '[URL Rewrite]']
-    for entry in sorted(entries, key=lambda e: (e['host'], e['path'], e['id'])):
+    ordered = sorted(entries, key=lambda e: (e['host'], e['path'], e['id']))
+    rejects = [e for e in ordered if e.get('response', 'reject') == 'reject']
+    replies = [e for e in ordered if e.get('response', 'reject') != 'reject']
+    lines = ['', '[URL Rewrite]'] if rejects else []
+    for entry in rejects:
         lines.extend([f"# Splash: {entry['id']}", f"{pattern(entry)} _ reject"])
+    if replies:
+        lines.extend(['', '[Map Local]'])
+        for entry in replies:
+            body, content_type = RESPONSES[entry['response']]
+            encoded = base64.b64encode(body.encode('utf-8')).decode('ascii')
+            lines.extend([
+                f"# Splash: {entry['id']}",
+                f'{pattern(entry)} data-type=base64 data="{encoded}" status-code=200 header="Content-Type:{content_type}"',
+            ])
     lines.extend(['', '[MITM]', 'hostname = %APPEND% ' + ','.join(sorted({e['host'] for e in entries}))])
     return '\n'.join(lines) + '\n'
+
+
+def native_sections(entries: list[dict]) -> dict:
+    """Egern fields with inline responses, avoiding third-party format conversion."""
+    validate_entries(entries)
+    if not entries:
+        return {}
+    rewrites, maps, body_rewrites = [], [], []
+    for entry in sorted(entries, key=lambda e: (e['host'], e['path'], e['id'])):
+        if entry.get('rewrite'):
+            body_rewrites.append({'response_jq': {'match': pattern(entry), 'filter': BODY_REWRITES[entry['rewrite']]}})
+            continue
+        response = entry.get('response', 'reject')
+        if response == 'reject':
+            rewrites.append({'match': pattern(entry), 'location': 'http://reject/'})
+        else:
+            body, content_type = RESPONSES[response]
+            maps.append({'match': pattern(entry), 'status_code': 200,
+                         'headers': {'Content-Type': content_type}, 'body': body})
+    result = {'mitm': {'hostnames': {'includes': sorted({e['host'] for e in entries})}}}
+    if rewrites:
+        result['url_rewrites'] = rewrites
+    if maps:
+        result['map_locals'] = maps
+    if body_rewrites:
+        result['body_rewrites'] = body_rewrites
+    return result

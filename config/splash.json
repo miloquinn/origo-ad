@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope": "Dedicated opening-ad endpoints only; same reviewed set in all three tiers. URL rejects, no scripts or remote response assets.",
+  "scope": "Dedicated opening-ad endpoints in all three tiers: bounded URL rejects, inline local responses, and native Egern field-only JSON filters. No remote scripts or response assets.",
   "reference": {
     "repository": "https://github.com/deezertidal/Surge_Module",
     "repository_commit": "5cc38f47de2ccb13ed8b06d99a1d753cd3afb3c9",
@@ -371,6 +371,221 @@
       "path": "/kaiping",
       "match": "exact",
       "source_line": 156
+    },
+    {
+      "id": "goofish",
+      "app": "闲鱼",
+      "host": "acs.m.goofish.com",
+      "path": "/gw/mtop.taobao.idlecommerce.splash.ads/",
+      "match": "subtree",
+      "source_line": 43,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partX/XianYu.sgmodule#L42-L43"
+    },
+    {
+      "id": "meituan-waimai-loadinfo",
+      "app": "美团外卖",
+      "host": "wmapi.meituan.com",
+      "path": "/api/v7/loadInfo",
+      "match": "exact",
+      "source_line": 10,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+    },
+    {
+      "id": "meituan-waimai-openscreen",
+      "app": "美团外卖",
+      "host": "wmapi.meituan.com",
+      "path": "/api/v7/openscreen",
+      "match": "exact",
+      "source_line": 10,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+    },
+    {
+      "id": "meituan-waimai-startpicture",
+      "app": "美团外卖",
+      "host": "wmapi.meituan.com",
+      "path": "/api/v7/startpicture",
+      "match": "exact",
+      "source_line": 10,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+    },
+    {
+      "id": "zhihu-launch-v2",
+      "app": "知乎",
+      "host": "api.zhihu.com",
+      "path": "/commercial_api/launch_v2",
+      "match": "exact",
+      "source_line": 47,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partZ/Zhihu.sgmodule#L45-L47"
+    },
+    {
+      "id": "zhihu-real-time-launch-v2",
+      "app": "知乎",
+      "host": "api.zhihu.com",
+      "path": "/commercial_api/real_time_launch_v2",
+      "match": "exact",
+      "source_line": 47,
+      "response": "empty-json",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partZ/Zhihu.sgmodule#L45-L47"
+    },
+    {
+      "id": "bilibili-splash-list",
+      "app": "哔哩哔哩",
+      "host": "app.bilibili.com",
+      "path": "/x/v2/splash/list",
+      "match": "exact",
+      "source_line": 73,
+      "rewrite": "bilibili-preload",
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+    },
+    {
+      "id": "bilibili-splash-show",
+      "app": "哔哩哔哩",
+      "host": "app.bilibili.com",
+      "path": "/x/v2/splash/show",
+      "match": "exact",
+      "source_line": 73,
+      "rewrite": "bilibili-preload",
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+    },
+    {
+      "id": "jd-start",
+      "app": "京东",
+      "host": "api.m.jd.com",
+      "path": "/client.action",
+      "match": "exact",
+      "source_line": 258,
+      "rewrite": "jd-start",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/jingdong/jingdong.js#L258-L265",
+      "query": "functionId=start"
+    },
+    {
+      "id": "xhs-splash-config",
+      "app": "小红书",
+      "host": "edith.xiaohongshu.com",
+      "path": "/api/sns/v{version}/system_service/splash_config",
+      "match": "exact",
+      "source_line": 52,
+      "rewrite": "xhs-splash",
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/xiaohongshu/xiaohongshu.js#L52-L64"
+    },
+    {
+      "id": "qunar-front",
+      "app": "去哪儿",
+      "host": "homefront.qunar.com",
+      "path": "/front/splash/ad",
+      "match": "exact",
+      "source_line": 2109,
+      "response": "empty-json"
+    },
+    {
+      "id": "meituan-mall",
+      "app": "美团买菜",
+      "host": "mall.meituan.com",
+      "path": "/api/c/homepage/splash",
+      "match": "exact",
+      "source_line": 1978,
+      "response": "empty-json"
+    },
+    {
+      "id": "mishop",
+      "app": "小米商城",
+      "host": "shop-api.retail.mi.com",
+      "path": "/mtop/navi/skywheel/mishop/splash",
+      "match": "exact",
+      "source_line": 2734,
+      "response": "empty-json"
+    },
+    {
+      "id": "miyoushe",
+      "app": "米游社",
+      "host": "bbs-api.miyoushe.com",
+      "path": "/apihub/api/getAppSplash",
+      "match": "exact",
+      "source_line": 2334,
+      "response": "empty"
+    },
+    {
+      "id": "douban",
+      "app": "豆瓣",
+      "host": "api.douban.com",
+      "path": "/v2/app_ads/splash",
+      "match": "exact",
+      "source_line": 2514,
+      "response": "empty"
+    },
+    {
+      "id": "jdcloud-router",
+      "app": "京东云无线宝",
+      "host": "router-app-api.jdcloud.com",
+      "path": "/v{version}/board/routerAppSplash",
+      "match": "exact",
+      "source_line": 2786,
+      "response": "empty"
+    },
+    {
+      "id": "bilibili-brand-list",
+      "app": "哔哩哔哩",
+      "host": "app.bilibili.com",
+      "path": "/x/v2/splash/brand/list",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bilibili-event-list2",
+      "app": "哔哩哔哩",
+      "host": "app.bilibili.com",
+      "path": "/x/v2/splash/event/list2",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bilibili-alt-list",
+      "app": "哔哩哔哩",
+      "host": "app.biliapi.net",
+      "path": "/x/v2/splash/list",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bilibili-alt-show",
+      "app": "哔哩哔哩",
+      "host": "app.biliapi.net",
+      "path": "/x/v2/splash/show",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bilibili-alt-brand-list",
+      "app": "哔哩哔哩",
+      "host": "app.biliapi.net",
+      "path": "/x/v2/splash/brand/list",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bilibili-alt-event-list2",
+      "app": "哔哩哔哩",
+      "host": "app.biliapi.net",
+      "path": "/x/v2/splash/event/list2",
+      "match": "exact",
+      "source_line": 73,
+      "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
+      "rewrite": "bilibili-preload"
     }
   ],
   "exclusions": [
@@ -419,8 +634,8 @@
       "reason": "Retain only literal-host and dedicated-ad branches; never reproduce generic wildcard/IP interception or unrelated account/update/recommendation branches."
     },
     {
-      "category": "Remote scripts and Map Local responses",
-      "reason": "This release preserves URL-reject behavior only. Script transformations and remote replacement bodies require separate per-app response review; never convert them blindly into rejects."
+      "category": "Remote scripts, remote replacement bodies and mixed-purpose startup responses",
+      "reason": "Do not execute remote scripts or fetch response assets. Independently reviewed constant empty responses and Egern-only field filters are allowed above. Preserve unrelated initialization fields; do not replace Taobao main splash configuration without a current response sample."
     },
     {
       "category": "Mixed startup payload or insufficiently specified URL shape",
@@ -431,5 +646,6 @@
       ],
       "reason": "One-stop start_up_with_ad may include normal initialization; broad path-to-tao_splash and adjson flag-prefix matching require captured complete URLs before defining safe literal path/query boundaries."
     }
-  ]
+  ],
+  "references_note": "Entries with source_url cite fixed public source revisions and source_line refers to that file. Other entries cite the user-supplied snapshot in reference. The manifests contain endpoint facts and independently authored bounded rules, not bundled upstream modules."
 }

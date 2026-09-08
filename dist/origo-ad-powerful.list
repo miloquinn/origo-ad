@@ -2,8 +2,8 @@
 # DESCRIPTION: Powerful domain-only ad, tracker, telemetry, and badware blocking; no MITM, rewrite, or script execution.
 # HOMEPAGE: https://github.com/miloquinn/origo-ad
 # LICENSE: GPL-3.0-only
-# SOURCE-SHA256: 2d1ef48cb2b5d40c607c704d0ae406fe42715796aeca1f8a7cd3fa8ccfc53379
-# RULES: 75503
+# SOURCE-SHA256: 1431f5e5472d31ae0c83d83d3c49145b222a2a66d988c7a851627999213c9016
+# RULES: 75502
 # SOURCE: HaGeZi Multi LIGHT (GPL-3.0-only) https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 # SOURCE: ACL4SSR BanAD (CC-BY-SA-4.0) https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
 # SOURCE: AdGuard CNAME disguised ads (MIT) https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt
@@ -10497,7 +10497,6 @@ DOMAIN,app.appzcvb.com
 DOMAIN,app.ardalio.com
 DOMAIN,app.avada.io
 DOMAIN,app.bentonow.com
-DOMAIN,app.biliapi.net
 DOMAIN,app.bloombergconnects.org
 DOMAIN,app.boarddecisions.com
 DOMAIN,app.c.bloomberg.com

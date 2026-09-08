@@ -1,16 +1,16 @@
 # Origo Ad
 
-Origo Ad 是一个独立的开源广告与追踪规则聚合项目。Lite / Balanced / Powerful 三档模块包含域名拦截和经过人工筛选的 App 开屏广告 URL 拒绝规则，不执行第三方脚本、不下载远程响应文件。单独的 `.list` RULE-SET 仍然只有域名规则。
+Origo Ad 是一个独立的开源广告与追踪规则聚合项目。Lite / Balanced / Powerful 三档包含域名拦截和经过人工筛选的 App 开屏处理：请求拒绝、本地空响应，以及 Egern 原生的 JSON 广告字段修改。不执行第三方脚本、不下载远程响应文件。单独的 `.list` RULE-SET 仍然只有域名规则。
 
-**2026-09-07 起，原有三个 `.module` 地址增加了开屏广告处理和精确 MITM 主机名单。** HTTPS 开屏接口需要在客户端启用 MITM，并安装、信任客户端自己生成的 CA 证书。只更新模块而未启用 MITM，不会获得这些 HTTPS URL 规则的效果；原有域名拦截仍有效。模块不携带 CA 私钥、不修改证书信任、不强制启用全局 MITM。
+**2026-09-08 起，Egern 推荐使用三个原生 `.yaml` 地址。** 原有 `.module` / `.sgmodule` 继续提供域名、开屏拒绝和本地空响应；Egern 原生版额外支持京东、小红书和哔哩哔哩的局部 JSON 修改。HTTPS 开屏接口需要在客户端启用 MITM，并安装、信任客户端自己生成的 CA 证书。只更新模块而未启用 MITM，不会获得这些 HTTPS URL 规则的效果；原有域名拦截仍有效。模块不携带 CA 私钥、不修改证书信任、不强制启用全局 MITM。
 
 ## 稳定产物
 
-- [Egern Lite 模块 `origo-ad-lite.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module)：最低域名规则开销档，LIGHT 精确域名基线 + 精选开屏规则。
+- [Egern Lite 原生模块 `origo-ad-lite.yaml`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.yaml)：最低域名规则开销档，LIGHT 精确域名基线 + 精选开屏规则。
 - [Surge Lite RULE-SET `origo-ad-lite.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.list)：Lite 的纯域名无策略版本，不含开屏 URL 处理。
-- [Egern 模块 `origo-ad-balanced.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module)：日常推荐主产物，包含域名 `REJECT` 与精选开屏规则。
+- [Egern Balanced 原生模块 `origo-ad-balanced.yaml`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.yaml)：日常推荐，包含域名 `REJECT`、精选开屏规则和局部 JSON 处理。
 - [Surge classical RULE-SET `origo-ad-balanced.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.list)：不带策略，供支持 `DOMAIN` / `DOMAIN-SUFFIX` RULE-SET 语法的客户端引用。
-- [Egern Powerful 模块 `origo-ad-powerful.module`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module)：域名覆盖更激进的可选档，附带同一组精选开屏规则。
+- [Egern Powerful 原生模块 `origo-ad-powerful.yaml`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.yaml)：域名覆盖更激进的可选档，附带同一组精选开屏规则。
 - [Surge Powerful RULE-SET `origo-ad-powerful.list`](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.list)：Powerful 的无策略版本。
 - 生成报告 [`build-report-lite.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report-lite.json)、[`build-report.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report.json) 与 [`build-report-powerful.json`](https://github.com/miloquinn/origo-ad/raw/main/dist/build-report-powerful.json)：分别记录三档的上游 URL、许可证、SHA-256、原始/接受/排除数量，以及最终产物摘要和哈希。
 
@@ -19,25 +19,28 @@ Egern 示例：
 ```yaml
 modules:
 - name: Origo Ad Lite
-  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.module
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.yaml
+  update_interval: 86400
   enabled: false
 - name: Origo Ad Balanced
-  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.module
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.yaml
+  update_interval: 86400
   enabled: true
 - name: Origo Ad Powerful
-  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.module
+  url: https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.yaml
+  update_interval: 86400
   enabled: false
 ```
 
 三档不要同时启用。低开销优先时使用 Lite，日常默认使用 Balanced；明确需要更多追踪、遥测域名覆盖，并能自行处理误杀时再切换 Powerful。三档开屏候选相同，不以更多脚本或更宽的 MITM 来区分档位。
 
-本仓库没有修改或打包 Origo VPN 配置，不发布第三方脚本或“解锁”功能。Egern 可以导入 Surge 格式模块，因此保留现有 `.module` 格式和地址。Surge 用户使用下面的完整模块；仅订阅 `.list` 不会加载 URL Rewrite / MITM：
+本仓库不打包个人 Origo VPN 配置，不发布第三方脚本或“解锁”功能。Egern 原生模块使用 YAML 兼容的 JSON 序列化，构建无需额外 YAML 依赖。Egern 也可以导入 Surge 格式模块，原有 `.module` 地址继续保留，但不包含原生 `response_jq` 处理。Surge 用户使用下面的完整模块；仅订阅 `.list` 不会加载 URL Rewrite / MITM：
 
 - [Surge Lite 完整模块](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.sgmodule)
 - [Surge Balanced 完整模块](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.sgmodule)
 - [Surge Powerful 完整模块](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-powerful.sgmodule)
 
-每档 `.module` 与 `.sgmodule` 内容相同。完整模块已经包含域名规则，无需再重复订阅同档 `.list`。
+每档 `.module` 与 `.sgmodule` 内容相同。Surge 本地内嵌响应使用 `data-type=base64`，需要支持该语法的版本（iOS 5.9.1 / Mac 5.5.1 或以上）。完整模块已经包含域名规则，无需再重复订阅同档 `.list`。
 
 ## 默认策略
 
@@ -57,22 +60,31 @@ Powerful 的域名部分在同一安全边界内继承 Balanced 的 LIGHT 基线
 
 ## 开屏广告范围与使用
 
-[`config/splash.json`](config/splash.json) 记录 45 个开屏端点候选，包括腾讯新闻、QQ 音乐、腾讯地图、起点读书、大众点评、拼多多、麦当劳、天翼云盘、途牛、微店、Jump 等接口。它们来自用户提供的 ultra+ 快照中的开屏端点事实，由 Origo 重新编写有主机和路径边界的匹配规则。端点是否仍用于某个 App 版本、广告是否已缓存、拒绝后是否保留倒计时，需要真机确认；这些不是“已验证支持 45 个 App”的承诺。
+[`config/splash.json`](config/splash.json) 记录 67 个开屏端点候选，包括腾讯新闻、QQ 音乐、起点读书、大众点评、拼多多，以及新补充的美团外卖、知乎、闲鱼、京东、小红书、哔哩哔哩、豆瓣、米游社等接口。依据包括用户提供的 ultra+ 快照和固定提交的公开规则源码；每个新增来源都可追溯。端点是否仍用于某个 App 版本、广告是否已缓存、拒绝后是否保留倒计时，需要真机确认；端点数量不代表已验证支持的 App 数量。
+
+| 处理方式 | 范围 | 客户端 |
+| --- | --- | --- |
+| URL 拒绝 | 原有 45 个候选 | Egern、Surge |
+| 本地空响应 | 12 个独立接口，包括闲鱼、美团外卖、知乎、豆瓣等 | Egern、Surge |
+| 局部 JSON 修改 | 哔哩哔哩两个精确 API 主机的 `splash/list`、`show`、`brand/list`、`event/list2` 删除 `data.show`、`event_list`、`preload`；京东 `functionId=start` 清空 `images`、归零 `showTimesDaily`；小红书 `splash_config` 将广告组与素材投放时间推迟至 2090 年 | Egern 原生 `.yaml`，10 个端点 |
 
 - 三档使用同一份候选清单；已被该档域名规则覆盖的主机不再添加 URL 规则和 MITM，因此不同档位的有效 URL 数量可能不同。不会为了 URL 去广告而放行已拦截域名。
 - 只匹配明确的开屏路径；共享 API 域名不会被扩大成整域名拒绝。路径中的 `{version}` 只匹配数字 API 版本，资源目录只在斜杠边界向下匹配。
+- 同一 API 的查询参数可以调整顺序，但必须含唯一且完全匹配的业务标识；重复标识、登录、首页等其他操作不会命中。JSON 修改保留正常字段与不认识的响应结构，不用空响应替代整份初始化数据。
 - MITM 仅列出实际使用 URL 规则的精确主机，无通配符。精确主机仍可能同时承载普通 API；MITM 的解密范围是主机级，URL 拒绝范围才是路径级。
 - 不导入 ultra+ 的账户资料、固件更新、书架刷新、微信链接提示处理，也不导入跨作者脚本或远程 Map Local 文件。
 - `config/allowlist.txt` 是域名生成白名单，不代表某主机被排除于 MITM。开屏清单单独审核。不要同时启用 ultra+、startingad 等重叠模块来测试本项目。
 - 开屏清单固定在 Git 中，日更任务不会自动从 ultra+ 增加端点。增删要改清单并通过匹配、正常功能反例和产物验证。
 
-Egern：更新当前启用档位的模块，在客户端检查 URL 重写和 MITM 主机是否已导入；如需 HTTPS 开屏处理，在客户端自行启用 MITM 并信任本机生成的 CA。Surge：导入同档 `.sgmodule`，启用 Rewrite / MITM 并使用自己的 CA。不要使用来源不明的现成 CA。
+Egern：把当前档位的模块地址换成 `.yaml` 并刷新，检查 URL 重写、本地映射、正文重写和 MITM 主机是否已导入；启用 MITM 并信任本机生成的 CA。主配置已有 CA 字段不等于 iOS 已信任。模块每日自动检查更新，首次切换请手动更新一次。Surge：导入同档 `.sgmodule`，启用 Rewrite / MITM 并使用自己的 CA。
+
+避免同时启用处理相同 App 开屏的旧插件；先确认插件地址仍返回配置文本，不能将下载成功的 HTML 页面当作规则。Egern 官方没有承诺调整模块顺序能解决正文改写或脚本冲突。若主配置已经排除了某个 MITM 主机，模块中的 includes 也不能当作已生效。本项目不改银行、支付等排除项，也不自动全局禁止 QUIC。
 
 验证时选一个常用 App，彻底退出后重新打开，在客户端请求记录中确认具体开屏 URL 命中；再检查登录、首页、搜索等正常操作。若异常，先停用模块定位；需要保留纯域名过滤时改用同档 `.list`。已有缓存、本地渲染广告、证书固定或未经过代理的流量，可能无法通过这些规则消除。
 
 ## 本地构建与验证
 
-只需要 Python 3.10+ 标准库：
+构建只需要 Python 3.10+ 标准库。安装环境已有 `jq` 时，测试会实际执行原生 JSON 过滤器，覆盖广告字段清除、正常数据保留和未知结构；没有 `jq` 时该执行测试会明确跳过。GitHub Actions 要求运行该项测试，不允许静默跳过：
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -102,7 +114,8 @@ python3 tools/build.py --tier powerful --no-baseline
 - 最终产物必须非空；Lite 必须在 35,000–60,000 条之间，Balanced 必须在 40,000–70,000 条之间，Powerful 必须在 60,000–90,000 条之间，且均须排序稳定、无重复、模块中的域名部分与 RULE-SET 内容一致。
 - 离线总验证还会检查 `Lite ⊆ Balanced ⊆ Powerful` 的语义覆盖关系。
 - 开屏规则必须来自本地清单，模块附加段必须与清单生成结果逐字一致；检查精确 MITM 主机、无脚本、无重复及与域名拦截的去重。
-- `.module` / `.sgmodule` 必须一致；`.list` 继续保持纯域名格式。
+- `.module` / `.sgmodule` 必须一致；`.list` 继续保持纯域名格式；`.yaml` 必须与当前清单重建的原生结构完全一致。
+- 报告分别统计拒绝、本地响应、Egern 正文修改，以及不同客户端的端点和 MITM 主机数量；Egern 专用字段修改不会退化成 Surge 整请求拒绝。
 - 报告中的 SHA-256 必须与文件实际内容一致，并记录开屏清单哈希和有效端点。
 - 所有产物先在临时目录完成，再替换 `dist`，失败不会发布新结果。
 

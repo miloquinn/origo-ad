@@ -1,9 +1,9 @@
 #!name=Origo Ad Balanced
-#!desc=Balanced domain-level ad and tracker blocking; blocks curated splash-ad URLs using HTTPS MITM; no scripts.
+#!desc=Balanced domain-level ad and tracker blocking; blocks curated splash-ad URLs shared with Egern using HTTPS MITM; no scripts.
 #!author=origo-ad contributors
 #!homepage=https://github.com/miloquinn/origo-ad
 #!license=GPL-3.0-only
-#!generated-source-sha256=04f2277e6e1a1e77438c340e3c676dbebeb20e7b0c1bb7e7b424362955eaba7c
+#!generated-source-sha256=50c80dd9df667cff5700c581eb6c6aafa89b83685fe286bdf9a5634928f30f38
 #!rule-count=47875
 
 # Source: HaGeZi Multi LIGHT (GPL-3.0-only) https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
@@ -47919,7 +47919,7 @@ DOMAIN,zzzmxvoxooaat.site,REJECT
 # Splash: mwee
 ^https?://capi\.mwee\.cn/app\-api/V[0-9]+/app/getstartad(?:\?|$) _ reject
 # Splash: qunar
-^https?://client\.qunar\.com/pitcher\-proxy\?qrt=p_splashAd(?:&|$) _ reject
+^https?://client\.qunar\.com/pitcher\-proxy\?(?:(?!qrt=)[^&#]*&)*qrt=p_splashAd(?:&(?!qrt=)[^&#]*)*$ _ reject
 # Splash: tujia
 ^https?://client\.tujia\.com/bnbapp\-node/app/portal/getStartPictureAdvertising(?:\?|$) _ reject
 # Splash: tianyi-cloud
@@ -47969,7 +47969,7 @@ DOMAIN,zzzmxvoxooaat.site,REJECT
 # Splash: weidian
 ^https?://thor\.weidian\.com/ares/home\.splash/ _ reject
 # Splash: weibo-intl
-^https?://weibointl\.api\.weibo\.cn/portal\.php\?a=get_coopen_ads(?:&|$) _ reject
+^https?://weibointl\.api\.weibo\.cn/portal\.php\?(?:(?!a=)[^&#]*&)*a=get_coopen_ads(?:&(?!a=)[^&#]*)*$ _ reject
 # Splash: bodivis
 ^https?://www\.bodivis\.com\.cn/app/splashAdvertise(?:\?|$) _ reject
 # Splash: qqmusic
@@ -47977,5 +47977,31 @@ DOMAIN,zzzmxvoxooaat.site,REJECT
 # Splash: guiderank
 ^https?://zone\.guiderank\-app\.com/guiderank\-web/app/ad/listLaunchADByCity\.do(?:\?|$) _ reject
 
+[Map Local]
+# Splash: goofish
+^https?://acs\.m\.goofish\.com/gw/mtop\.taobao\.idlecommerce\.splash\.ads/ data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: douban
+^https?://api\.douban\.com/v2/app_ads/splash(?:\?|$) data-type=base64 data="" status-code=200 header="Content-Type:text/plain"
+# Splash: zhihu-launch-v2
+^https?://api\.zhihu\.com/commercial_api/launch_v2(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: zhihu-real-time-launch-v2
+^https?://api\.zhihu\.com/commercial_api/real_time_launch_v2(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: miyoushe
+^https?://bbs\-api\.miyoushe\.com/apihub/api/getAppSplash(?:\?|$) data-type=base64 data="" status-code=200 header="Content-Type:text/plain"
+# Splash: qunar-front
+^https?://homefront\.qunar\.com/front/splash/ad(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: meituan-mall
+^https?://mall\.meituan\.com/api/c/homepage/splash(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: jdcloud-router
+^https?://router\-app\-api\.jdcloud\.com/v[0-9]+/board/routerAppSplash(?:\?|$) data-type=base64 data="" status-code=200 header="Content-Type:text/plain"
+# Splash: mishop
+^https?://shop\-api\.retail\.mi\.com/mtop/navi/skywheel/mishop/splash(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: meituan-waimai-loadinfo
+^https?://wmapi\.meituan\.com/api/v7/loadInfo(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: meituan-waimai-openscreen
+^https?://wmapi\.meituan\.com/api/v7/openscreen(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+# Splash: meituan-waimai-startpicture
+^https?://wmapi\.meituan\.com/api/v7/startpicture(?:\?|$) data-type=base64 data="e30=" status-code=200 header="Content-Type:application/json"
+
 [MITM]
-hostname = %APPEND% 4gimg.map.qq.com,api-mifit-cn2.zepp.com,api.applovefrom.com,api.club.lenovo.cn,api.internetofcity.cn,api.laifeng.com,api.mcd.cn,api.pinduoduo.com,api.waitwaitpay.com,api.yangkeduo.com,api.zhuishushenqi.com,app-gw.csdn.net,app3.qdaily.com,baichuan.baidu.com,capi.mwee.cn,client.qunar.com,client.tujia.com,cloud.189.cn,daoyu.sdo.com,gw.csdn.net,gw.kaola.com,helper.2bulu.com,m.caijing.com.cn,m.tuniu.com,mage.if.qidian.com,magev6.if.qidian.com,mangaapi.manhuaren.com,mapi.dianping.com,mea.meitudata.com,mime.baidu.com,notch.qdaily.com,open3.vistastory.com,pic.edaijia.cn,pss.txffp.com,qt.qq.com,r.inews.qq.com,sso.ifanr.com,switch.jumpvg.com,thor.weidian.com,weibointl.api.weibo.cn,www.bodivis.com.cn,y.gtimg.cn,zone.guiderank-app.com
+hostname = %APPEND% 4gimg.map.qq.com,acs.m.goofish.com,api-mifit-cn2.zepp.com,api.applovefrom.com,api.club.lenovo.cn,api.douban.com,api.internetofcity.cn,api.laifeng.com,api.mcd.cn,api.pinduoduo.com,api.waitwaitpay.com,api.yangkeduo.com,api.zhihu.com,api.zhuishushenqi.com,app-gw.csdn.net,app3.qdaily.com,baichuan.baidu.com,bbs-api.miyoushe.com,capi.mwee.cn,client.qunar.com,client.tujia.com,cloud.189.cn,daoyu.sdo.com,gw.csdn.net,gw.kaola.com,helper.2bulu.com,homefront.qunar.com,m.caijing.com.cn,m.tuniu.com,mage.if.qidian.com,magev6.if.qidian.com,mall.meituan.com,mangaapi.manhuaren.com,mapi.dianping.com,mea.meitudata.com,mime.baidu.com,notch.qdaily.com,open3.vistastory.com,pic.edaijia.cn,pss.txffp.com,qt.qq.com,r.inews.qq.com,router-app-api.jdcloud.com,shop-api.retail.mi.com,sso.ifanr.com,switch.jumpvg.com,thor.weidian.com,weibointl.api.weibo.cn,wmapi.meituan.com,www.bodivis.com.cn,y.gtimg.cn,zone.guiderank-app.com

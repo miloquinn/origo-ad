@@ -30,24 +30,37 @@ The included inputs are normalized to lowercase ASCII hostnames, invalid/non-dom
 
 - Moving branch URLs are intentional for daily refreshes; the build report records the exact downloaded SHA-256 and response metadata.
 - A source license change is a manual-review event. Do not merely edit `sources.json` to silence a mismatch.
-- Do not import executable scripts, redirects or remote response payloads. The user-authorized splash lane may publish reviewed URL rejects and literal MITM hosts from `config/splash.json`; never convert shared API hosts into domain blocks. Broad privacy/security categories require explicit Powerful-only review.
+- Do not import executable scripts, redirects or remote response payloads. The user-authorized splash lane may publish reviewed URL rejects, inline constant responses, finite native JSON filters and literal MITM hosts from `config/splash.json`; never convert shared API hosts into domain blocks. Broad privacy/security categories require explicit Powerful-only review.
 - Upstream allowlists are evidence, not automatic inputs. Add a local exception only after reproducing an Origo Ad false positive.
 - This review is engineering due diligence, not legal advice.
 
 
-## Curated opening-ad endpoints (2026-09-07)
+## Curated opening-ad endpoints (2026-09-08)
 
 The user explicitly requested opening-ad blocking in all three tiers. The reviewed reference is [deezertidal/Surge_Module](https://github.com/deezertidal/Surge_Module), whose current tree at `5cc38f47de2ccb13ed8b06d99a1d753cd3afb3c9` contains a README, `files/` and `rule/`. Its README links to modules hosted on yfamilys.com. The GitHub tree does not contain the supplied ultra+ module or a root license file; we do not describe it as a licensed, vendored source or claim that the pasted snapshot corresponds to that commit.
 
-`config/splash.json` records the repository, module URL, user-supplied snapshot SHA-256 and source line for each endpoint fact. Origo independently renders bounded literal-host/path rules from 45 selected opening-ad endpoints. We do not vendor the original module, scripts, response files, or broad regular expressions. Only candidates originally using URL `reject` are selected; Map Local responses are not silently converted into connection failures. No automated scraper updates this lane.
+`config/splash.json` records the repository, module URL, user-supplied snapshot SHA-256 and source line for each endpoint fact. Entries with `source_url` instead cite an immutable source revision and its own line numbers. Origo independently renders bounded literal-host/path rules from 67 selected endpoints: 45 original rejects, 12 inline local responses and 10 Egern-only field modifications. We do not vendor the original module, remote scripts, response files or broad regular expressions. No automated scraper updates this lane.
 
-All tiers use the same reviewed candidates. Entries already covered by a tier's domain blocks are omitted from its URL/MITM sections. Thus we retain the existing domain semantics instead of adding DIRECT exceptions or removing broad blocks. The build report records selected entries and how many were already covered.
+Additional implementation evidence (read as endpoint/response-shape facts, not downloaded as executable dependencies):
+
+- [Biliverse Bilibili response handler, fixed revision](https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90): four explicit splash paths on `app.bilibili.com` and `app.biliapi.net`. Origo deletes only `data.show`, `event_list` and `preload`; unlike the reference it preserves account fields. No third-party JavaScript is executed.
+- [fmz200 JD handler, fixed revision](https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/jingdong/jingdong.js#L258-L265): `functionId=start` changes advertising images and display count, preserving other startup fields.
+- [fmz200 Xiaohongshu handler, fixed revision](https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/xiaohongshu/xiaohongshu.js#L52-L64): future-dated ad group and creative windows, preserving configuration shape.
+- [fmz200 Meituan Waimai](https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10), [Zhihu](https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partZ/Zhihu.sgmodule#L45-L47) and [Xianyu](https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partX/XianYu.sgmodule#L42-L43): independently rendered, bounded advertisement branches with inline `{}` responses.
+
+The other six local-response candidates retain the response class from the supplied ultra+ snapshot. Empty JSON is `{}`; whitespace-only reject-200 payloads are normalized to an empty body. Taobao's main splash response mixes initialization fields and remains excluded pending a current device response sample. Shared native/Surge local responses are tested for exact status, body and content-type equivalence. Egern-only jq edits are never translated into whole-response rejection for Surge.
+
+All tiers use the same reviewed candidates. Entries already covered by a tier's domain blocks are omitted from its URL/MITM sections. The build report records selected entries and how many were already covered. The one new allowlist correction is the exact shared API host `app.biliapi.net`: Powerful previously blocked it wholesale, while the fixed Biliverse handler above also processes normal `/x/v2/feed/index` requests on that host. It now remains available with path-scoped splash filtering; other Bilibili tracking hosts remain blocked. This is based on the shared API contract, not a claim of phone-level reproduction.
 
 Official implementation references:
 
 - [Egern FAQ: Surge module import](https://egernapp.com/zh-CN/docs/faq/)
+- [Egern native modules](https://egernapp.com/docs/configuration/modules/)
+- [Egern native response jq filters](https://egernapp.com/docs/configuration/body_rewrites/)
+- [Egern inline Map Local schema](https://egernapp.com/docs/configuration/example/)
+- [Surge inline Map Local syntax and minimum versions](https://manual.nssurge.com/http/map-local.html)
 - [Surge URL Rewrite syntax and HTTPS requirement](https://manual.nssurge.com/http/url-rewrite.html)
 - [Surge module hostname append](https://manual.nssurge.com/profile/module.html)
 - [Surge HTTPS decryption](https://manual.nssurge.com/http/mitm.html)
 
-Verification covers generation, matching boundaries, negative URLs representing normal functionality, domain overlap, provenance hashes and tamper rejection. Client import, trusted-CA setup, certificate pinning and live App-version behavior require device verification and are not implied by static tests.
+Verification covers generation, matching boundaries, negative URLs representing normal functionality, execution of JSON filters against representative fixtures when jq is present, domain overlap, provenance hashes and tamper rejection. Client import, trusted-CA setup, certificate pinning, cached/IP-direct requests and live App-version behavior require device verification and are not implied by static tests.

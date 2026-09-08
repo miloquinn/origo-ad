@@ -1,5 +1,9 @@
 import copy
+import base64
+import json
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -85,18 +89,122 @@ class SplashTests(unittest.TestCase):
         self.assertNotIn('api.mcd.cn', splash.render_sections(selected))
         self.assertIn('api.pinduoduo.com', splash.render_sections(selected))
 
+    def test_shared_bilibili_api_remains_available_with_path_level_ad_filtering(self):
+        host = 'app.biliapi.net'
+        blocked, _ = build.merge_rules(
+            [build.Rule('DOMAIN', host), build.Rule('DOMAIN', 'ads.example')],
+            build.parse_allowlist(ROOT / 'config/allowlist.txt'),
+        )
+        self.assertEqual(blocked, [build.Rule('DOMAIN', 'ads.example')])
+        selected = splash.select_entries(self.manifest, blocked)
+        self.assertEqual(len([e for e in selected if e['host'] == host]), 4)
+        self.assertEqual(self.matches('https://' + host + '/x/v2/feed/index'), [])
+
     def test_shared_api_hosts_are_never_promoted_to_domain_blocks(self):
         output = splash.render_sections(self.entries)
         self.assertNotIn('[Rule]', output)
         self.assertNotIn('DOMAIN', output)
         self.assertNotIn('[Script]', output)
-        self.assertNotIn('[Map Local]', output)
         self.assertNotIn('script-path', output)
-        self.assertNotIn('data=', output)
+        self.assertNotIn('data=https', output)
         self.assertNotIn('ca-p12', output)
         host_line = output.split('hostname = %APPEND% ')[1].strip()
-        self.assertEqual(host_line.split(','), sorted({e['host'] for e in self.entries}))
+        self.assertEqual(host_line.split(','), sorted({e['host'] for e in self.entries if not e.get('rewrite')}))
         self.assertNotIn('*', host_line)
+
+    def test_local_responses_are_inline_and_equal_between_clients(self):
+        native_maps = {e['match']: e for e in splash.native_sections(self.entries)['map_locals']}
+        surge = splash.render_sections(self.entries)
+        for entry in self.entries:
+            if 'response' not in entry or entry['response'] == 'reject':
+                continue
+            pattern = splash.pattern(entry)
+            body, content_type = splash.RESPONSES[entry['response']]
+            self.assertEqual(native_maps[pattern], {
+                'match': pattern, 'status_code': 200,
+                'headers': {'Content-Type': content_type}, 'body': body,
+            })
+            encoded = base64.b64encode(body.encode()).decode()
+            self.assertIn(f'{pattern} data-type=base64 data="{encoded}" status-code=200 header="Content-Type:{content_type}"', surge)
+
+    def test_native_json_filters_never_become_surge_request_rejections(self):
+        entries = [e for e in self.entries if e.get('rewrite')]
+        self.assertEqual(splash.render_sections(entries), '')
+        native = splash.native_sections(entries)
+        self.assertEqual(set(native), {'body_rewrites', 'mitm'})
+        self.assertEqual(len(native['body_rewrites']), len(entries))
+        self.assertEqual(native['mitm']['hostnames']['includes'], sorted({e['host'] for e in entries}))
+
+    def test_dispatcher_query_can_move_but_must_be_unambiguous(self):
+        for params in ['functionId=start', 'client=apple&functionId=start',
+                       'client=apple&functionId=start&version=15', 'functionId=start&client=apple']:
+            self.assertEqual(self.matches('https://api.m.jd.com/client.action?' + params), ['jd-start'])
+        for params in ['functionId=welcomeHome', 'functionId=startHome',
+                       'functionId=login&next=functionId=start', 'otherfunctionId=start',
+                       'functionId=start&functionId=login', 'functionId=login&functionId=start',
+                       'functionId=start&functionId=start', 'functionId=start#fragment']:
+            self.assertEqual(self.matches('https://api.m.jd.com/client.action?' + params), [])
+
+    def test_popular_app_rules_preserve_normal_features(self):
+        for url in [
+            'https://api.m.jd.com/client.action?functionId=welcomeHome',
+            'https://api.m.jd.com/client.action?functionId=login',
+            'https://acs.m.goofish.com/gw/mtop.taobao.idle.item.detail/1.0/',
+            'https://acs.m.goofish.com/gw/mtop.taobao.idlecommerce.splash.adsHistory/1.0/',
+            'https://app.bilibili.com/x/v2/feed/index',
+            'https://app.bilibili.com/x/v2/splash/event/list2History',
+            'https://api.zhihu.com/topstory/recommend',
+            'https://api.zhihu.com/commercial_api/launch_v2_config',
+            'https://edith.xiaohongshu.com/api/sns/v1/note/feed',
+            'https://wmapi.meituan.com/api/v7/order/detail',
+            'https://wmapi.meituan.com/api/v7/loadInfo/other',
+            'https://guide-acs.m.taobao.com/gw/mtop.taobao.wireless.home.splash.awesome.get/1.0/',
+        ]:
+            with self.subTest(url=url):
+                self.assertEqual(self.matches(url), [])
+
+    @unittest.skipUnless(shutil.which('jq'), 'jq is only needed for native filter execution tests')
+    def test_native_filters_remove_only_ad_fields_and_preserve_unknown_shapes(self):
+        def run_filter(name, value):
+            result = subprocess.run(['jq', '-c', splash.BODY_REWRITES[name]], input=json.dumps(value),
+                                    capture_output=True, text=True, check=True)
+            return json.loads(result.stdout)
+        bili = {'code': 0, 'data': {'show': [{'ad': 1}], 'event_list': ['ad'], 'preload': ['ad'],
+                                 'list': ['other'], 'account': {'vip': 0}}, 'message': 'ok'}
+        self.assertEqual(run_filter('bilibili-preload', bili), {
+            'code': 0, 'data': {'list': ['other'], 'account': {'vip': 0}}, 'message': 'ok',
+        })
+        jd = {'images': ['ad'], 'showTimesDaily': 3, 'config': {'login': True}, 'user': {'vip': False}}
+        self.assertEqual(run_filter('jd-start', jd), dict(jd, images=[], showTimesDaily=0))
+        xhs = {'code': 0, 'data': {'ads_groups': [
+            {'group_id': 'keep', 'start_time': 1, 'end_time': 2,
+             'ads': [{'creative_id': 'keep', 'start_time': 1, 'end_time': 2}, None]},
+            'unexpected',
+        ], 'settings': {'keep': True}}}
+        updated = copy.deepcopy(xhs)
+        for item in [updated['data']['ads_groups'][0], updated['data']['ads_groups'][0]['ads'][0]]:
+            item.update(start_time=3818332800, end_time=3818419199)
+        self.assertEqual(run_filter('xhs-splash', xhs), updated)
+        for name in splash.BODY_REWRITES:
+            for value in [None, [], 'unknown', 3, {}, {'data': None}, {'data': []},
+                          {'data': {'ads_groups': None, 'keep': 1}}, {'images': None}]:
+                with self.subTest(filter=name, value=value):
+                    self.assertEqual(run_filter(name, value), value)
+            result = run_filter(name, {'error': 'unauthorized', 'code': 401})
+            self.assertEqual(result, {'error': 'unauthorized', 'code': 401})
+
+    def test_response_templates_and_pinned_sources_cannot_inject_code(self):
+        for key, value in [('response', 'https://example.com/body'), ('response', {}),
+                           ('rewrite', 'remote-script'), ('rewrite', 'jd-start'),
+                           ('source_url', 'https://github.com/example/repo/blob/main/rules.js')]:
+            entry = dict(self.entries[0], **{key: value})
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                splash.validate_entries([entry])
+        jd = next(e for e in self.entries if e['id'] == 'jd-start')
+        for changes in [{'path': '/splash'}, {'query': 'functionId=welcomeHome'},
+                        {'host': 'other.example'}, {'response': 'empty-json'}]:
+            with self.assertRaises(ValueError):
+                splash.validate_entries([dict(jd, **changes)])
 
     def test_rejects_unreviewable_hosts_paths_duplicates_and_injection(self):
         for key, value in [

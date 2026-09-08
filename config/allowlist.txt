@@ -29,6 +29,8 @@ DOMAIN,objects.githubusercontent.com
 # Common Chinese authentication/payment endpoints
 DOMAIN,passport.bilibili.com
 DOMAIN,api.bilibili.com
+# Shared Bilibili app API also serves feeds; filter its splash paths, not the host.
+DOMAIN,app.biliapi.net
 DOMAIN,login.taobao.com
 DOMAIN,passport.jd.com
 DOMAIN,pay.weixin.qq.com

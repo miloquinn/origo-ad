@@ -2,7 +2,7 @@
 # DESCRIPTION: Lite exact-domain ad and tracker blocking for lower overhead; no MITM, rewrite, or script execution.
 # HOMEPAGE: https://github.com/miloquinn/origo-ad
 # LICENSE: GPL-3.0-only
-# SOURCE-SHA256: 5afe429c848f96e8ce31bb897aa8c7d90181a3318c5ae44a296ae5c2c385c381
+# SOURCE-SHA256: bd578ab68be36e11fcb7f807a49bb5f6106fb25dddd2f3a88e01a3cfb418eae5
 # RULES: 36608
 # SOURCE: HaGeZi Multi LIGHT (GPL-3.0-only) https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 

@@ -2,24 +2,28 @@
   "artifacts": {
     "origo-ad-balanced.list": {
       "bytes": 1317905,
-      "sha256": "35d8ebff12e0908384b9dfcf4d2f49f8b20bc5b333059b62be6d25a975eb53a3"
+      "sha256": "8db7169bc241e8d984f9243eda54d250178fb51f379c844424bb44a260d97fc9"
     },
     "origo-ad-balanced.module": {
-      "bytes": 1657763,
-      "sha256": "30cbfdaca0355f804b8e66ee3af66ff2628784ea846ae9842d7365e718911b13"
+      "bytes": 1660082,
+      "sha256": "eb2add7a4e7e17136e4b79719f989ed1375d8754afa6da872f3626d9ee33588b"
     },
     "origo-ad-balanced.sgmodule": {
-      "bytes": 1657763,
-      "sha256": "30cbfdaca0355f804b8e66ee3af66ff2628784ea846ae9842d7365e718911b13"
+      "bytes": 1660082,
+      "sha256": "eb2add7a4e7e17136e4b79719f989ed1375d8754afa6da872f3626d9ee33588b"
+    },
+    "origo-ad-balanced.yaml": {
+      "bytes": 5112800,
+      "sha256": "51806ba8ae3c4d217213e03c112b82bc1830d95dcacdf6e617495e8a5ea78e20"
     }
   },
-  "build_id": "04f2277e6e1a1e77438c340e3c676dbebeb20e7b0c1bb7e7b424362955eaba7c",
+  "build_id": "50c80dd9df667cff5700c581eb6c6aafa89b83685fe286bdf9a5634928f30f38",
   "configuration": {
-    "allowlist_rule_count": 23,
-    "allowlist_sha256": "0231a2dcc5f55067766e618bd2bb39cdf4eb40c8b5db943eb95ec81819b5d961",
+    "allowlist_rule_count": 24,
+    "allowlist_sha256": "8ef7be49926e154de96f98155c80a24a2c4b12e9a6d3f18e65a13dbd0ac51126",
     "policy": "balanced-domain-only",
-    "sources_sha256": "d7a0143fe8c0d6b0a6452792c12dede2174e6c1dcf9f8d4657dabc85c2d420a8",
-    "splash_manifest_sha256": "058c230862a704c2e7c24472e7230d938e8cdfc573cf4763b31cc96189eba011",
+    "sources_sha256": "a76a75e1aedb857ee45bf931a468c9890033761d2cdd2d84e9bb930180f3b876",
+    "splash_manifest_sha256": "a5f4acbf91c1c5afec8ce5f7685dd7f4a64a036c13bb74631654867a0d8e4ad4",
     "tier": "balanced"
   },
   "license": "GPL-3.0-only",
@@ -83,6 +87,9 @@
     }
   ],
   "splash": {
+    "egern_body_rewrite_count": 10,
+    "egern_map_local_count": 12,
+    "egern_url_rewrite_count": 44,
     "entries": [
       {
         "app": "腾讯地图",
@@ -91,6 +98,16 @@
         "match": "subtree",
         "path": "/mwaSplash/",
         "source_line": 724
+      },
+      {
+        "app": "闲鱼",
+        "host": "acs.m.goofish.com",
+        "id": "goofish",
+        "match": "subtree",
+        "path": "/gw/mtop.taobao.idlecommerce.splash.ads/",
+        "response": "empty-json",
+        "source_line": 43,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partX/XianYu.sgmodule#L42-L43"
       },
       {
         "app": "Zepp",
@@ -117,6 +134,15 @@
         "source_line": 383
       },
       {
+        "app": "豆瓣",
+        "host": "api.douban.com",
+        "id": "douban",
+        "match": "exact",
+        "path": "/v2/app_ads/splash",
+        "response": "empty",
+        "source_line": 2514
+      },
+      {
         "app": "城市服务接口",
         "host": "api.internetofcity.cn",
         "id": "internetofcity",
@@ -131,6 +157,17 @@
         "match": "exact",
         "path": "/v{version}/start/ads",
         "source_line": 360
+      },
+      {
+        "app": "京东",
+        "host": "api.m.jd.com",
+        "id": "jd-start",
+        "match": "exact",
+        "path": "/client.action",
+        "query": "functionId=start",
+        "rewrite": "jd-start",
+        "source_line": 258,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/jingdong/jingdong.js#L258-L265"
       },
       {
         "app": "麦当劳",
@@ -165,6 +202,26 @@
         "source_line": 391
       },
       {
+        "app": "知乎",
+        "host": "api.zhihu.com",
+        "id": "zhihu-launch-v2",
+        "match": "exact",
+        "path": "/commercial_api/launch_v2",
+        "response": "empty-json",
+        "source_line": 47,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partZ/Zhihu.sgmodule#L45-L47"
+      },
+      {
+        "app": "知乎",
+        "host": "api.zhihu.com",
+        "id": "zhihu-real-time-launch-v2",
+        "match": "exact",
+        "path": "/commercial_api/real_time_launch_v2",
+        "response": "empty-json",
+        "source_line": 47,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partZ/Zhihu.sgmodule#L45-L47"
+      },
+      {
         "app": "追书神器",
         "host": "api.zhuishushenqi.com",
         "id": "zhuishushenqi",
@@ -181,6 +238,86 @@
         "source_line": 657
       },
       {
+        "app": "哔哩哔哩",
+        "host": "app.biliapi.net",
+        "id": "bilibili-alt-brand-list",
+        "match": "exact",
+        "path": "/x/v2/splash/brand/list",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.biliapi.net",
+        "id": "bilibili-alt-event-list2",
+        "match": "exact",
+        "path": "/x/v2/splash/event/list2",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.biliapi.net",
+        "id": "bilibili-alt-list",
+        "match": "exact",
+        "path": "/x/v2/splash/list",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.biliapi.net",
+        "id": "bilibili-alt-show",
+        "match": "exact",
+        "path": "/x/v2/splash/show",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.bilibili.com",
+        "id": "bilibili-brand-list",
+        "match": "exact",
+        "path": "/x/v2/splash/brand/list",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.bilibili.com",
+        "id": "bilibili-event-list2",
+        "match": "exact",
+        "path": "/x/v2/splash/event/list2",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.bilibili.com",
+        "id": "bilibili-splash-list",
+        "match": "exact",
+        "path": "/x/v2/splash/list",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
+        "app": "哔哩哔哩",
+        "host": "app.bilibili.com",
+        "id": "bilibili-splash-show",
+        "match": "exact",
+        "path": "/x/v2/splash/show",
+        "rewrite": "bilibili-preload",
+        "source_line": 73,
+        "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90"
+      },
+      {
         "app": "好奇心日报",
         "host": "app3.qdaily.com",
         "id": "qdaily-app",
@@ -195,6 +332,15 @@
         "match": "exact",
         "path": "/rs/adpmobile/launch",
         "source_line": 310
+      },
+      {
+        "app": "米游社",
+        "host": "bbs-api.miyoushe.com",
+        "id": "miyoushe",
+        "match": "exact",
+        "path": "/apihub/api/getAppSplash",
+        "response": "empty",
+        "source_line": 2334
       },
       {
         "app": "美味不用等",
@@ -238,6 +384,16 @@
         "source_line": 271
       },
       {
+        "app": "小红书",
+        "host": "edith.xiaohongshu.com",
+        "id": "xhs-splash-config",
+        "match": "exact",
+        "path": "/api/sns/v{version}/system_service/splash_config",
+        "rewrite": "xhs-splash",
+        "source_line": 52,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Scripts/xiaohongshu/xiaohongshu.js#L52-L64"
+      },
+      {
         "app": "CSDN",
         "host": "gw.csdn.net",
         "id": "csdn",
@@ -260,6 +416,15 @@
         "match": "exact",
         "path": "/getSplash",
         "source_line": 8
+      },
+      {
+        "app": "去哪儿",
+        "host": "homefront.qunar.com",
+        "id": "qunar-front",
+        "match": "exact",
+        "path": "/front/splash/ad",
+        "response": "empty-json",
+        "source_line": 2109
       },
       {
         "app": "财经网",
@@ -292,6 +457,15 @@
         "match": "exact",
         "path": "/argus/api/v{version}/client/getsplashscreen",
         "source_line": 587
+      },
+      {
+        "app": "美团买菜",
+        "host": "mall.meituan.com",
+        "id": "meituan-mall",
+        "match": "exact",
+        "path": "/api/c/homepage/splash",
+        "response": "empty-json",
+        "source_line": 1978
       },
       {
         "app": "漫画人",
@@ -382,6 +556,24 @@
         "source_line": 91
       },
       {
+        "app": "京东云无线宝",
+        "host": "router-app-api.jdcloud.com",
+        "id": "jdcloud-router",
+        "match": "exact",
+        "path": "/v{version}/board/routerAppSplash",
+        "response": "empty",
+        "source_line": 2786
+      },
+      {
+        "app": "小米商城",
+        "host": "shop-api.retail.mi.com",
+        "id": "mishop",
+        "match": "exact",
+        "path": "/mtop/navi/skywheel/mishop/splash",
+        "response": "empty-json",
+        "source_line": 2734
+      },
+      {
         "app": "AppSo",
         "host": "sso.ifanr.com",
         "id": "appso",
@@ -415,6 +607,36 @@
         "source_line": 511
       },
       {
+        "app": "美团外卖",
+        "host": "wmapi.meituan.com",
+        "id": "meituan-waimai-loadinfo",
+        "match": "exact",
+        "path": "/api/v7/loadInfo",
+        "response": "empty-json",
+        "source_line": 10,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+      },
+      {
+        "app": "美团外卖",
+        "host": "wmapi.meituan.com",
+        "id": "meituan-waimai-openscreen",
+        "match": "exact",
+        "path": "/api/v7/openscreen",
+        "response": "empty-json",
+        "source_line": 10,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+      },
+      {
+        "app": "美团外卖",
+        "host": "wmapi.meituan.com",
+        "id": "meituan-waimai-startpicture",
+        "match": "exact",
+        "path": "/api/v7/startpicture",
+        "response": "empty-json",
+        "source_line": 10,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/6e7bf91a2b412ff75177084e0d593af19a3c5947/Surge/module/split/partM/Meituan-MeituanWaimai.sgmodule#L9-L10"
+      },
+      {
         "app": "bodivis",
         "host": "www.bodivis.com.cn",
         "id": "bodivis",
@@ -440,9 +662,11 @@
       }
     ],
     "excluded_by_domain_count": 1,
-    "manifest_sha256": "058c230862a704c2e7c24472e7230d938e8cdfc573cf4763b31cc96189eba011",
-    "mitm_host_count": 43,
-    "rule_count": 44
+    "manifest_sha256": "a5f4acbf91c1c5afec8ce5f7685dd7f4a64a036c13bb74631654867a0d8e4ad4",
+    "mitm_host_count": 56,
+    "rule_count": 66,
+    "surge_mitm_host_count": 52,
+    "surge_rule_count": 56
   },
   "summary": {
     "allowlist_removed": 0,
