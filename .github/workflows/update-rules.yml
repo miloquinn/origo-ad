@@ -26,10 +26,16 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Prepare the existing Rust regex compatibility check
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ripgrep
+
       - name: Run unit tests
         run: |
           ruby --version
           jq --version
+          rg --version
           python -m unittest discover -s tests -v
 
       - name: Fetch, build, and apply lite safety gates
