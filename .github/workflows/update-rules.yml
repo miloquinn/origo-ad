@@ -28,6 +28,7 @@ jobs:
 
       - name: Run unit tests
         run: |
+          ruby --version
           jq --version
           python -m unittest discover -s tests -v
 

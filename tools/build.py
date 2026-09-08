@@ -40,6 +40,7 @@ POWERFUL_EGERN_CONFIG_NAME = "origo-ad-powerful.yaml"
 POWERFUL_RULESET_NAME = "origo-ad-powerful.list"
 POWERFUL_REPORT_NAME = "build-report-powerful.json"
 PROJECT_URL = "https://github.com/miloquinn/origo-ad"
+RAW_DIST_URL = "https://raw.githubusercontent.com/miloquinn/origo-ad/main/dist"
 USER_AGENT = "origo-ad/2 (+https://github.com/miloquinn/origo-ad)"
 VALID_RULE_KINDS = {"DOMAIN", "DOMAIN-SUFFIX"}
 LABEL_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
@@ -434,6 +435,43 @@ def render_surge_ruleset(rules: list[Rule], metadata: dict, tier: str = "balance
     return "\n".join(lines) + "\n"
 
 
+def render_yaml(value: object, indent: int = 0) -> str:
+    """Render the limited JSON-compatible structures used by Egern modules."""
+    prefix = " " * indent
+    if isinstance(value, dict):
+        if not value:
+            return f"{prefix}{{}}"
+        lines: list[str] = []
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise BuildError("native Egern configuration keys must be strings")
+            rendered_key = key if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*", key) else json.dumps(key)
+            if isinstance(item, (dict, list)):
+                lines.append(f"{prefix}{rendered_key}:")
+                lines.append(render_yaml(item, indent + 2))
+            else:
+                lines.append(f"{prefix}{rendered_key}: {render_yaml(item)}")
+        return "\n".join(lines)
+    if isinstance(value, list):
+        if not value:
+            return f"{prefix}[]"
+        lines = []
+        for item in value:
+            if isinstance(item, dict) and item:
+                nested = render_yaml(item, indent + 2).splitlines()
+                lines.append(f"{prefix}- {nested[0].lstrip()}")
+                lines.extend(nested[1:])
+            elif isinstance(item, list) and item:
+                lines.append(f"{prefix}-")
+                lines.append(render_yaml(item, indent + 2))
+            else:
+                lines.append(f"{prefix}- {render_yaml(item)}")
+        return "\n".join(lines)
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return json.dumps(value, ensure_ascii=False)
+    raise BuildError(f"unsupported native Egern YAML value: {type(value).__name__}")
+
+
 def render_egern_config(rules: list[Rule], metadata: dict, tier: str = "balanced") -> str:
     details = TIER_DETAILS.get(tier)
     if details is None:
@@ -453,16 +491,16 @@ def render_egern_config(rules: list[Rule], metadata: dict, tier: str = "balanced
         "homepage": PROJECT_URL,
         "rules": [
             {
-                "domain" if rule.kind == "DOMAIN" else "domain_suffix": {
-                    "match": rule.domain,
+                "rule_set": {
+                    "match": f"{RAW_DIST_URL}/{artifact_names(tier).ruleset}",
                     "policy": "REJECT",
+                    "update_interval": 86400,
                 }
             }
-            for rule in rules
         ],
         **splash.native_sections(splash_entries),
     }
-    return json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    return render_yaml(document) + "\n"
 
 
 def make_report(
@@ -618,10 +656,8 @@ def validate_dist(
         if not egern_path.is_file() or egern_path.stat().st_size == 0:
             raise BuildError(f"missing or empty artifact: {egern_path}")
         egern_text = egern_path.read_text(encoding="utf-8")
-        try:
-            egern_document = json.loads(egern_text)
-        except json.JSONDecodeError as exc:
-            raise BuildError(f"invalid native Egern configuration: {exc}") from exc
+        if not egern_text.startswith("name:"):
+            raise BuildError("invalid native Egern configuration: expected block-style YAML starting with name")
 
         if splash_manifest_path is None:
             raise BuildError("splash manifest is required to validate splash artifacts")
@@ -653,7 +689,7 @@ def validate_dist(
             reconstructed_metadata,
             tier=tier,
         )
-        if egern_document != json.loads(expected_egern_text):
+        if egern_text != expected_egern_text:
             raise BuildError("native Egern configuration does not match build report")
         actual[names.egern_config] = sha256_text(egern_text)
     for name, digest in actual.items():

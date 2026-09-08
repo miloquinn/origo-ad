@@ -145,6 +145,33 @@ class SplashTests(unittest.TestCase):
                        'functionId=start&functionId=start', 'functionId=start#fragment']:
             self.assertEqual(self.matches('https://api.m.jd.com/client.action?' + params), [])
 
+    def test_dispatcher_query_excludes_encoded_keys_and_preserves_similar_names(self):
+        for key in ['f', 'functionI', 'functionIdSuffix', 'FunctionId', 'functionIx', 'x', 'client.version']:
+            for params in [f'{key}=ios&functionId=start', f'functionId=start&{key}=ios']:
+                with self.subTest(params=params):
+                    self.assertEqual(self.matches('https://api.m.jd.com/client.action?' + params), ['jd-start'])
+        for params in ['functionId=start&function%49d=login', '%66unctionId=login&functionId=start',
+                       'functionId=start&functionId', 'functionId&functionId=start',
+                       'functionId=start&functionId=']:
+            self.assertEqual(self.matches('https://api.m.jd.com/client.action?' + params), [])
+
+    def test_generated_patterns_never_use_unsupported_lookaround_or_backreferences(self):
+        for entry in self.entries:
+            expression = splash.pattern(entry)
+            with self.subTest(entry=entry['id']):
+                self.assertNotRegex(expression, r'\(\?(?!:)')
+                self.assertNotRegex(expression, r'\\[1-9]')
+
+    @unittest.skipUnless(shutil.which('rg'), 'ripgrep is an optional independent Rust-regex compiler check')
+    def test_all_splash_patterns_compile_in_the_linear_rust_regex_engine(self):
+        for entry in self.entries:
+            result = subprocess.run(
+                ['rg', '--no-config', '--engine', 'default', '--quiet', '--regexp', splash.pattern(entry)],
+                input='', capture_output=True, text=True,
+            )
+            with self.subTest(entry=entry['id']):
+                self.assertIn(result.returncode, (0, 1), result.stderr)
+
     def test_popular_app_rules_preserve_normal_features(self):
         for url in [
             'https://api.m.jd.com/client.action?functionId=welcomeHome',

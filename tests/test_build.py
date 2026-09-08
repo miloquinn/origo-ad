@@ -1,4 +1,5 @@
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -10,6 +11,23 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import build  # noqa: E402
+
+
+def parse_yaml(text: str) -> object:
+    result = subprocess.run(
+        [
+            "ruby",
+            "-rpsych",
+            "-rjson",
+            "-e",
+            "print JSON.generate(Psych.safe_load(STDIN.read, aliases: false))",
+        ],
+        input=text,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(result.stdout)
 
 
 class DomainNormalizationTests(unittest.TestCase):
@@ -304,20 +322,52 @@ class RenderingTests(unittest.TestCase):
         }
 
         rendered = build.render_egern_config(rules, metadata)
-        document = json.loads(rendered)
+        document = parse_yaml(rendered)
 
+        self.assertTrue(rendered.startswith("name:"))
         self.assertEqual(document["name"], "Origo Ad Balanced")
         self.assertEqual(
             document["rules"],
             [
-                {"domain": {"match": "ads.example", "policy": "REJECT"}},
-                {"domain_suffix": {"match": "tracker.example", "policy": "REJECT"}},
+                {
+                    "rule_set": {
+                        "match": f"{build.RAW_DIST_URL}/origo-ad-balanced.list",
+                        "policy": "REJECT",
+                        "update_interval": 86400,
+                    }
+                },
             ],
         )
         native_sections = build.splash.native_sections(entries)
         for key, value in native_sections.items():
             self.assertEqual(document[key], value)
         self.assertNotIn("scripts", document)
+
+    def test_native_egern_module_size_does_not_inline_domain_rules(self):
+        metadata = {"build_id": "splash123", "rule_count": 1, "splash": {"entries": []}}
+        one_rule = [build.Rule("DOMAIN", "ads.example")]
+        many_rules = [build.Rule("DOMAIN", f"ads-{index}.example") for index in range(50_000)]
+
+        compact = build.render_egern_config(one_rule, metadata)
+        expanded = build.render_egern_config(many_rules, {**metadata, "rule_count": len(many_rules)})
+
+        self.assertEqual(compact, expanded)
+        self.assertLess(len(compact.encode("utf-8")), 1_000)
+        self.assertNotIn("ads.example", compact)
+        self.assertNotIn("ads-49999.example", expanded)
+
+    def test_native_egern_rule_set_uses_its_own_tier_list(self):
+        metadata = {"build_id": "splash123", "rule_count": 1, "splash": {"entries": []}}
+
+        for tier in build.TIER_DETAILS:
+            with self.subTest(tier=tier):
+                document = parse_yaml(
+                    build.render_egern_config([build.Rule("DOMAIN", "ads.example")], metadata, tier=tier)
+                )
+                self.assertEqual(
+                    document["rules"][0]["rule_set"]["match"],
+                    f"{build.RAW_DIST_URL}/{build.artifact_names(tier).ruleset}",
+                )
 
     def test_module_and_native_egern_have_exact_splash_endpoint_parity(self):
         entries = [
@@ -346,7 +396,7 @@ class RenderingTests(unittest.TestCase):
         }
 
         module = build.render_egern_module([build.Rule("DOMAIN", "ads.example")], metadata)
-        native = json.loads(build.render_egern_config([build.Rule("DOMAIN", "ads.example")], metadata))
+        native = parse_yaml(build.render_egern_config([build.Rule("DOMAIN", "ads.example")], metadata))
         module_patterns = {
             line.split(" _ reject", 1)[0].split(" data-type=", 1)[0]
             for line in module.splitlines()
@@ -382,7 +432,7 @@ class RenderingTests(unittest.TestCase):
         }
 
         module = build.render_egern_module([build.Rule("DOMAIN", "ads.example")], metadata)
-        native = json.loads(build.render_egern_config([build.Rule("DOMAIN", "ads.example")], metadata))
+        native = parse_yaml(build.render_egern_config([build.Rule("DOMAIN", "ads.example")], metadata))
         response_jq = native["body_rewrites"][0]["response_jq"]
 
         self.assertEqual(response_jq["match"], build.splash.pattern(entry))
@@ -470,9 +520,53 @@ class RenderingTests(unittest.TestCase):
             report, _, _ = self._write_splash_artifacts(dist, manifest_path)
             names = build.artifact_names("balanced")
             native_path = dist / names.egern_config
-            document = json.loads(native_path.read_text(encoding="utf-8"))
-            document["rules"][0]["domain"]["policy"] = "DIRECT"
-            tampered = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+            document = parse_yaml(native_path.read_text(encoding="utf-8"))
+            document["rules"][0]["rule_set"]["policy"] = "DIRECT"
+            tampered = build.render_yaml(document) + "\n"
+            native_path.write_text(tampered, encoding="utf-8")
+            report["artifacts"][names.egern_config] = {
+                "sha256": build.sha256_text(tampered),
+                "bytes": len(tampered.encode("utf-8")),
+            }
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            with self.assertRaisesRegex(build.BuildError, "does not match build report"):
+                build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+
+    def test_splash_validator_rejects_rehashed_foreign_rule_set_url(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            report, _, _ = self._write_splash_artifacts(dist, manifest_path)
+            names = build.artifact_names("balanced")
+            native_path = dist / names.egern_config
+            document = parse_yaml(native_path.read_text(encoding="utf-8"))
+            document["rules"][0]["rule_set"]["match"] = "https://foreign.example/ads.list"
+            tampered = build.render_yaml(document) + "\n"
+            native_path.write_text(tampered, encoding="utf-8")
+            report["artifacts"][names.egern_config] = {
+                "sha256": build.sha256_text(tampered),
+                "bytes": len(tampered.encode("utf-8")),
+            }
+            (dist / names.report).write_text(json.dumps(report), encoding="utf-8")
+
+            with self.assertRaisesRegex(build.BuildError, "does not match build report"):
+                build.validate_dist(dist, 1, 10, splash_manifest_path=manifest_path)
+
+    def test_splash_validator_rejects_rehashed_missing_native_splash_section(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            dist = root / "dist"
+            dist.mkdir()
+            manifest_path, _ = self._write_splash_manifest(root)
+            report, _, _ = self._write_splash_artifacts(dist, manifest_path)
+            names = build.artifact_names("balanced")
+            native_path = dist / names.egern_config
+            document = parse_yaml(native_path.read_text(encoding="utf-8"))
+            document.pop("body_rewrites")
+            tampered = build.render_yaml(document) + "\n"
             native_path.write_text(tampered, encoding="utf-8")
             report["artifacts"][names.egern_config] = {
                 "sha256": build.sha256_text(tampered),
@@ -602,7 +696,8 @@ class RenderingTests(unittest.TestCase):
                     report = build.build(config_path, allowlist, dist, use_baseline=False, tier=tier)
                     names = build.artifact_names(tier)
                     module = (dist / names.module).read_text(encoding="utf-8")
-                    egern_document = json.loads((dist / names.egern_config).read_text(encoding="utf-8"))
+                    egern_text = (dist / names.egern_config).read_text(encoding="utf-8")
+                    egern_document = parse_yaml(egern_text)
                     self.assertEqual(module, (dist / names.surge_module).read_text(encoding="utf-8"))
                     self.assertIn("[URL Rewrite]", module)
                     self.assertNotIn("[Script]", module)
@@ -617,6 +712,18 @@ class RenderingTests(unittest.TestCase):
                     self.assertEqual(report["splash"]["surge_mitm_host_count"], 1)
                     self.assertIn(names.surge_module, report["artifacts"])
                     self.assertIn(names.egern_config, report["artifacts"])
+                    self.assertEqual(
+                        egern_document["rules"],
+                        [
+                            {
+                                "rule_set": {
+                                    "match": f"{build.RAW_DIST_URL}/{names.ruleset}",
+                                    "policy": "REJECT",
+                                    "update_interval": 86400,
+                                }
+                            }
+                        ],
+                    )
                     self.assertEqual(
                         {item["match"] for item in egern_document["url_rewrites"]},
                         {

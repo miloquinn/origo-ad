@@ -5,16 +5,16 @@
       "sha256": "619f27daddba7e4b2240194a3fa18b74531085c21dbb0ce00ab8d3268488caa3"
     },
     "origo-ad-lite.module": {
-      "bytes": 1242318,
-      "sha256": "615e223c8695cbd0a342d5359576d100917f5d001a20ea7770a799310622120a"
+      "bytes": 1243090,
+      "sha256": "bb90a36ed221f7dc9ca5df2dcc50f9674fadadd2f15b287ca228f53527f573fc"
     },
     "origo-ad-lite.sgmodule": {
-      "bytes": 1242318,
-      "sha256": "615e223c8695cbd0a342d5359576d100917f5d001a20ea7770a799310622120a"
+      "bytes": 1243090,
+      "sha256": "bb90a36ed221f7dc9ca5df2dcc50f9674fadadd2f15b287ca228f53527f573fc"
     },
     "origo-ad-lite.yaml": {
-      "bytes": 3884081,
-      "sha256": "46c97116f2a03151e35b38187421dae4ee3cd52f3c173c2b81b4c243e9c02fab"
+      "bytes": 14360,
+      "sha256": "9ad5b7643f8c473ec8284186ad7bb1025131c44f3d08f9c05d9a827abeb03010"
     }
   },
   "build_id": "bd578ab68be36e11fcb7f807a49bb5f6106fb25dddd2f3a88e01a3cfb418eae5",

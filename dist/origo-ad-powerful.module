@@ -75546,7 +75546,7 @@ DOMAIN,zzzmxvoxooaat.site,REJECT
 # Splash: mwee
 ^https?://capi\.mwee\.cn/app\-api/V[0-9]+/app/getstartad(?:\?|$) _ reject
 # Splash: qunar
-^https?://client\.qunar\.com/pitcher\-proxy\?(?:(?!qrt=)[^&#]*&)*qrt=p_splashAd(?:&(?!qrt=)[^&#]*)*$ _ reject
+^https?://client\.qunar\.com/pitcher\-proxy\?(?:(?:|q|qr|[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|q[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|qr[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrsuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|qrt[A-Za-z0-9_.-]+)(?:=[^&#]*)?&)*qrt=p_splashAd(?:&(?:|q|qr|[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|q[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|qr[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrsuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|qrt[A-Za-z0-9_.-]+)(?:=[^&#]*)?)*$ _ reject
 # Splash: tujia
 ^https?://client\.tujia\.com/bnbapp\-node/app/portal/getStartPictureAdvertising(?:\?|$) _ reject
 # Splash: tianyi-cloud
@@ -75590,7 +75590,7 @@ DOMAIN,zzzmxvoxooaat.site,REJECT
 # Splash: weidian
 ^https?://thor\.weidian\.com/ares/home\.splash/ _ reject
 # Splash: weibo-intl
-^https?://weibointl\.api\.weibo\.cn/portal\.php\?(?:(?!a=)[^&#]*&)*a=get_coopen_ads(?:&(?!a=)[^&#]*)*$ _ reject
+^https?://weibointl\.api\.weibo\.cn/portal\.php\?(?:(?:|[ABCDEFGHIJKLMNOPQRSTUVWXYZbcdefghijklmnopqrstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|a[A-Za-z0-9_.-]+)(?:=[^&#]*)?&)*a=get_coopen_ads(?:&(?:|[ABCDEFGHIJKLMNOPQRSTUVWXYZbcdefghijklmnopqrstuvwxyz0123456789_\.\-][A-Za-z0-9_.-]*|a[A-Za-z0-9_.-]+)(?:=[^&#]*)?)*$ _ reject
 # Splash: bodivis
 ^https?://www\.bodivis\.com\.cn/app/splashAdvertise(?:\?|$) _ reject
 # Splash: qqmusic

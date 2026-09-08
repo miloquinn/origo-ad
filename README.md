@@ -34,7 +34,7 @@ modules:
 
 三档不要同时启用。低开销优先时使用 Lite，日常默认使用 Balanced；明确需要更多追踪、遥测域名覆盖，并能自行处理误杀时再切换 Powerful。三档开屏候选相同，不以更多脚本或更宽的 MITM 来区分档位。
 
-本仓库不打包个人 Origo VPN 配置，不发布第三方脚本或“解锁”功能。Egern 原生模块使用 YAML 兼容的 JSON 序列化，构建无需额外 YAML 依赖。Egern 也可以导入 Surge 格式模块，原有 `.module` 地址继续保留，但不包含原生 `response_jq` 处理。Surge 用户使用下面的完整模块；仅订阅 `.list` 不会加载 URL Rewrite / MITM：
+本仓库不打包个人 Origo VPN 配置，不发布第三方脚本或“解锁”功能。Egern 原生模块使用明确的块式 YAML，通过一个 `rule_set` 引用同档 `.list`，开屏处理保留在模块内。模块约 14 KB，不再内联数万条域名对象；域名覆盖与原来一致。Egern 也可以导入 Surge 格式模块，原有 `.module` 地址继续保留，但不包含原生 `response_jq` 处理。Surge 用户使用下面的完整模块；仅订阅 `.list` 不会加载 URL Rewrite / MITM：
 
 - [Surge Lite 完整模块](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-lite.sgmodule)
 - [Surge Balanced 完整模块](https://github.com/miloquinn/origo-ad/raw/main/dist/origo-ad-balanced.sgmodule)
@@ -70,7 +70,7 @@ Powerful 的域名部分在同一安全边界内继承 Balanced 的 LIGHT 基线
 
 - 三档使用同一份候选清单；已被该档域名规则覆盖的主机不再添加 URL 规则和 MITM，因此不同档位的有效 URL 数量可能不同。不会为了 URL 去广告而放行已拦截域名。
 - 只匹配明确的开屏路径；共享 API 域名不会被扩大成整域名拒绝。路径中的 `{version}` 只匹配数字 API 版本，资源目录只在斜杠边界向下匹配。
-- 同一 API 的查询参数可以调整顺序，但必须含唯一且完全匹配的业务标识；重复标识、登录、首页等其他操作不会命中。JSON 修改保留正常字段与不认识的响应结构，不用空响应替代整份初始化数据。
+- 同一 API 的查询参数可以调整顺序，但必须含唯一且完全匹配的业务标识；重复标识、登录、首页等其他操作不会命中。表达式不使用前瞻、后顾或反向引用，兼容线性正则引擎；其他参数名限 ASCII 常见字符，拒绝可能隐藏重复业务标识的编码参数名。JSON 修改保留正常字段与不认识的响应结构，不用空响应替代整份初始化数据。
 - MITM 仅列出实际使用 URL 规则的精确主机，无通配符。精确主机仍可能同时承载普通 API；MITM 的解密范围是主机级，URL 拒绝范围才是路径级。
 - 不导入 ultra+ 的账户资料、固件更新、书架刷新、微信链接提示处理，也不导入跨作者脚本或远程 Map Local 文件。
 - `config/allowlist.txt` 是域名生成白名单，不代表某主机被排除于 MITM。开屏清单单独审核。不要同时启用 ultra+、startingad 等重叠模块来测试本项目。
@@ -84,7 +84,7 @@ Egern：把当前档位的模块地址换成 `.yaml` 并刷新，检查 URL 重�
 
 ## 本地构建与验证
 
-构建只需要 Python 3.10+ 标准库。安装环境已有 `jq` 时，测试会实际执行原生 JSON 过滤器，覆盖广告字段清除、正常数据保留和未知结构；没有 `jq` 时该执行测试会明确跳过。GitHub Actions 要求运行该项测试，不允许静默跳过：
+构建只需要 Python 3.10+ 标准库。测试需要已有的 Ruby/Psych 独立解析原生 YAML，并检查模块不会随域名数量膨胀。已有 `jq` 时会实际执行 JSON 过滤器；已有 `rg` 时会额外用 Rust 正则引擎编译所有开屏匹配式。缺少 jq 或 rg 会明确显示相应跳过项；禁止前瞻等不兼容语法的检查始终执行。GitHub Actions 要求 Ruby 和 jq 可用：
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -114,7 +114,7 @@ python3 tools/build.py --tier powerful --no-baseline
 - 最终产物必须非空；Lite 必须在 35,000–60,000 条之间，Balanced 必须在 40,000–70,000 条之间，Powerful 必须在 60,000–90,000 条之间，且均须排序稳定、无重复、模块中的域名部分与 RULE-SET 内容一致。
 - 离线总验证还会检查 `Lite ⊆ Balanced ⊆ Powerful` 的语义覆盖关系。
 - 开屏规则必须来自本地清单，模块附加段必须与清单生成结果逐字一致；检查精确 MITM 主机、无脚本、无重复及与域名拦截的去重。
-- `.module` / `.sgmodule` 必须一致；`.list` 继续保持纯域名格式；`.yaml` 必须与当前清单重建的原生结构完全一致。
+- `.module` / `.sgmodule` 必须一致；`.list` 继续保持纯域名格式；`.yaml` 必须与当前清单重建的原生文本完全一致，且只引用本仓库同档域名列表，禁止外部 URL 替换。
 - 报告分别统计拒绝、本地响应、Egern 正文修改，以及不同客户端的端点和 MITM 主机数量；Egern 专用字段修改不会退化成 Surge 整请求拒绝。
 - 报告中的 SHA-256 必须与文件实际内容一致，并记录开屏清单哈希和有效端点。
 - 所有产物先在临时目录完成，再替换 `dist`，失败不会发布新结果。

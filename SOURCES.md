@@ -57,10 +57,12 @@ Official implementation references:
 - [Egern FAQ: Surge module import](https://egernapp.com/zh-CN/docs/faq/)
 - [Egern native modules](https://egernapp.com/docs/configuration/modules/)
 - [Egern native response jq filters](https://egernapp.com/docs/configuration/body_rewrites/)
+- [Egern rule_set reference syntax](https://egernapp.com/docs/configuration/rules/)
+- [Rust regex supported syntax](https://docs.rs/regex/latest/regex/): no look-around or backreferences. The installed Egern 2.20 packet-tunnel binary contains this regex engine; matching expressions therefore use only the shared regular subset. Tests additionally compile them with ripgrep's default Rust engine when it is available.
 - [Egern inline Map Local schema](https://egernapp.com/docs/configuration/example/)
 - [Surge inline Map Local syntax and minimum versions](https://manual.nssurge.com/http/map-local.html)
 - [Surge URL Rewrite syntax and HTTPS requirement](https://manual.nssurge.com/http/url-rewrite.html)
 - [Surge module hostname append](https://manual.nssurge.com/profile/module.html)
 - [Surge HTTPS decryption](https://manual.nssurge.com/http/mitm.html)
 
-Verification covers generation, matching boundaries, negative URLs representing normal functionality, execution of JSON filters against representative fixtures when jq is present, domain overlap, provenance hashes and tamper rejection. Client import, trusted-CA setup, certificate pinning, cached/IP-direct requests and live App-version behavior require device verification and are not implied by static tests.
+Verification covers generation, matching boundaries, negative URLs representing normal functionality, execution of JSON filters against representative fixtures when jq is present, independent Ruby/Psych YAML parsing, domain overlap, provenance hashes and tamper rejection. Native modules use one tier-bound rule_set reference instead of tens of thousands of inline rule objects. This removes the large native parsing load without claiming that memory was the cause of the reported startup failure. Client startup, trusted-CA setup, certificate pinning, cached/IP-direct requests and live App-version behavior require device verification and are not implied by these tests.

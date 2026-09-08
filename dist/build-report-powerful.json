@@ -5,16 +5,16 @@
       "sha256": "bcc91e71d59e0e911a8a28c8555b3764151744cf5917f6701f1f749d912b5f67"
     },
     "origo-ad-powerful.module": {
-      "bytes": 2588989,
-      "sha256": "4673c5246ea4263f67d2dde35088c7ed67f308bfcbbb8e882f682aaccd90d14c"
+      "bytes": 2589761,
+      "sha256": "ffbd8d1b53505f9bb8c405ef7e29fa27e1e4623afb55690ac7b044f34921c24c"
     },
     "origo-ad-powerful.sgmodule": {
-      "bytes": 2588989,
-      "sha256": "4673c5246ea4263f67d2dde35088c7ed67f308bfcbbb8e882f682aaccd90d14c"
+      "bytes": 2589761,
+      "sha256": "ffbd8d1b53505f9bb8c405ef7e29fa27e1e4623afb55690ac7b044f34921c24c"
     },
     "origo-ad-powerful.yaml": {
-      "bytes": 8030387,
-      "sha256": "f50d93337b247089cc8cdb8fed97738e9db17a20a802fd4c04e0111a541eaa58"
+      "bytes": 13901,
+      "sha256": "8e35e5cebd5c0c58238ed73c1e5b556db9a5d37181924d69431383318848b0c4"
     }
   },
   "build_id": "1431f5e5472d31ae0c83d83d3c49145b222a2a66d988c7a851627999213c9016",

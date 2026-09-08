@@ -135,15 +135,33 @@ def select_entries(manifest: dict, blocked_domains) -> list[dict]:
     return sorted(selected, key=lambda e: (e['host'], e['path'], e['id']))
 
 
+def other_query_parameter(key: str) -> str:
+    """Match an ASCII parameter whose name differs from the dispatcher key.
+
+    Egern's linear regex engine cannot compile look-around. Enumerate shorter,
+    first-differing and longer names instead. Percent-encoded parameter names
+    are intentionally excluded because they could hide a duplicate key.
+    """
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-'
+    name_char = r'[A-Za-z0-9_.-]'
+    alternatives = [re.escape(key[:i]) for i in range(len(key))]
+    for i, char in enumerate(key):
+        different = '[' + re.escape(alphabet.replace(char, '')) + ']'
+        alternatives.append(re.escape(key[:i]) + different + name_char + '*')
+    alternatives.append(re.escape(key) + name_char + '+')
+    return '(?:' + '|'.join(alternatives) + r')(?:=[^&#]*)?'
+
+
 def pattern(entry: dict) -> str:
     # Escape literal punctuation; numeric versions cannot escape their path segment.
     path = re.escape(entry['path']).replace(r'\{version\}', '[0-9]+')
     if entry.get('query'):
         # API dispatch parameters may move within the query string. Match one
         # exact value and refuse ambiguous duplicate dispatcher keys.
-        key = re.escape(entry['query'].split('=', 1)[0])
-        ending = r'\?(?:(?!' + key + r'=)[^&#]*&)*' + re.escape(entry['query'])
-        ending += r'(?:&(?!' + key + r'=)[^&#]*)*$'
+        key = entry['query'].split('=', 1)[0]
+        other = other_query_parameter(key)
+        ending = r'\?(?:' + other + '&)*' + re.escape(entry['query'])
+        ending += '(?:&' + other + ')*$'
     else:
         ending = '' if entry['match'] == 'subtree' else r'(?:\?|$)'
     return '^https?://' + re.escape(entry['host']) + path + ending
