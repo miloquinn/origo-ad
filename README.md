@@ -2,7 +2,7 @@
 
 Origo Ad 是一个独立的开源广告与追踪规则聚合项目。Lite / Balanced / Powerful 三档包含域名拦截和经过人工筛选的 App 开屏处理：请求拒绝、本地空响应，以及 Egern 原生的 JSON 广告字段修改。不执行第三方脚本、不下载远程响应文件。单独的 `.list` RULE-SET 仍然只有域名规则。
 
-**2026-09-08 起，Egern 推荐使用三个原生 `.yaml` 地址。** 原有 `.module` / `.sgmodule` 继续提供域名、开屏拒绝和本地空响应；Egern 原生版额外支持京东、小红书和哔哩哔哩的局部 JSON 修改。HTTPS 开屏接口需要在客户端启用 MITM，并安装、信任客户端自己生成的 CA 证书。只更新模块而未启用 MITM，不会获得这些 HTTPS URL 规则的效果；原有域名拦截仍有效。模块不携带 CA 私钥、不修改证书信任、不强制启用全局 MITM。
+**2026-09-08 起，Egern 推荐使用三个原生 `.yaml` 地址。** 原有 `.module` / `.sgmodule` 继续提供域名、开屏拒绝和本地空响应；Egern 原生版额外支持京东、小红书、哔哩哔哩和美丽修行的局部 JSON 修改。HTTPS 开屏接口需要在客户端启用 MITM，并安装、信任客户端自己生成的 CA 证书。只更新模块而未启用 MITM，不会获得这些 HTTPS URL 规则的效果；原有域名拦截仍有效。模块不携带 CA 私钥、不修改证书信任、不强制启用全局 MITM。
 
 ## 稳定产物
 
@@ -60,13 +60,13 @@ Powerful 的域名部分在同一安全边界内继承 Balanced 的 LIGHT 基线
 
 ## 开屏广告范围与使用
 
-[`config/splash.json`](config/splash.json) 记录 67 个开屏端点候选，包括腾讯新闻、QQ 音乐、起点读书、大众点评、拼多多，以及新补充的美团外卖、知乎、闲鱼、京东、小红书、哔哩哔哩、豆瓣、米游社等接口。依据包括用户提供的 ultra+ 快照和固定提交的公开规则源码；每个新增来源都可追溯。端点是否仍用于某个 App 版本、广告是否已缓存、拒绝后是否保留倒计时，需要真机确认；端点数量不代表已验证支持的 App 数量。
+[`config/splash.json`](config/splash.json) 记录 68 个开屏端点候选，包括腾讯新闻、QQ 音乐、起点读书、大众点评、拼多多，以及新补充的美团外卖、知乎、闲鱼、京东、小红书、哔哩哔哩、豆瓣、米游社、美丽修行等接口。依据包括用户提供的 ultra+ 快照和固定提交的公开规则源码；每个新增来源都可追溯。端点是否仍用于某个 App 版本、广告是否已缓存、拒绝后是否保留倒计时，需要真机确认；端点数量不代表已验证支持的 App 数量。
 
 | 处理方式 | 范围 | 客户端 |
 | --- | --- | --- |
 | URL 拒绝 | 原有 45 个候选 | Egern、Surge |
 | 本地空响应 | 12 个独立接口，包括闲鱼、美团外卖、知乎、豆瓣等 | Egern、Surge |
-| 局部 JSON 修改 | 哔哩哔哩两个精确 API 主机的 `splash/list`、`show`、`brand/list`、`event/list2` 删除 `data.show`、`event_list`、`preload`；京东 `functionId=start` 清空 `images`、归零 `showTimesDaily`；小红书 `splash_config` 将广告组与素材投放时间推迟至 2090 年 | Egern 原生 `.yaml`，10 个端点 |
+| 局部 JSON 修改 | 哔哩哔哩两个精确 API 主机的 `splash/list`、`show`、`brand/list`、`event/list2` 删除 `data.show`、`event_list`、`preload`；京东 `functionId=start` 清空 `images`、归零 `showTimesDaily`；小红书 `splash_config` 将广告组与素材投放时间推迟至 2090 年；美丽修行清空 `result.openAppAdvert.openAdvertOnline` 并归零 `result.openAdKeepTime` | Egern 原生 `.yaml`，11 个端点 |
 
 - 三档使用同一份候选清单；已被该档域名规则覆盖的主机不再添加 URL 规则和 MITM，因此不同档位的有效 URL 数量可能不同。不会为了 URL 去广告而放行已拦截域名。
 - 只匹配明确的开屏路径；共享 API 域名不会被扩大成整域名拒绝。路径中的 `{version}` 只匹配数字 API 版本，资源目录只在斜杠边界向下匹配。

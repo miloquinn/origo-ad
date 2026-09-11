@@ -186,6 +186,11 @@ class SplashTests(unittest.TestCase):
             'https://wmapi.meituan.com/api/v7/order/detail',
             'https://wmapi.meituan.com/api/v7/loadInfo/other',
             'https://guide-acs.m.taobao.com/gw/mtop.taobao.wireless.home.splash.awesome.get/1.0/',
+            'https://api.bevol.com/appmain/app/home/page',
+            'https://api.bevol.com/usercenter/account/info',
+            'https://api.bevol.com/personal/page',
+            'https://api.bevol.com/trialbox/shop/app/homePage',
+            'https://api.bevol.com/appmain/app/home/launchHistory',
         ]:
             with self.subTest(url=url):
                 self.assertEqual(self.matches(url), [])
@@ -220,6 +225,47 @@ class SplashTests(unittest.TestCase):
             result = run_filter(name, {'error': 'unauthorized', 'code': 401})
             self.assertEqual(result, {'error': 'unauthorized', 'code': 401})
 
+    @unittest.skipUnless(shutil.which('jq'), 'jq is only needed for native filter execution tests')
+    def test_bevol_filter_preserves_launch_settings_and_unknown_shapes(self):
+        def run_filter(value):
+            result = subprocess.run(['jq', '-c', splash.BODY_REWRITES['bevol-launch']],
+                                    input=json.dumps(value), capture_output=True, text=True, check=True)
+            return json.loads(result.stdout)
+
+        payload = {'code': 0, 'message': 'ok', 'result': {
+            'openAppAdvert': {'openAdvertOnline': [{'id': 'ad'}], 'settings': {'keep': True}},
+            'openAdKeepTime': 5, 'isMember': False, 'config': {'home': 'keep'},
+        }}
+        expected = copy.deepcopy(payload)
+        expected['result']['openAppAdvert']['openAdvertOnline'] = []
+        expected['result']['openAdKeepTime'] = 0
+        self.assertEqual(run_filter(payload), expected)
+        self.assertEqual(run_filter(expected), expected)
+
+        for group in [None, [], 'unknown', 3, False, {}, {'openAdvertOnline': None},
+                      {'openAdvertOnline': {}}, {'openAdvertOnline': 'unknown'}]:
+            value = {'result': {'openAppAdvert': group, 'openAdKeepTime': 5, 'keep': True}}
+            self.assertEqual(run_filter(value), {
+                'result': {'openAppAdvert': group, 'openAdKeepTime': 0, 'keep': True},
+            })
+            for timer in [None, [], {}, '5', False]:
+                value['result']['openAdKeepTime'] = timer
+                with self.subTest(group=group, timer=timer):
+                    self.assertEqual(run_filter(value), value)
+
+        for result, expected_result in [
+            ({'openAdKeepTime': 5}, {'openAdKeepTime': 0}),
+            ({'openAppAdvert': {'openAdvertOnline': ['ad']}},
+             {'openAppAdvert': {'openAdvertOnline': []}}),
+            ({'openAppAdvert': {'openAdvertOnline': ['ad']}, 'openAdKeepTime': '5'},
+             {'openAppAdvert': {'openAdvertOnline': []}, 'openAdKeepTime': '5'}),
+        ]:
+            self.assertEqual(run_filter({'result': result}), {'result': expected_result})
+
+        for result in [None, [], 'unknown', 3, False]:
+            value = {'result': result, 'code': 401, 'error': 'unauthorized'}
+            self.assertEqual(run_filter(value), value)
+
     def test_response_templates_and_pinned_sources_cannot_inject_code(self):
         for key, value in [('response', 'https://example.com/body'), ('response', {}),
                            ('rewrite', 'remote-script'), ('rewrite', 'jd-start'),
@@ -232,6 +278,14 @@ class SplashTests(unittest.TestCase):
                         {'host': 'other.example'}, {'response': 'empty-json'}]:
             with self.assertRaises(ValueError):
                 splash.validate_entries([dict(jd, **changes)])
+        bevol = next(e for e in self.entries if e['id'] == 'bevol-launch')
+        for changes in [{'path': '/usercenter/account/info'}, {'host': 'other.example'},
+                        {'query': 'action=launch'}, {'match': 'subtree'}, {'response': 'empty-json'}]:
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                splash.validate_entries([dict(bevol, **changes)])
+        without_filter = {key: value for key, value in bevol.items() if key != 'rewrite'}
+        with self.assertRaises(ValueError):
+            splash.validate_entries([without_filter])
 
     def test_rejects_unreviewable_hosts_paths_duplicates_and_injection(self):
         for key, value in [

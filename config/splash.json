@@ -586,6 +586,16 @@
       "source_line": 73,
       "source_url": "https://github.com/Biliverse/ADBlock/blob/43b07841fa55ba77e29d478cab0be44c8b49a3c2/src/process/Response.mjs#L73-L90",
       "rewrite": "bilibili-preload"
+    },
+    {
+      "id": "bevol-launch",
+      "app": "美丽修行",
+      "host": "api.bevol.com",
+      "path": "/appmain/app/home/launch",
+      "match": "exact",
+      "source_line": 47,
+      "source_url": "https://github.com/fmz200/wool_scripts/blob/3ca7487b4e4b86d9af76e50df72c62eacfbb659e/Scripts/mlxx/mlxx.js#L47-L51",
+      "rewrite": "bevol-launch"
     }
   ],
   "exclusions": [

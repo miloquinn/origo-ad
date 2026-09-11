@@ -2,28 +2,28 @@
   "artifacts": {
     "origo-ad-balanced.list": {
       "bytes": 1265307,
-      "sha256": "a7de4e589dbcf56cf585ae73aef2dd9980ebfee70672861ac523093fd10e652d"
+      "sha256": "8c99b3e77f64e0a331d5a0a6fa34d888c76de88db85c4378b709c23a6b9d0d19"
     },
     "origo-ad-balanced.module": {
       "bytes": 1600045,
-      "sha256": "b797a4345987e4dcbac7ce518fdf277683e3fcebb5a3bc2065ff5d7875452669"
+      "sha256": "b3ff5b375cc17da770468c8654bfba5a6f2390945e787c3ece371814e506c5ef"
     },
     "origo-ad-balanced.sgmodule": {
       "bytes": 1600045,
-      "sha256": "b797a4345987e4dcbac7ce518fdf277683e3fcebb5a3bc2065ff5d7875452669"
+      "sha256": "b3ff5b375cc17da770468c8654bfba5a6f2390945e787c3ece371814e506c5ef"
     },
     "origo-ad-balanced.yaml": {
-      "bytes": 14353,
-      "sha256": "df1c7891a2988e5c23244bd4e27b4156daa821de7bb7ea290952ab3de1fd2220"
+      "bytes": 14846,
+      "sha256": "ff887a9f6851d5dd6a75232667e2bcec884941fea4e7364f45276ba5f4b2712c"
     }
   },
-  "build_id": "f24711d546b15945043ac6e7c9a5dc901f51606737b0890897b6921a8e991345",
+  "build_id": "84a6f5cb64c4683a8811015175dafaa96f7f1608091d3ef0eb88d61af7f1e733",
   "configuration": {
     "allowlist_rule_count": 24,
     "allowlist_sha256": "8ef7be49926e154de96f98155c80a24a2c4b12e9a6d3f18e65a13dbd0ac51126",
     "policy": "balanced-domain-only",
-    "sources_sha256": "a76a75e1aedb857ee45bf931a468c9890033761d2cdd2d84e9bb930180f3b876",
-    "splash_manifest_sha256": "a5f4acbf91c1c5afec8ce5f7685dd7f4a64a036c13bb74631654867a0d8e4ad4",
+    "sources_sha256": "80702b43b75d57523fa44197343122220279d04acf1fd956a9de84c230d1e74b",
+    "splash_manifest_sha256": "ec1283d019c1a53889bacbd03c999d6d68225997b221628314e10e75ed8ea81f",
     "tier": "balanced"
   },
   "license": "GPL-3.0-only",
@@ -87,7 +87,7 @@
     }
   ],
   "splash": {
-    "egern_body_rewrite_count": 10,
+    "egern_body_rewrite_count": 11,
     "egern_map_local_count": 12,
     "egern_url_rewrite_count": 44,
     "entries": [
@@ -124,6 +124,16 @@
         "match": "subtree",
         "path": "/api/v{version}/splash/",
         "source_line": 703
+      },
+      {
+        "app": "美丽修行",
+        "host": "api.bevol.com",
+        "id": "bevol-launch",
+        "match": "exact",
+        "path": "/appmain/app/home/launch",
+        "rewrite": "bevol-launch",
+        "source_line": 47,
+        "source_url": "https://github.com/fmz200/wool_scripts/blob/3ca7487b4e4b86d9af76e50df72c62eacfbb659e/Scripts/mlxx/mlxx.js#L47-L51"
       },
       {
         "app": "联想社区",
@@ -662,9 +672,9 @@
       }
     ],
     "excluded_by_domain_count": 1,
-    "manifest_sha256": "a5f4acbf91c1c5afec8ce5f7685dd7f4a64a036c13bb74631654867a0d8e4ad4",
-    "mitm_host_count": 56,
-    "rule_count": 66,
+    "manifest_sha256": "ec1283d019c1a53889bacbd03c999d6d68225997b221628314e10e75ed8ea81f",
+    "mitm_host_count": 57,
+    "rule_count": 67,
     "surge_mitm_host_count": 52,
     "surge_rule_count": 56
   },

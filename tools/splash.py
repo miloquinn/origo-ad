@@ -35,6 +35,14 @@ BODY_REWRITES = {
         'if (.ads | type) == "array" then .ads |= map(defer_ad) else . end '
         'else . end) end'
     ),
+    'bevol-launch': (
+        'if type != "object" then . elif (.result | type) != "object" then . else '
+        '(if (.result.openAppAdvert | type) != "object" then . '
+        'elif (.result.openAppAdvert.openAdvertOnline | type) == "array" '
+        'then .result.openAppAdvert.openAdvertOnline = [] else . end) | '
+        '(if (.result.openAdKeepTime | type) == "number" '
+        'then .result.openAdKeepTime = 0 else . end) end'
+    ),
 }
 REWRITE_ROUTES = {
     'bilibili-preload': {
@@ -44,6 +52,7 @@ REWRITE_ROUTES = {
     },
     'jd-start': {('api.m.jd.com', '/client.action', 'functionId=start')},
     'xhs-splash': {('edith.xiaohongshu.com', '/api/sns/v{version}/system_service/splash_config', '')},
+    'bevol-launch': {('api.bevol.com', '/appmain/app/home/launch', '')},
 }
 REVIEWED_LOCAL_ROUTES = {
     ('wmapi.meituan.com', '/api/v7/loadInfo', ''),

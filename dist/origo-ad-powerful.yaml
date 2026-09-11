@@ -14,6 +14,7 @@ mitm:
       - "acs.m.goofish.com"
       - "api-mifit-cn2.zepp.com"
       - "api.applovefrom.com"
+      - "api.bevol.com"
       - "api.club.lenovo.cn"
       - "api.douban.com"
       - "api.internetofcity.cn"
@@ -206,6 +207,9 @@ map_locals:
       Content-Type: "application/json"
     body: "{}"
 body_rewrites:
+  - response_jq:
+      match: "^https?://api\\.bevol\\.com/appmain/app/home/launch(?:\\?|$)"
+      filter: "if type != \"object\" then . elif (.result | type) != \"object\" then . else (if (.result.openAppAdvert | type) != \"object\" then . elif (.result.openAppAdvert.openAdvertOnline | type) == \"array\" then .result.openAppAdvert.openAdvertOnline = [] else . end) | (if (.result.openAdKeepTime | type) == \"number\" then .result.openAdKeepTime = 0 else . end) end"
   - response_jq:
       match: "^https?://api\\.m\\.jd\\.com/client\\.action\\?(?:(?:|f|fu|fun|func|funct|functi|functio|function|functionI|[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|f[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|fu[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|fun[ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|func[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrsuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|funct[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghjklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functi[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functio[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|function[ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functionI[ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functionId[A-Za-z0-9_.-]+)(?:=[^&#]*)?&)*functionId=start(?:&(?:|f|fu|fun|func|funct|functi|functio|function|functionI|[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdeghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|f[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|fu[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|fun[ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|func[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrsuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|funct[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghjklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functi[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functio[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|function[ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functionI[ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz0123456789_\\.\\-][A-Za-z0-9_.-]*|functionId[A-Za-z0-9_.-]+)(?:=[^&#]*)?)*$"
       filter: "if type != \"object\" then . else (if (.images | type) == \"array\" then .images = [] else . end) | (if (.showTimesDaily | type) == \"number\" then .showTimesDaily = 0 else . end) end"

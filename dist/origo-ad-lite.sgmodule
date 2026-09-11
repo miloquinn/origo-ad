@@ -3,7 +3,7 @@
 #!author=origo-ad contributors
 #!homepage=https://github.com/miloquinn/origo-ad
 #!license=GPL-3.0-only
-#!generated-source-sha256=09be1e22c9b3f2e9bd5199f32a0f32f09e6104baf0084200a7698dcc67fb10b3
+#!generated-source-sha256=ab49058715dca529e46914155d8451e9e3505cd2381e57e0b1b12cd6a76f9e05
 #!rule-count=35397
 
 # Source: HaGeZi Multi LIGHT (GPL-3.0-only) https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt

@@ -2,7 +2,7 @@
 # DESCRIPTION: Balanced domain-only ad and tracker blocking; no MITM, rewrite, or script execution.
 # HOMEPAGE: https://github.com/miloquinn/origo-ad
 # LICENSE: GPL-3.0-only
-# SOURCE-SHA256: f24711d546b15945043ac6e7c9a5dc901f51606737b0890897b6921a8e991345
+# SOURCE-SHA256: 84a6f5cb64c4683a8811015175dafaa96f7f1608091d3ef0eb88d61af7f1e733
 # RULES: 46702
 # SOURCE: HaGeZi Multi LIGHT (GPL-3.0-only) https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt
 # SOURCE: ACL4SSR BanAD (CC-BY-SA-4.0) https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
