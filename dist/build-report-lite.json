@@ -1,23 +1,23 @@
 {
   "artifacts": {
     "origo-ad-lite.list": {
-      "bytes": 1052299,
-      "sha256": "b2422176fbb40006f7f7ce2c84c4d26fcfea7b62912e3b19decbdd9102795ea8"
+      "bytes": 1048073,
+      "sha256": "3c16ce77c6a6b7a067e37c4aa7d7e3eacfd25d2594a855d6b2510c204d22e7c8"
     },
     "origo-ad-lite.module": {
-      "bytes": 1337749,
-      "sha256": "82c8fcb92eb15b2a73067cee9e07778b8e4c4634b6f1853c32f3f1f765e3dedd"
+      "bytes": 1332634,
+      "sha256": "c127d721824d09ceae5dca2b88e992d7232bae0a52b97fe96477582e3c4cab1c"
     },
     "origo-ad-lite.sgmodule": {
-      "bytes": 1337749,
-      "sha256": "82c8fcb92eb15b2a73067cee9e07778b8e4c4634b6f1853c32f3f1f765e3dedd"
+      "bytes": 1332634,
+      "sha256": "c127d721824d09ceae5dca2b88e992d7232bae0a52b97fe96477582e3c4cab1c"
     },
     "origo-ad-lite.yaml": {
       "bytes": 14853,
       "sha256": "037db2bd063c170a256da5d4b0971a6935dcdc30e996996640c810f4263e3f23"
     }
   },
-  "build_id": "c620dbc235e6f9ffa560a049e12dd6167209b2b803bc0eba7475f4e93df74dea",
+  "build_id": "e33ba70c8fe4d6b1d94276bc83ee12260f8fbbf34ed395d419006493ae402450",
   "configuration": {
     "allowlist_rule_count": 24,
     "allowlist_sha256": "8ef7be49926e154de96f98155c80a24a2c4b12e9a6d3f18e65a13dbd0ac51126",
@@ -30,10 +30,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 39661,
-      "bytes": 775137,
+      "accepted_unique": 39534,
+      "bytes": 771800,
       "duplicates": 0,
-      "etag": "\"aba455984ede6bf4a142ef7b3358e6798ad5e7ef7253ce9d4f4f89feed31f901\"",
+      "etag": "\"d4ec742647744d066c9609408c87e035253977a63f00f0ba94235fe781db615a\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -42,9 +42,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 39661,
+      "raw_candidates": 39534,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "3f4e10a1484b68a69b50407ea56682ee9a3d7574586a93e0459fc4f6d5fbe525",
+      "sha256": "b9c4b4959b7d2f80dbeffa435e0e3cec909e472704399a65e925714a1c449639",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     }
   ],
@@ -643,11 +643,11 @@
   "summary": {
     "allowlist_removed": 0,
     "covered_exact": 0,
-    "domain_count": 39661,
+    "domain_count": 39534,
     "domain_suffix_count": 0,
-    "final": 39661,
-    "final_rule_count": 39661,
-    "input_unique": 39661,
+    "final": 39534,
+    "final_rule_count": 39534,
+    "input_unique": 39534,
     "redundant_suffixes": 0
   },
   "tier": "lite"

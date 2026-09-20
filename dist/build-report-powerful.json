@@ -1,23 +1,23 @@
 {
   "artifacts": {
     "origo-ad-powerful.list": {
-      "bytes": 2184127,
-      "sha256": "151611138189203335b4354c708dbc01ded16da5bd4bd0f53fab3ec6103a0da7"
+      "bytes": 2174181,
+      "sha256": "92424db09b66042e132cb2cb60a2169ece533e310335d352a65c28e425408fb2"
     },
     "origo-ad-powerful.module": {
-      "bytes": 2752331,
-      "sha256": "a3fa09d77c106228907687b225a1f7dbe4a6b797a3e032197b424bd93298b574"
+      "bytes": 2740355,
+      "sha256": "149115d9f6726a68339964f73cc35b5d9a3f4897672de7da2d2b0e43a0d2d56c"
     },
     "origo-ad-powerful.sgmodule": {
-      "bytes": 2752331,
-      "sha256": "a3fa09d77c106228907687b225a1f7dbe4a6b797a3e032197b424bd93298b574"
+      "bytes": 2740355,
+      "sha256": "149115d9f6726a68339964f73cc35b5d9a3f4897672de7da2d2b0e43a0d2d56c"
     },
     "origo-ad-powerful.yaml": {
       "bytes": 14394,
       "sha256": "1f42d6f609c35691562f2d10c1002f1b1380a0bf2cde9283ee4da39214acdbd8"
     }
   },
-  "build_id": "c641dbbc3b157d3632ba5cb1d49d4ca2b9ae95b44ead9ee451e6acddd0de5add",
+  "build_id": "51ee744c91c2831e18205bd7759e0daa18df9b746df5951f6d77f380f9e79067",
   "configuration": {
     "allowlist_rule_count": 24,
     "allowlist_sha256": "8ef7be49926e154de96f98155c80a24a2c4b12e9a6d3f18e65a13dbd0ac51126",
@@ -30,10 +30,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 39661,
-      "bytes": 775137,
+      "accepted_unique": 39534,
+      "bytes": 771800,
       "duplicates": 0,
-      "etag": "\"aba455984ede6bf4a142ef7b3358e6798ad5e7ef7253ce9d4f4f89feed31f901\"",
+      "etag": "\"d4ec742647744d066c9609408c87e035253977a63f00f0ba94235fe781db615a\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -42,9 +42,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 39661,
+      "raw_candidates": 39534,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "3f4e10a1484b68a69b50407ea56682ee9a3d7574586a93e0459fc4f6d5fbe525",
+      "sha256": "b9c4b4959b7d2f80dbeffa435e0e3cec909e472704399a65e925714a1c449639",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     },
     {
@@ -86,10 +86,10 @@
       "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt"
     },
     {
-      "accepted_unique": 64046,
-      "bytes": 1235705,
+      "accepted_unique": 63807,
+      "bytes": 1228744,
       "duplicates": 0,
-      "etag": "\"d306e29d40e1336d639ac270c695bcd5a38f992db6dc6e2d57c7c4c8033a8885\"",
+      "etag": "\"72a6e4e5aff0d3e3ad6d7a92e0dd722771fc0137e947614d6d7c90b3c7fbb5d7\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-pro-plus-mini",
@@ -98,9 +98,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi PRO++ mini",
-      "raw_candidates": 64046,
+      "raw_candidates": 63807,
       "risk": "aggressive mobile-sized baseline; upstream warns that some legitimate domains may be blocked",
-      "sha256": "c5f2a79da7a5d04e01939c7cc15723afd624d80a74b751258027befd7b84a722",
+      "sha256": "30cd5fbc36eda84637da14f2826045a1ad5263a8aa75a5d445982f0df1eebd9c",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.plus.mini-onlydomains.txt"
     },
     {
@@ -687,12 +687,12 @@
   },
   "summary": {
     "allowlist_removed": 1,
-    "covered_exact": 1120,
-    "domain_count": 78587,
+    "covered_exact": 1116,
+    "domain_count": 78297,
     "domain_suffix_count": 1521,
-    "final": 80108,
-    "final_rule_count": 80108,
-    "input_unique": 81249,
+    "final": 79818,
+    "final_rule_count": 79818,
+    "input_unique": 80955,
     "redundant_suffixes": 20
   },
   "tier": "powerful"
