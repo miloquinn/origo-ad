@@ -1,23 +1,23 @@
 {
   "artifacts": {
     "origo-ad-powerful.list": {
-      "bytes": 2348621,
-      "sha256": "1094f6522afe3cf4839d52ca27e58ec448525f8c66207d56301e7ce260b9b110"
+      "bytes": 2364785,
+      "sha256": "ec16034c80e61c82ddd38147faa95edb3e555b360ab50cc16560c9fe233cf063"
     },
     "origo-ad-powerful.module": {
-      "bytes": 2962808,
-      "sha256": "bbc68de963010385dda0829bcbaa30ae418faca877a2657b42e49c1a8cc744f9"
+      "bytes": 2981478,
+      "sha256": "eaf8389a79cb09c711a1015fea10e1f0dfb4e1c7fe68d92a3563783e01025cc1"
     },
     "origo-ad-powerful.sgmodule": {
-      "bytes": 2962808,
-      "sha256": "bbc68de963010385dda0829bcbaa30ae418faca877a2657b42e49c1a8cc744f9"
+      "bytes": 2981478,
+      "sha256": "eaf8389a79cb09c711a1015fea10e1f0dfb4e1c7fe68d92a3563783e01025cc1"
     },
     "origo-ad-powerful.yaml": {
       "bytes": 14394,
       "sha256": "1f42d6f609c35691562f2d10c1002f1b1380a0bf2cde9283ee4da39214acdbd8"
     }
   },
-  "build_id": "9822214b79c6fb929917d932e376e79dc3eb69d9fa700366dbb7387e9bf3b6eb",
+  "build_id": "6e566021d2effa0ec4c8dc2af0073793cbb4b62d4b597d51a60c4d86280953ed",
   "configuration": {
     "allowlist_rule_count": 24,
     "allowlist_sha256": "8ef7be49926e154de96f98155c80a24a2c4b12e9a6d3f18e65a13dbd0ac51126",
@@ -30,10 +30,10 @@
   "schema_version": 1,
   "sources": [
     {
-      "accepted_unique": 45212,
-      "bytes": 895960,
+      "accepted_unique": 45716,
+      "bytes": 910587,
       "duplicates": 0,
-      "etag": "\"0063ea462303e318eed0a3fcd2c6a5d6f29c4ce40b7cd7cf2b770d8853abe734\"",
+      "etag": "\"e11f4c157aa8fd0c8a4eaf7b3f70bdcdc21fa045492c3342d998428da5c90861\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-light",
@@ -42,9 +42,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi LIGHT",
-      "raw_candidates": 45212,
+      "raw_candidates": 45716,
       "risk": "relaxed; exact-host rules preserve the upstream low-breakage intent",
-      "sha256": "e49fb4fd97d307213f0d1144eafb8051f05608a14ca4800a9d2658d7ae1ac54e",
+      "sha256": "c3d14f7c1f693bff16ed24a55f1b3f6a56b01350a4abe07ed89a89746cb667a0",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt"
     },
     {
@@ -86,10 +86,10 @@
       "url": "https://raw.githubusercontent.com/AdguardTeam/cname-trackers/master/data/combined_disguised_ads_justdomains.txt"
     },
     {
-      "accepted_unique": 69648,
-      "bytes": 1312931,
+      "accepted_unique": 69821,
+      "bytes": 1320550,
       "duplicates": 0,
-      "etag": "\"262929200f8bbb010ed4e81173176847618747a22a12d66c95c4585924d7c396\"",
+      "etag": "\"86186abf06a33825d7b77f67ff6e4a03d41c4e1b2f0139cf0fbff8ee3ae06e8c\"",
       "excluded_by_type": {},
       "homepage": "https://github.com/hagezi/dns-blocklists",
       "id": "hagezi-pro-plus-mini",
@@ -98,9 +98,9 @@
       "license": "GPL-3.0-only",
       "license_url": "https://github.com/hagezi/dns-blocklists/blob/main/LICENSE",
       "name": "HaGeZi Multi PRO++ mini",
-      "raw_candidates": 69648,
+      "raw_candidates": 69821,
       "risk": "aggressive mobile-sized baseline; upstream warns that some legitimate domains may be blocked",
-      "sha256": "5e2cbd9d7eb9e84e504825ec246d1937b190a281166912f4e381cfa326330fe7",
+      "sha256": "1283ffa3219ecc7c2467d3c9293abeb3815d5a406a6c912f4bbd8fd5b4edc0f3",
       "url": "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.plus.mini-onlydomains.txt"
     },
     {
@@ -688,11 +688,11 @@
   "summary": {
     "allowlist_removed": 1,
     "covered_exact": 1091,
-    "domain_count": 85156,
+    "domain_count": 85514,
     "domain_suffix_count": 1521,
-    "final": 86677,
-    "final_rule_count": 86677,
-    "input_unique": 87789,
+    "final": 87035,
+    "final_rule_count": 87035,
+    "input_unique": 88147,
     "redundant_suffixes": 20
   },
   "tier": "powerful"
